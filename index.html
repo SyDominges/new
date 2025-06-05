@@ -273,67 +273,64 @@
                 location.reload();
             }
         });
-        <script>
-// ... (ابق على كل الكود السابق حتى جزء loadEmployeeData)
-
-
-}
-
-// ... (ابق على بقية الكود كما هو)
         
-   function loadEmployeeData() {
-    loading.style.display = 'block';
-    
-    // روابط Raw المباشرة (تأكد من صحة المسار)
-    const baseUrl = 'https://raw.githubusercontent.com/SyDominges/test/3efb71c979f0e711536dbfa006ffe76898f26bc2/';
-    
-    Promise.all([
-        fetch(`${baseUrl}encrypted_part1.json?t=${Date.now()}`)
-            .then(res => {
-                if (!res.ok) throw new Error('Part1 load failed');
-                return res.text();
-            }),
-        fetch(`${baseUrl}encrypted_part2.json?t=${Date.now()}`)
-            .then(res => {
-                if (!res.ok) throw new Error('Part2 load failed');
-                return res.text();
-            })
-    ])
-    .then(([part1, part2]) => {
-        try {
-            // فك التشفير مع التحقق
-            const decrypt = (data) => {
-                const bytes = CryptoJS.AES.decrypt(data.trim(), encryptionKey);
-                const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-                if (!decrypted) throw new Error('فشل فك التشفير - كلمة سر خاطئة');
-                return JSON.parse(decrypted);
-            };
+        // تحميل بيانات الموظفين
+        function loadEmployeeData() {
+            loading.style.display = 'block';
+            errorMessage.style.display = 'none';
+            
+            // مسارات ملفات JSON (تأكد من أن الملفات موجودة في نفس المجلد)
+            const jsonFiles = [
+                'encrypted_part1.json',
+                'encrypted_part2.json'
+            ];
+            
+            Promise.all(jsonFiles.map(file => 
+                fetch(file + '?t=' + Date.now())
+                    .then(response => {
+                        if (!response.ok) throw new Error(`فشل تحميل ${file}`);
+                        return response.text();
+                    })
+            ))
+            .then(([part1, part2]) => {
+                try {
+                    // فك التشفير
+                    const decrypt = (data) => {
+                        const bytes = CryptoJS.AES.decrypt(data.trim(), encryptionKey);
+                        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                        if (!decrypted) throw new Error('فشل فك التشفير - كلمة سر خاطئة');
+                        return JSON.parse(decrypted);
+                    };
 
-            const data1 = decrypt(part1);
-            const data2 = decrypt(part2);
-            
-            // دمج البيانات
-            allEmployees = [...Object.values(data1), ...Object.values(data2)];
-            
-            if (allEmployees.length === 0) throw new Error('البيانات فارغة بعد الفك');
-            
-            console.log('تم تحميل:', allEmployees.length, 'سجلاً');
-            showStatus("تم تحميل البيانات بنجاح", true);
-            
-        } catch (error) {
-            console.error('فك التشفير فشل:', error);
-            console.log('محتوى part1:', part1.substring(0, 100));
-            showStatus(`خطأ: ${error.message}`, false);
+                    const data1 = decrypt(part1);
+                    const data2 = decrypt(part2);
+                    
+                    // دمج البيانات
+                    allEmployees = [...Object.values(data1), ...Object.values(data2)];
+                    
+                    if (allEmployees.length === 0) throw new Error('البيانات فارغة بعد الفك');
+                    
+                    console.log('تم تحميل:', allEmployees.length, 'سجلاً');
+                    showStatus("تم تحميل البيانات بنجاح", true);
+                    
+                } catch (error) {
+                    console.error('فك التشفير فشل:', error);
+                    showStatus(`خطأ: ${error.message}`, false);
+                    if (error.message.includes('كلمة سر خاطئة')) {
+                        alert("كلمة سر فك التشفير غير صحيحة. سيتم إعادة تحميل الصفحة.");
+                        location.reload();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('خطأ التحميل:', error);
+                showStatus(`فشل تحميل الملفات: ${error.message}`, false);
+            })
+            .finally(() => {
+                loading.style.display = 'none';
+            });
         }
-    })
-    .catch(error => {
-        console.error('خطأ التحميل:', error);
-        showStatus(`فشل تحميل الملفات: ${error.message}`, false);
-    })
-    .finally(() => {
-        loading.style.display = 'none';
-    });
-}     
+        
         // التحقق من صحة البيانات
         function verifyData(data) {
             if (!data || typeof data !== 'object') return false;
