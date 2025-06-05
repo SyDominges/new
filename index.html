@@ -368,38 +368,69 @@
 // استدعاء الدالة بعد تحميل البيانات
 // أضف هذا السطر في نهاية دالة loadEmployeeData بعد نجاح التحميل:
 debugData();
-        function performSearch() {
-            const searchInput = document.getElementById('searchInput');
-            let searchTerm = searchInput.value.trim().replace(/\D/g, '');
+      function performSearch() {
+    const searchInput = document.getElementById('searchInput');
+    let searchTerm = searchInput.value.trim().replace(/\D/g, '');
+    
+    if (searchTerm.startsWith('0')) {
+        searchTerm = searchTerm.substring(1);
+    }
+    
+    if (searchTerm.length < 8) {
+        errorMessage.textContent = 'الرجاء إدخال 8 أرقام على الأقل';
+        errorMessage.style.display = 'block';
+        return;
+    }
+    
+    // تفعيل وضع التصحيح
+    console.log(`====== بدء البحث عن: ${searchTerm} ======`);
+    
+    errorMessage.style.display = 'none';
+    noResults.style.display = 'none';
+    employeeDetails.style.display = 'none';
+    loading.style.display = 'block';
+    
+    setTimeout(() => {
+        loading.style.display = 'none';
+        
+        try {
+            let foundEmployee = null;
             
-            if (searchTerm.startsWith('0')) {
-                searchTerm = searchTerm.substring(1);
-            }
-            
-            if (searchTerm.length < 8) {
-                errorMessage.textContent = 'الرجاء إدخال 8 أرقام على الأقل';
-                errorMessage.style.display = 'block';
-                return;
-            }
-            
-            errorMessage.style.display = 'none';
-            noResults.style.display = 'none';
-            employeeDetails.style.display = 'none';
-            loading.style.display = 'block';
-            
-            setTimeout(() => {
-                loading.style.display = 'none';
-                const foundEmployee = allEmployees.find(emp => {
-                    const nationalId = emp['الرقم الوطني']?.replace(/\D/g, '') || '';
-                    return nationalId.includes(searchTerm);
-                });
+            // تسجيل جميع الأرقام الوطنية المتاحة للتصحيح
+            console.log("الأرقام الوطنية المتاحة:");
+            allEmployees.forEach((emp, index) => {
+                const empId = emp['الرقم الوطني']?.replace(/\D/g, '') || '';
+                console.log(`السجل ${index + 1}: ${empId}`);
                 
-                if (foundEmployee) {
-                    displayEmployeeDetails(foundEmployee);
-                } else {
-                    noResults.style.display = 'block';
+                if (empId.includes(searchTerm)) {
+                    foundEmployee = emp;
                 }
-            }, 800);
+            });
+            
+            if (foundEmployee) {
+                console.log("تم العثور على:", foundEmployee);
+                displayEmployeeDetails(foundEmployee);
+            } else {
+                console.warn("لم يتم العثور على نتائج مطابقة");
+                noResults.style.display = 'block';
+                
+                // اقتراحات لاستكشاف الأخطاء
+                if (allEmployees.length === 0) {
+                    console.error("البيانات فارغة! تأكد من:");
+                    console.error("- صحة كلمة سر التشفير");
+                    console.error("- تنسيق الملفات المشفرة");
+                } else {
+                    console.warn("نصائح استكشاف الأخطاء:");
+                    console.warn("- تأكد من تطابق تنسيق الرقم المدخل مع البيانات");
+                    console.warn("- جرب البحث بأجزاء من الرقم (8 أرقام بدلاً من 11)");
+                }
+            }
+        } catch (error) {
+            console.error("حدث خطأ أثناء البحث:", error);
+            errorMessage.textContent = 'حدث خطأ أثناء معالجة البحث';
+            errorMessage.style.display = 'block';
+        }
+    }, 800);
         }
         
         // عرض تفاصيل الموظف
