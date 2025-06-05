@@ -290,7 +290,7 @@
             loading.style.display = 'block';
             errorMessage.style.display = 'none';
             
-            const baseUrl = 'https://raw.githubusercontent.com/SyDominges/test/3efb71c979f0e711536dbfa006ffe76898f26bc2/';
+            const baseUrl = 'https://raw.githubusercontent.com/SyDominges/new/3efb71c979f0e711536dbfa006ffe76898f26bc2/';
             
             Promise.all([
                 fetch(`${baseUrl}encrypted_part11.json`).then(res => res.text()),
@@ -337,7 +337,37 @@
         
         // البحث عن الموظف
         document.getElementById('searchButton').addEventListener('click', performSearch);
+        function debugData() {
+    console.log("====== بدء التحليل التشخيصي ======");
+    
+    // 1. التحقق من جودة البيانات المحملة
+    console.log("عدد السجلات المحملة:", allEmployees.length);
+    if (allEmployees.length > 0) {
+        console.log("عينة من أول سجل:", JSON.stringify(allEmployees[0], null, 2));
         
+        // 2. التحقق من وجود حقل الرقم الوطني
+        const firstEmp = allEmployees[0];
+        if (!firstEmp['الرقم الوطني']) {
+            console.error("تحذير: لا يوجد حقل 'الرقم الوطني' في السجلات");
+        } else {
+            console.log("نموذج الرقم الوطني في البيانات:", firstEmp['الرقم الوطني']);
+        }
+    }
+    
+    // 3. اختبار البحث يدويًا
+    const testNationalId = "123456789"; // استبدلها برقم تجريبي موجود ببياناتك
+    const found = allEmployees.some(emp => {
+        const empId = emp['الرقم الوطني']?.replace(/\D/g, '') || '';
+        return empId.includes(testNationalId);
+    });
+    console.log(`اختبار البحث عن ${testNationalId}:`, found ? "موجود" : "غير موجود");
+    
+    console.log("====== انتهاء التحليل ======");
+}
+
+// استدعاء الدالة بعد تحميل البيانات
+// أضف هذا السطر في نهاية دالة loadEmployeeData بعد نجاح التحميل:
+debugData();
         function performSearch() {
             const searchInput = document.getElementById('searchInput');
             let searchTerm = searchInput.value.trim().replace(/\D/g, '');
