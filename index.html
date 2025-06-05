@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الاستعلام عن البيانات الشخصية</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        #searchInput {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        #searchInput:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-style: italic;
+            display: none;
+        }
+        .employee-details {
+            display: none;
+            margin-top: 30px;
+            text-align: right;
+            border: 1px solid #eee;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: bold;
+            width: 150px;
+            color: #555;
+        }
+        .detail-value {
+            flex: 1;
+        }
+        .error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+            display: none;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+            display: none;
+        }
+        .instructions {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            .detail-row {
+                flex-direction: column;
+            }
+            .detail-label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>الاستعلام عن البيانات الشخصية</h1>
+        <p class="instructions">الرجاء إدخال الرقم الوطني للاستعلام عن البيانات</p>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="أدخل الرقم الوطني (11 رقمًا)" maxlength="11" inputmode="numeric">
+            <div class="error-message" id="errorMessage">الرقم الوطني يجب أن يحتوي على 11 رقمًا على الأقل</div>
+            <button id="searchButton">استعلام</button>
+        </div>
+        
+        <div class="loading" id="loading">جاري البحث عن البيانات...</div>
+        <div class="no-results" id="noResults">لا توجد بيانات مطابقة للرقم الوطني المدخل</div>
+        
+        <div class="employee-details" id="employeeDetails">
+            <h2 id="employeeName">بيانات الموظف</h2>
+            <div id="detailsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const loading = document.getElementById('loading');
+        const noResults = document.getElementById('noResults');
+        const employeeDetails = document.getElementById('employeeDetails');
+        const employeeName = document.getElementById('employeeName');
+        const detailsContent = document.getElementById('detailsContent');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // Load JSON data
+        let allEmployees = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('8jfh0-7m5vq.json')
+                .then(response => response.json())
+                .then(data => {
+                    allEmployees = data;
+                })
+                .catch(error => {
+                    console.error('Error loading JSON data:', error);
+                    errorMessage.textContent = 'حدث خطأ أثناء تحميل البيانات';
+                    errorMessage.style.display = 'block';
+                });
+        });
+        
+        // Search functionality
+        function performSearch() {
+            let searchTerm = searchInput.value.trim();
+            
+            // Remove all non-digit characters
+            searchTerm = searchTerm.replace(/\D/g, '');
+            
+            // Remove leading zero if exists
+            if (searchTerm.startsWith('0')) {
+                searchTerm = searchTerm.substring(1);
+            }
+            
+            // Validate input (at least 8 digits)
+            if (searchTerm.length < 8) {
+                errorMessage.textContent = 'الرجاء إدخال 8 أرقام على الأقل (بدون الصفر الأول)';
+                errorMessage.style.display = 'block';
+                noResults.style.display = 'none';
+                employeeDetails.style.display = 'none';
+                return;
+            }
+            
+            errorMessage.style.display = 'none';
+            loading.style.display = 'block';
+            noResults.style.display = 'none';
+            employeeDetails.style.display = 'none';
+            
+            // Simulate loading delay
+            setTimeout(() => {
+                loading.style.display = 'none';
+                
+                // Search for employee
+                const foundEmployee = allEmployees.find(employee => {
+                    const nationalId = employee['الرقم الوطني'] ? employee['الرقم الوطني'].replace(/\D/g, '') : '';
+                    return nationalId.includes(searchTerm);
+                });
+                
+                if (foundEmployee) {
+                    displayEmployeeDetails(foundEmployee);
+                } else {
+                    noResults.style.display = 'block';
+                }
+            }, 800);
+        }
+        
+        // Display employee details
+        function displayEmployeeDetails(employee) {
+            employeeName.textContent = employee['الاسم والنسبة'] || 'بيانات الموظف';
+            
+            // Format birth date
+            const birthDay = employee['المواليد / اليوم'] || '--';
+            const birthMonth = employee['المواليد / شهر'] || '--';
+            const birthYear = employee['المواليد / عام'] || '--';
+            const birthDate = `${birthDay}/${birthMonth}/${birthYear}`;
+            
+            // Create detail rows
+            detailsContent.innerHTML = '';
+            
+            const fieldsToShow = [
+                { label: 'الرقم الذاتي', value: employee['الرقم الذاتي'] },
+                { label: 'الاسم', value: employee['الاسم'] },
+                { label: 'النسبة', value: employee['النسبة'] },
+                { label: 'اسم الأب', value: employee['اسم الأب'] },
+                { label: 'اسم الأم', value: employee['اسم الأم'] },
+                { label: 'تاريخ الميلاد', value: birthDate },
+                { label: 'مكان الولادة', value: employee['الولادة والتاريخ'] },
+                { label: 'الرقم الوطني', value: employee['الرقم الوطني'] },
+                { label: 'الشهادة العلمية', value: employee['الشهادة'] },
+                { label: 'التخصص', value: employee['التخصص'] },
+                { label: 'المسمى الوظيفي', value: employee['مسمى وظيفي'] },
+                { label: 'الجهة التابع لها', value: employee['الجهة'] }
+            ];
+            
+            fieldsToShow.forEach(field => {
+                if (field.value && field.value !== 'null') {
+                    const row = document.createElement('div');
+                    row.className = 'detail-row';
+                    row.innerHTML = `
+                        <div class="detail-label">${field.label}:</div>
+                        <div class="detail-value">${field.value}</div>
+                    `;
+                    detailsContent.appendChild(row);
+                }
+            });
+            
+            employeeDetails.style.display = 'block';
+        }
+        
+        // Input validation
+        searchInput.addEventListener('input', function() {
+            // Allow only numbers
+            this.value = this.value.replace(/\D/g, '');
+            
+            // Hide error message if valid
+            if (this.value.replace(/^0/, '').length >= 8) {
+                errorMessage.style.display = 'none';
+            }
+        });
+        
+        // Event listeners
+        searchButton.addEventListener('click', performSearch);
+        
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>
