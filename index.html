@@ -191,11 +191,11 @@
     <!-- صفحة تسجيل الدخول -->
     <div class="container">
         <div class="login-container" id="loginContainer">
-            <h1>تسجيل الدخول</h1>
+            <h1>تسجيل الدخوووول</h1>
             <div class="alert alert-error" id="loginError">اسم المستخدم أو كلمة المرور غير صحيحة</div>
             
             <div class="form-group">
-                <label for="username">اسم المستخدم</label>
+                <label for="username">اســــم المستخدم</label>
                 <input type="text" id="username" class="form-control" placeholder="أدخل اسم المستخدم">
             </div>
             
@@ -210,13 +210,13 @@
         <!-- الصفحة الرئيسية -->
         <div class="main-container" id="mainContainer">
             <div class="search-container">
-                <h1>الاستعلام عن البياناااات الشخصية</h1>
+                <h1>الاستعلام عن البيانات الشخصية</h1>
                 <p class="instructions">الرجاء إدخال الرقم الوطني للاستعلام عن البيانات</p>
                 
-                <div class="alert alert-error" id="errorMessage">الرقم الوطني يجب أن يحتوي على 11 رقمًا على الأقل</div>
+                <div class="alert alert-error" id="errorMessage">الرقم الوطني يجب أن يحتوي على 8 أرقام على الأقل</div>
                 
                 <div class="form-group">
-                    <input type="text" id="searchInput" class="form-control" placeholder="أدخل الرقم الوطني (11 رقمًا)" maxlength="11" inputmode="numeric">
+                    <input type="text" id="searchInput" class="form-control" placeholder="أدخل الرقم الوطني (8 أرقام على الأقل)" maxlength="11" inputmode="numeric">
                 </div>
                 
                 <button class="btn" id="searchButton">استعلام</button>
@@ -285,37 +285,21 @@
             }
         });
         
-        // تحميل بيانات الموظفين
-        // جرب هذه الدالة البديلة للفك
-function alternativeDecrypt(data) {
-    try {
-        // الطريقة الأساسية
-        const bytes = CryptoJS.AES.decrypt(
-            data,
-            CryptoJS.enc.Utf8.parse(ENCRYPTION_KEY)
-        );
-        let decrypted = bytes.toString(CryptoJS.enc.Utf8);
-        
-        // إذا فشلت، جرب بدون خيارات
-        if (!decrypted) {
-            decrypted = CryptoJS.AES.decrypt(
-                data,
-                ENCRYPTION_KEY
-            ).toString(CryptoJS.enc.Utf8);
-        }
-        
-        return JSON.parse(decrypted);
-    } catch (e) {
-        console.error("فشل الفك بالطريقتين:", e);
-        throw e;
-    }
-}
-        function loadEmployeeData() {
-            loading.style.display = 'block';
-            errorMessage.style.display = 'none';
-            
-        
-            .then(([part1, part2]) => {
+        // تحميل بيانات الموظفين من Netlify
+        async function loadEmployeeData() {
+            const NETLIFY_URL = "https://thunderous-fox-412e5b.netlify.app/";
+            const FILES = ["encrypted_part11.json", "encrypted_part22.json"];
+
+            try {
+                loading.style.display = 'block';
+                errorMessage.style.display = 'none';
+                
+                // تحميل الملفات من Netlify
+                const [part1, part2] = await Promise.all([
+                    fetch(`${NETLIFY_URL}${FILES[0]}`).then(res => res.text()),
+                    fetch(`${NETLIFY_URL}${FILES[1]}`).then(res => res.text())
+                ]);
+
                 try {
                     const decrypt = (data) => {
                         const bytes = CryptoJS.AES.decrypt(
@@ -337,125 +321,119 @@ function alternativeDecrypt(data) {
                     allEmployees = [...Object.values(data1), ...Object.values(data2)];
                     
                     if (allEmployees.length === 0) throw new Error('لا توجد بيانات');
-               ```javascript
-async function loadEmployeeData() {
-    const JS_DELIVR_URL = "https://cdn.jsdelivr.net/gh/SyDominges/new@e76f37fc34300a0821ca00613a8b801b05494fba/";
-    const FILES = ["encrypted_part11.json", "encrypted_part22.json"];
-
-    try {
-        loading.style.display = 'block';
-        
-        // تحميل الملفات من jsDelivr
-        const [part1, part2] = await Promise.all([
-            fetch(`${JS_DELIVR_URL}${FILES[0]}`).then(res => res.text()),
-            fetch(`${JS_DELIVR_URL}${FILES[1]}`).then(res => res.text())
-        ]);     
+                    
                     loading.style.display = 'none';
+                    debugData(); // استدعاء دالة التحليل التشخيصي
                 } catch (error) {
                     console.error('Error:', error);
-                    errorMessage.textContent = 'حدث خطأ في تحميل البيانات';
+                    errorMessage.textContent = 'حدث خطأ في فك تشفير البيانات';
                     errorMessage.style.display = 'block';
                     loading.style.display = 'none';
                 }
-            })
+            } catch (error) {
+                console.error('Error:', error);
+                errorMessage.textContent = 'حدث خطأ في تحميل البيانات من السيرفر';
+                errorMessage.style.display = 'block';
+                loading.style.display = 'none';
+            }
+        }
 
+        function debugData() {
+            console.log("====== بدء التحليل التشخيصي ======");
+            
+            // 1. التحقق من جودة البيانات المحملة
+            console.log("عدد السجلات المحملة:", allEmployees.length);
+            if (allEmployees.length > 0) {
+                console.log("عينة من أول سجل:", JSON.stringify(allEmployees[0], null, 2));
+                
+                // 2. التحقق من وجود حقل الرقم الوطني
+                const firstEmp = allEmployees[0];
+                if (!firstEmp['الرقم الوطني']) {
+                    console.error("تحذير: لا يوجد حقل 'الرقم الوطني' في السجلات");
+                } else {
+                    console.log("نموذج الرقم الوطني في البيانات:", firstEmp['الرقم الوطني']);
+                }
+            }
+            
+            // 3. اختبار البحث يدويًا
+            if (allEmployees.length > 0) {
+                const testNationalId = allEmployees[0]['الرقم الوطني']?.replace(/\D/g, '').substring(0, 8) || "12345678";
+                const found = allEmployees.some(emp => {
+                    const empId = emp['الرقم الوطني']?.replace(/\D/g, '') || '';
+                    return empId.includes(testNationalId);
+                });
+                console.log(`اختبار البحث عن ${testNationalId}:`, found ? "موجود" : "غير موجود");
+            }
+            
+            console.log("====== انتهاء التحليل ======");
+        }
         
         // البحث عن الموظف
         document.getElementById('searchButton').addEventListener('click', performSearch);
-        function debugData() {
-    console.log("====== بدء التحليل التشخيصي ======");
-    
-    // 1. التحقق من جودة البيانات المحملة
-    console.log("عدد السجلات المحملة:", allEmployees.length);
-    if (allEmployees.length > 0) {
-        console.log("عينة من أول سجل:", JSON.stringify(allEmployees[0], null, 2));
         
-        // 2. التحقق من وجود حقل الرقم الوطني
-        const firstEmp = allEmployees[0];
-        if (!firstEmp['الرقم الوطني']) {
-            console.error("تحذير: لا يوجد حقل 'الرقم الوطني' في السجلات");
-        } else {
-            console.log("نموذج الرقم الوطني في البيانات:", firstEmp['الرقم الوطني']);
-        }
-    }
-    
-    // 3. اختبار البحث يدويًا
-    const testNationalId = "123456789"; // استبدلها برقم تجريبي موجود ببياناتك
-    const found = allEmployees.some(emp => {
-        const empId = emp['الرقم الوطني']?.replace(/\D/g, '') || '';
-        return empId.includes(testNationalId);
-    });
-    console.log(`اختبار البحث عن ${testNationalId}:`, found ? "موجود" : "غير موجود");
-    
-    console.log("====== انتهاء التحليل ======");
-}
-
-// استدعاء الدالة بعد تحميل البيانات
-// أضف هذا السطر في نهاية دالة loadEmployeeData بعد نجاح التحميل:
-debugData();
-      function performSearch() {
-    const searchInput = document.getElementById('searchInput');
-    let searchTerm = searchInput.value.trim().replace(/\D/g, '');
-    
-    if (searchTerm.startsWith('0')) {
-        searchTerm = searchTerm.substring(1);
-    }
-    
-    if (searchTerm.length < 8) {
-        errorMessage.textContent = 'الرجاء إدخال 8 أرقام على الأقل';
-        errorMessage.style.display = 'block';
-        return;
-    }
-    
-    // تفعيل وضع التصحيح
-    console.log(`====== بدء البحث عن: ${searchTerm} ======`);
-    
-    errorMessage.style.display = 'none';
-    noResults.style.display = 'none';
-    employeeDetails.style.display = 'none';
-    loading.style.display = 'block';
-    
-    setTimeout(() => {
-        loading.style.display = 'none';
-        
-        try {
-            let foundEmployee = null;
+        function performSearch() {
+            const searchInput = document.getElementById('searchInput');
+            let searchTerm = searchInput.value.trim().replace(/\D/g, '');
             
-            // تسجيل جميع الأرقام الوطنية المتاحة للتصحيح
-            console.log("الأرقام الوطنية المتاحة:");
-            allEmployees.forEach((emp, index) => {
-                const empId = emp['الرقم الوطني']?.replace(/\D/g, '') || '';
-                console.log(`السجل ${index + 1}: ${empId}`);
-                
-                if (empId.includes(searchTerm)) {
-                    foundEmployee = emp;
-                }
-            });
-            
-            if (foundEmployee) {
-                console.log("تم العثور على:", foundEmployee);
-                displayEmployeeDetails(foundEmployee);
-            } else {
-                console.warn("لم يتم العثور على نتائج مطابقة");
-                noResults.style.display = 'block';
-                
-                // اقتراحات لاستكشاف الأخطاء
-                if (allEmployees.length === 0) {
-                    console.error("البيانات فارغة! تأكد من:");
-                    console.error("- صحة كلمة سر التشفير");
-                    console.error("- تنسيق الملفات المشفرة");
-                } else {
-                    console.warn("نصائح استكشاف الأخطاء:");
-                    console.warn("- تأكد من تطابق تنسيق الرقم المدخل مع البيانات");
-                    console.warn("- جرب البحث بأجزاء من الرقم (8 أرقام بدلاً من 11)");
-                }
+            if (searchTerm.startsWith('0')) {
+                searchTerm = searchTerm.substring(1);
             }
-        } catch (error) {
-            console.error("حدث خطأ أثناء البحث:", error);
-            errorMessage.textContent = 'حدث خطأ أثناء معالجة البحث';
-            errorMessage.style.display = 'block';
-        }
-    }, 800);
+            
+            if (searchTerm.length < 8) {
+                errorMessage.textContent = 'الرجاء إدخال 8 أرقام على الأقل';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // تفعيل وضع التصحيح
+            console.log(`====== بدء البحث عن: ${searchTerm} ======`);
+            
+            errorMessage.style.display = 'none';
+            noResults.style.display = 'none';
+            employeeDetails.style.display = 'none';
+            loading.style.display = 'block';
+            
+            setTimeout(() => {
+                loading.style.display = 'none';
+                
+                try {
+                    let foundEmployee = null;
+                    
+                    // تسجيل جميع الأرقام الوطنية المتاحة للتصحيح
+                    console.log("الأرقام الوطنية المتاحة:");
+                    allEmployees.forEach((emp, index) => {
+                        const empId = emp['الرقم الوطني']?.replace(/\D/g, '') || '';
+                        console.log(`السجل ${index + 1}: ${empId}`);
+                        
+                        if (empId.includes(searchTerm)) {
+                            foundEmployee = emp;
+                        }
+                    });
+                    
+                    if (foundEmployee) {
+                        console.log("تم العثور على:", foundEmployee);
+                        displayEmployeeDetails(foundEmployee);
+                    } else {
+                        console.warn("لم يتم العثور على نتائج مطابقة");
+                        noResults.style.display = 'block';
+                        
+                        // اقتراحات لاستكشاف الأخطاء
+                        if (allEmployees.length === 0) {
+                            console.error("البيانات فارغة! تأكد من:");
+                            console.error("- صحة كلمة سر التشفير");
+                            console.error("- تنسيق الملفات المشفرة");
+                        } else {
+                            console.warn("نصائح استكشاف الأخطاء:");
+                            console.warn("- تأكد من تطابق تنسيق الرقم المدخل مع البيانات");
+                            console.warn("- جرب البحث بأجزاء من الرقم (8 أرقام بدلاً من 11)");
+                        }
+                    }
+                } catch (error) {
+                    console.error("حدث خطأ أثناء البحث:", error);
+                    errorMessage.textContent = 'حدث خطأ أثناء معالجة البحث';
+                    errorMessage.style.display = 'block';
+                }
+            }, 800);
         }
         
         // عرض تفاصيل الموظف
