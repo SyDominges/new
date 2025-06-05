@@ -286,6 +286,30 @@
         });
         
         // تحميل بيانات الموظفين
+        // جرب هذه الدالة البديلة للفك
+function alternativeDecrypt(data) {
+    try {
+        // الطريقة الأساسية
+        const bytes = CryptoJS.AES.decrypt(
+            data,
+            CryptoJS.enc.Utf8.parse(ENCRYPTION_KEY)
+        );
+        let decrypted = bytes.toString(CryptoJS.enc.Utf8);
+        
+        // إذا فشلت، جرب بدون خيارات
+        if (!decrypted) {
+            decrypted = CryptoJS.AES.decrypt(
+                data,
+                ENCRYPTION_KEY
+            ).toString(CryptoJS.enc.Utf8);
+        }
+        
+        return JSON.parse(decrypted);
+    } catch (e) {
+        console.error("فشل الفك بالطريقتين:", e);
+        throw e;
+    }
+}
         function loadEmployeeData() {
             loading.style.display = 'block';
             errorMessage.style.display = 'none';
