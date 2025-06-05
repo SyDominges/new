@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>أداة تشفير وتقسيم البيانات</h2>
+  <input type="file" id="jsonFile" accept=".json">
+  <br><br>
+  <input type="password" id="encryptionKey" placeholder="كلمة السر للتشفير">
+  <button onclick="processData()">تشفير وتقسيم</button>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script>
+    function processData() {
+      const file = document.getElementById('jsonFile').files[0];
+      const key = document.getElementById('encryptionKey').value;
+      
+      if (!file || !key) {
+        alert("الرجاء اختيار ملف وإدخال كلمة السر");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          const keys = Object.keys(data);
+          
+          // تقسيم البيانات إلى جزئين
+          const part1 = {};
+          const part2 = {};
+          
+          keys.forEach((key, index) => {
+            if (index % 2 === 0) part1[key] = data[key];
+            else part2[key] = data[key];
+          });
+
+          // تشفير الجزء الأول
+          const iv1 = CryptoJS.lib.WordArray.random(16);
+          const encrypted1 = CryptoJS.AES.encrypt(
+            JSON.stringify(part1), 
+            CryptoJS.enc.Utf8.parse(key),
+            { iv: iv1 }
+          ).toString();
+
+          // تشفير الجزء الثاني
+          const iv2 = CryptoJS.lib.WordArray.random(16);
+          const encrypted2 = CryptoJS.AES.encrypt(
+            JSON.stringify(part2),
+            CryptoJS.enc.Utf8.parse(key),
+            { iv: iv2 }
+          ).toString();
+
+          // إنشاء ملفات مشفرة
+          downloadFile(encrypted1, "encrypted_part1.json");
+          downloadFile(encrypted2, "encrypted_part2.json");
+          
+          alert("تم التشفير والتقسيم بنجاح!");
+        } catch (error) {
+          alert("حدث خطأ: " + error.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function downloadFile(content, filename) {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+    }
+  </script>
+</body>
+</html>
