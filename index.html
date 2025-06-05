@@ -289,80 +289,88 @@
 async function loadEmployeeData() {
     const NETLIFY_URL = "https://thunderous-fox-412e5b.netlify.app/";
     const FILES = ["encrypted_part11.json", "encrypted_part22.json"];
-    const PASSWORD = "My-Drop-Site"; // كلمة المرور التي ذكرتها
+    const SITE_PASSWORD = "My-Drop-Site"; // كلمة مرور السيرفر
+    const ENCRYPTION_KEY = "@ali96json@"; // كلمة سر فك التشفير
 
     try {
         loading.style.display = 'block';
         errorMessage.style.display = 'none';
-        
-        // تحميل الملفات مع رأس المصادقة
-        const [part1, part2] = await Promise.all([
-            fetch(`${NETLIFY_URL}${FILES[0]}`, {
-                headers: {
-                    'Authorization': `Basic ${btoa(PASSWORD + ':')}`
-                }
-            }).then(res => {
-                if (!res.ok) throw new Error(`فشل التحميل: ${res.status}`);
-                return res.text();
-            }),
-            fetch(`${NETLIFY_URL}${FILES[1]}`, {
-                headers: {
-                    'Authorization': `Basic ${btoa(PASSWORD + ':')}`
-                }
-            }).then(res => {
-                if (!res.ok) throw new Error(`فشل التحميل: ${res.status}`);
-                return res.text();
-            })
-        ]);
 
-        // فك التشفير
+        // 1. إنشاء رؤوس الطلب مع المصادقة
+        const headers = new Headers();
+        headers.set('Authorization', 'Basic ' + btoa(SITE_PASSWORD + ":"));
+
+        // 2. محاولة التحميل مع معالجة الأخطاء
+        const responses = await Promise.all(
+            FILES.map(file => 
+                fetch(`${NETLIFY_URL}${file}`, { 
+                    headers: headers,
+                    mode: 'cors' // مهم لتفعيل CORS
+                }).then(async res => {
+                    if (!res.ok) {
+                        const errorData = await res.text();
+                        throw new Error(`HTTP ${res.status}: ${errorData}`);
+                    }
+                    return res.text();
+                })
+        );
+
+        // 3. فك التشفير
         const decrypt = (data) => {
             try {
-                const bytes = CryptoJS.AES.decrypt(
-                    data.trim(),
+                // طريقة فك التشفير البديلة إذا فشلت الطريقة الأساسية
+                let bytes = CryptoJS.AES.decrypt(
+                    { ciphertext: CryptoJS.enc.Base64.parse(data) },
                     CryptoJS.enc.Utf8.parse(ENCRYPTION_KEY),
-                    {
-                        mode: CryptoJS.mode.CBC,
-                        padding: CryptoJS.pad.Pkcs7
-                    }
+                    { mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
                 );
-                const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                
+                let decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                
+                if (!decrypted) {
+                    // المحاولة بطريقة بديلة
+                    bytes = CryptoJS.AES.decrypt(
+                        data,
+                        ENCRYPTION_KEY
+                    );
+                    decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                }
+                
                 if (!decrypted) throw new Error('فشل فك التشفير');
                 return JSON.parse(decrypted);
             } catch (e) {
-                console.error('خطأ فك التشفير:', e);
-                throw new Error('كلمة سر التشفير غير صحيحة');
+                console.error('Error decrypting:', e);
+                throw new Error('تأكد من كلمة سر التشفير');
             }
         };
 
-        const data1 = decrypt(part1);
-        const data2 = decrypt(part2);
-        
+        const [data1, data2] = responses.map(decrypt);
         allEmployees = [...Object.values(data1), ...Object.values(data2)];
         
-        if (allEmployees.length === 0) {
-            throw new Error('تم تحميل البيانات ولكنها فارغة');
-        }
-        
         loading.style.display = 'none';
-        console.log('تم تحميل بيانات الموظفين بنجاح:', allEmployees.length);
-        debugData();
+        console.log('تم تحميل البيانات بنجاح!');
         
     } catch (error) {
         console.error('حدث خطأ:', error);
         loading.style.display = 'none';
         
-        if (error.message.includes('فشل التحميل')) {
-            errorMessage.textContent = 'خطأ في الوصول إلى الملفات (قد تكون كلمة المرور خاطئة)';
-        } else if (error.message.includes('كلمة سر التشفير')) {
-            errorMessage.textContent = 'خطأ في فك تشفير البيانات - تأكد من كلمة السر';
+        // معالجة أنواع الأخطاء المختلفة
+        if (error.message.includes('Failed to fetch')) {
+            errorMessage.innerHTML = `
+                فشل الاتصال بالسيرفر. الأسباب المحتملة:<br>
+                1. مشكلة في الإنترنت<br>
+                2. السيرفر غير متاح<br>
+                3. قيود أمان المتصفح
+            `;
+        } else if (error.message.includes('HTTP')) {
+            errorMessage.textContent = `خطأ من السيرفر: ${error.message}`;
         } else {
-            errorMessage.textContent = `حدث خطأ: ${error.message}`;
+            errorMessage.textContent = error.message;
         }
         
         errorMessage.style.display = 'block';
-            }
-        }
+    }
+}
 
         function debugData() {
             console.log("====== بدء التحليل التشخيصي ======");
