@@ -210,7 +210,7 @@
         <!-- الصفحة الرئيسية -->
         <div class="main-container" id="mainContainer">
             <div class="search-container">
-                <h1>الاستعلام عن البيانات الشخصية</h1>
+                <h1>الاستعلام عن البياناااات الشخصية</h1>
                 <p class="instructions">الرجاء إدخال الرقم الوطني للاستعلام عن البيانات</p>
                 
                 <div class="alert alert-error" id="errorMessage">الرقم الوطني يجب أن يحتوي على 11 رقمًا على الأقل</div>
@@ -314,11 +314,7 @@ function alternativeDecrypt(data) {
             loading.style.display = 'block';
             errorMessage.style.display = 'none';
             
-        const BASE_URL = "https://cdn.jsdelivr.net/gh/SyDominges/new@e76f37fc34300a0821ca00613a8b801b05494fba/";
-            Promise.all([
-                fetch(`${baseUrl}encrypted_part11.json`).then(res => res.text()),
-                fetch(`${baseUrl}encrypted_part22.json`).then(res => res.text())
-            ])
+        
             .then(([part1, part2]) => {
                 try {
                     const decrypt = (data) => {
@@ -341,7 +337,19 @@ function alternativeDecrypt(data) {
                     allEmployees = [...Object.values(data1), ...Object.values(data2)];
                     
                     if (allEmployees.length === 0) throw new Error('لا توجد بيانات');
-                    
+               ```javascript
+async function loadEmployeeData() {
+    const JS_DELIVR_URL = "https://cdn.jsdelivr.net/gh/SyDominges/new@e76f37fc34300a0821ca00613a8b801b05494fba/";
+    const FILES = ["encrypted_part11.json", "encrypted_part22.json"];
+
+    try {
+        loading.style.display = 'block';
+        
+        // تحميل الملفات من jsDelivr
+        const [part1, part2] = await Promise.all([
+            fetch(`${JS_DELIVR_URL}${FILES[0]}`).then(res => res.text()),
+            fetch(`${JS_DELIVR_URL}${FILES[1]}`).then(res => res.text())
+        ]);     
                     loading.style.display = 'none';
                 } catch (error) {
                     console.error('Error:', error);
