@@ -1,167 +1,185 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.github.io https://*.githubusercontent.com;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام الاستعلام عن البيانات الشخصية</title>
     <style>
-        /* أنماط صفحة تسجيل الدخول */
+        :root {
+            --primary-color: #3498db;
+            --error-color: #e74c3c;
+            --success-color: #2ecc71;
+            --text-color: #333;
+            --light-gray: #f5f5f5;
+            --white: #ffffff;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        /* تصميم صفحة تسجيل الدخول */
         .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-            background-color: white;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
             padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 50px auto;
             text-align: center;
         }
+        
         .login-container h1 {
-            color: #2c3e50;
+            color: var(--primary-color);
             margin-bottom: 30px;
+            font-size: 24px;
         }
-        .login-input {
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .form-control {
             width: 100%;
-            padding: 12px;
+            padding: 12px 15px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             font-size: 16px;
-            margin-bottom: 15px;
-            text-align: center;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
         }
-        .login-button {
-            padding: 12px 25px;
-            background-color: #3498db;
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 4px;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
             cursor: pointer;
             font-size: 16px;
             width: 100%;
+            transition: background-color 0.3s;
         }
-        .login-button:hover {
+        
+        .btn:hover {
             background-color: #2980b9;
         }
-        .login-error {
-            color: #e74c3c;
-            margin-top: 10px;
+        
+        .btn-logout {
+            background-color: var(--error-color);
+        }
+        
+        .btn-logout:hover {
+            background-color: #c0392b;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
             display: none;
         }
         
-        /* أنماط الصفحة الرئيسية (مخفية في البداية) */
-        .main-container {
-            display: none;
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        .alert-error {
+            background-color: #f8d7da;
+            color: var(--error-color);
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .loading {
             text-align: center;
-        }
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
-        }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 30px;
-        }
-        .search-container {
-            margin-bottom: 20px;
-        }
-        #searchInput {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        #searchInput:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-        button {
-            padding: 12px 25px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .no-results {
-            text-align: center;
-            padding: 20px;
-            color: #7f8c8d;
-            font-style: italic;
+            padding: 15px;
             display: none;
         }
+        
         .employee-details {
-            display: none;
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
             margin-top: 30px;
-            text-align: right;
-            border: 1px solid #eee;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #f9f9f9;
+            display: none;
         }
+        
         .detail-row {
             display: flex;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
             border-bottom: 1px solid #eee;
         }
-        .detail-row:last-child {
-            border-bottom: none;
-        }
+        
         .detail-label {
             font-weight: bold;
             width: 150px;
             color: #555;
         }
+        
         .detail-value {
             flex: 1;
         }
-        .error-message {
-            color: #e74c3c;
-            margin-top: 10px;
+        
+        /* الصفحة الرئيسية */
+        .main-container {
             display: none;
+            max-width: 600px;
+            margin: 30px auto;
         }
-        .loading {
-            text-align: center;
-            padding: 20px;
-            font-size: 18px;
-            display: none;
-        }
-        .instructions {
-            color: #7f8c8d;
-            font-size: 14px;
+        
+        .search-container {
+            background-color: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
             margin-bottom: 20px;
         }
-        .logout-btn {
-            margin-top: 20px;
-            background-color: #e74c3c;
+        
+        .instructions {
+            color: #666;
+            margin-bottom: 20px;
+            text-align: center;
         }
-        .logout-btn:hover {
-            background-color: #c0392b;
-        }
+        
         @media (max-width: 768px) {
-            .main-container, .login-container {
+            .login-container, .main-container {
                 padding: 20px;
+                margin: 20px auto;
             }
+            
             .detail-row {
                 flex-direction: column;
             }
+            
             .detail-label {
                 width: 100%;
                 margin-bottom: 5px;
@@ -171,77 +189,86 @@
 </head>
 <body>
     <!-- صفحة تسجيل الدخول -->
-    <div class="login-container" id="loginContainer">
-        <h1>تسجيل الدخول</h1>
-        <input type="text" id="username" class="login-input" placeholder="اسم المستخدم">
-        <input type="password" id="password" class="login-input" placeholder="كلمة المرور">
-        <div class="login-error" id="loginError">اسم المستخدم أو كلمة المرور غير صحيحة</div>
-        <button class="login-button" id="loginButton">دخول</button>
-    </div>
-    
-    <!-- الصفحة الرئيسية (مخفية في البداية) -->
-    <div class="main-container" id="mainContainer">
-        <h1>الاستعلام عن البيانات الشخصية</h1>
-        <p class="instructions">الرجاء إدخال الرقم الوطني للاستعلام عن البيانات</p>
-        
-        <div class="search-container">
-            <input type="text" id="searchInput" placeholder="أدخل الرقم الوطني (11 رقمًا)" maxlength="11" inputmode="numeric">
-            <div class="error-message" id="errorMessage">الرقم الوطني يجب أن يحتوي على 11 رقمًا على الأقل</div>
-            <button id="searchButton">استعلام</button>
+    <div class="container">
+        <div class="login-container" id="loginContainer">
+            <h1>تسجيل الدخول</h1>
+            <div class="alert alert-error" id="loginError">اسم المستخدم أو كلمة المرور غير صحيحة</div>
+            
+            <div class="form-group">
+                <label for="username">اسم المستخدم</label>
+                <input type="text" id="username" class="form-control" placeholder="أدخل اسم المستخدم">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">كلمة المرور</label>
+                <input type="password" id="password" class="form-control" placeholder="أدخل كلمة المرور">
+            </div>
+            
+            <button class="btn" id="loginButton">دخول</button>
         </div>
         
-        <div class="loading" id="loading">جاري البحث عن البيانات...</div>
-        <div class="no-results" id="noResults">لا توجد بيانات مطابقة للرقم الوطني المدخل</div>
-        
-        <div class="employee-details" id="employeeDetails">
-            <h2 id="employeeName">بيانات الموظف</h2>
-            <div id="detailsContent"></div>
+        <!-- الصفحة الرئيسية -->
+        <div class="main-container" id="mainContainer">
+            <div class="search-container">
+                <h1>الاستعلام عن البيانات الشخصية</h1>
+                <p class="instructions">الرجاء إدخال الرقم الوطني للاستعلام عن البيانات</p>
+                
+                <div class="alert alert-error" id="errorMessage">الرقم الوطني يجب أن يحتوي على 11 رقمًا على الأقل</div>
+                
+                <div class="form-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="أدخل الرقم الوطني (11 رقمًا)" maxlength="11" inputmode="numeric">
+                </div>
+                
+                <button class="btn" id="searchButton">استعلام</button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <p>جاري البحث عن البيانات...</p>
+            </div>
+            
+            <div class="alert alert-error" id="noResults">لا توجد بيانات مطابقة للرقم الوطني المدخل</div>
+            
+            <div class="employee-details" id="employeeDetails">
+                <h2 id="employeeName">بيانات الموظف</h2>
+                <div id="detailsContent"></div>
+            </div>
+            
+            <button class="btn btn-logout" id="logoutButton">تسجيل الخروج</button>
         </div>
-        
-        <button class="login-button logout-btn" id="logoutButton">تسجيل الخروج</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        // بيانات تسجيل الدخول (SHA-256 لـ "admin" و "5-6-2025")
+        // بيانات تسجيل الدخول (SHA-256)
         const CORRECT_USERNAME_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
         const CORRECT_PASSWORD_HASH = "a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e";
-        const ENCRYPTION_KEY = "@ali96json@"; // كلمة سر التشفير الجديدة
+        const ENCRYPTION_KEY = "@ali96json@";
         let failedAttempts = 0;
         const MAX_ATTEMPTS = 3;
         
-        // عناصر تسجيل الدخول
+        // عناصر DOM
         const loginContainer = document.getElementById('loginContainer');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const loginButton = document.getElementById('loginButton');
-        const loginError = document.getElementById('loginError');
         const mainContainer = document.getElementById('mainContainer');
+        const loginError = document.getElementById('loginError');
+        const errorMessage = document.getElementById('errorMessage');
+        const noResults = document.getElementById('noResults');
+        const loading = document.getElementById('loading');
+        const employeeDetails = document.getElementById('employeeDetails');
         const logoutButton = document.getElementById('logoutButton');
         
-        // عناصر الصفحة الرئيسية
-        const searchInput = document.getElementById('searchInput');
-        const searchButton = document.getElementById('searchButton');
-        const loading = document.getElementById('loading');
-        const noResults = document.getElementById('noResults');
-        const employeeDetails = document.getElementById('employeeDetails');
-        const employeeName = document.getElementById('employeeName');
-        const detailsContent = document.getElementById('detailsContent');
-        const errorMessage = document.getElementById('errorMessage');
-        
-        // بيانات الموظفين
+        // بيانات التطبيق
         let allEmployees = [];
         
-        // حدث تسجيل الدخول
-        loginButton.addEventListener('click', function() {
+        // أحداث تسجيل الدخول
+        document.getElementById('loginButton').addEventListener('click', function() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
             if (failedAttempts >= MAX_ATTEMPTS) {
                 loginError.textContent = 'تم تجاوز عدد المحاولات المسموح بها';
-                loginButton.disabled = true;
+                loginError.style.display = 'block';
                 return;
             }
-            
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
             
             const hashedUsername = CryptoJS.SHA256(username).toString();
             const hashedPassword = CryptoJS.SHA256(password).toString();
@@ -253,16 +280,8 @@
                 loadEmployeeData();
             } else {
                 failedAttempts++;
-                loginError.textContent = `بيانات غير صحيحة. المحاولات المتبقية: ${MAX_ATTEMPTS - failedAttempts}`;
                 loginError.style.display = 'block';
-            }
-        });
-        
-        // حدث تسجيل الخروج
-        logoutButton.addEventListener('click', function() {
-            if (confirm("هل أنت متأكد من تسجيل الخروج؟")) {
-                sessionStorage.clear();
-                location.reload();
+                loginError.textContent = `بيانات الدخول غير صحيحة. المحاولات المتبقية: ${MAX_ATTEMPTS - failedAttempts}`;
             }
         });
         
@@ -271,24 +290,14 @@
             loading.style.display = 'block';
             errorMessage.style.display = 'none';
             
-            // روابط الملفات المعدلة
             const baseUrl = 'https://raw.githubusercontent.com/SyDominges/test/3efb71c979f0e711536dbfa006ffe76898f26bc2/';
             
             Promise.all([
-                fetch(`${baseUrl}encrypted_part11.json?t=${Date.now()}`)
-                    .then(res => {
-                        if (!res.ok) throw new Error('Failed to load part11');
-                        return res.text();
-                    }),
-                fetch(`${baseUrl}encrypted_part22.json?t=${Date.now()}`)
-                    .then(res => {
-                        if (!res.ok) throw new Error('Failed to load part22');
-                        return res.text();
-                    })
+                fetch(`${baseUrl}encrypted_part11.json`).then(res => res.text()),
+                fetch(`${baseUrl}encrypted_part22.json`).then(res => res.text())
             ])
             .then(([part1, part2]) => {
                 try {
-                    // فك التشفير مع خيارات محددة
                     const decrypt = (data) => {
                         const bytes = CryptoJS.AES.decrypt(
                             data.trim(),
@@ -306,71 +315,52 @@
                     const data1 = decrypt(part1);
                     const data2 = decrypt(part2);
                     
-                    // دمج البيانات مع التحقق
                     allEmployees = [...Object.values(data1), ...Object.values(data2)];
                     
-                    if (allEmployees.length === 0) {
-                        throw new Error('البيانات فارغة بعد الفك');
-                    }
+                    if (allEmployees.length === 0) throw new Error('لا توجد بيانات');
                     
-                    console.log('تم تحميل:', allEmployees.length, 'سجلاً');
-                    showStatus("تم تحميل البيانات بنجاح", true);
-                    
+                    loading.style.display = 'none';
                 } catch (error) {
                     console.error('Error:', error);
-                    showStatus(`خطأ: ${error.message}`, false);
-                    console.log('محتوى part1:', part1.substring(0, 100));
+                    errorMessage.textContent = 'حدث خطأ في تحميل البيانات';
+                    errorMessage.style.display = 'block';
+                    loading.style.display = 'none';
                 }
             })
             .catch(error => {
                 console.error('Fetch error:', error);
-                showStatus(`خطأ في تحميل الملفات: ${error.message}`, false);
-            })
-            .finally(() => {
+                errorMessage.textContent = 'فشل في تحميل الملفات';
+                errorMessage.style.display = 'block';
                 loading.style.display = 'none';
             });
         }
         
-        // عرض حالة التحميل
-        function showStatus(message, isSuccess) {
-            errorMessage.textContent = message;
-            errorMessage.style.color = isSuccess ? '#27ae60' : '#e74c3c';
-            errorMessage.style.display = 'block';
-        }
+        // البحث عن الموظف
+        document.getElementById('searchButton').addEventListener('click', performSearch);
         
-        // وظيفة البحث
         function performSearch() {
-            let searchTerm = searchInput.value.trim();
+            const searchInput = document.getElementById('searchInput');
+            let searchTerm = searchInput.value.trim().replace(/\D/g, '');
             
-            // إزالة جميع الأحرف غير الرقمية
-            searchTerm = searchTerm.replace(/\D/g, '');
-            
-            // إزالة الصفر الأول إذا وجد
             if (searchTerm.startsWith('0')) {
                 searchTerm = searchTerm.substring(1);
             }
             
-            // التحقق من صحة الإدخال (8 أرقام على الأقل)
             if (searchTerm.length < 8) {
-                errorMessage.textContent = 'الرجاء إدخال 8 أرقام على الأقل (بدون الصفر الأول)';
+                errorMessage.textContent = 'الرجاء إدخال 8 أرقام على الأقل';
                 errorMessage.style.display = 'block';
-                noResults.style.display = 'none';
-                employeeDetails.style.display = 'none';
                 return;
             }
             
             errorMessage.style.display = 'none';
-            loading.style.display = 'block';
             noResults.style.display = 'none';
             employeeDetails.style.display = 'none';
+            loading.style.display = 'block';
             
-            // محاكاة تأخير التحميل
             setTimeout(() => {
                 loading.style.display = 'none';
-                
-                // البحث عن الموظف
-                const foundEmployee = allEmployees.find(employee => {
-                    const nationalId = employee['الرقم الوطني'] ? employee['الرقم الوطني'].replace(/\D/g, '') : '';
+                const foundEmployee = allEmployees.find(emp => {
+                    const nationalId = emp['الرقم الوطني']?.replace(/\D/g, '') || '';
                     return nationalId.includes(searchTerm);
                 });
                 
@@ -384,40 +374,32 @@
         
         // عرض تفاصيل الموظف
         function displayEmployeeDetails(employee) {
-            employeeName.textContent = employee['الاسم والنسبة'] || 'بيانات الموظف';
-            
-            // تنسيق تاريخ الميلاد
-            const birthDay = employee['المواليد / اليوم'] || '--';
-            const birthMonth = employee['المواليد / شهر'] || '--';
-            const birthYear = employee['المواليد / عام'] || '--';
-            const birthDate = `${birthDay}/${birthMonth}/${birthYear}`;
-            
-            // إنشاء صفوف التفاصيل
+            document.getElementById('employeeName').textContent = employee['الاسم والنسبة'] || 'بيانات الموظف';
+            const detailsContent = document.getElementById('detailsContent');
             detailsContent.innerHTML = '';
             
-            const fieldsToShow = [
-                { label: 'الرقم الذاتي', value: employee['الرقم الذاتي'] },
-                { label: 'الاسم', value: employee['الاسم'] },
-                { label: 'النسبة', value: employee['النسبة'] },
-                { label: 'اسم الأب', value: employee['اسم الأب'] },
-                { label: 'اسم الأم', value: employee['اسم الأم'] },
-                { label: 'تاريخ الميلاد', value: birthDate },
-                { label: 'مكان الولادة', value: employee['الولادة والتاريخ'] },
-                { label: 'الرقم الوطني', value: employee['الرقم الوطني'] },
-                { label: 'الشهادة العلمية', value: employee['الشهادة'] },
-                { label: 'التخصص', value: employee['التخصص'] },
-                { label: 'المسمى الوظيفي', value: employee['مسمى وظيفي'] },
-                { label: 'الجهة التابع لها', value: employee['الجهة'] }
+            const fields = [
+                'الرقم الذاتي', 'الاسم', 'النسبة', 'اسم الأب', 'اسم الأم',
+                'المواليد / اليوم', 'المواليد / شهر', 'المواليد / عام',
+                'الولادة والتاريخ', 'الرقم الوطني', 'الشهادة', 'التخصص',
+                'مسمى وظيفي', 'الجهة'
             ];
             
-            fieldsToShow.forEach(field => {
-                if (field.value && field.value !== 'null') {
+            fields.forEach(field => {
+                if (employee[field] && employee[field] !== 'null') {
                     const row = document.createElement('div');
                     row.className = 'detail-row';
-                    row.innerHTML = `
-                        <div class="detail-label">${field.label}:</div>
-                        <div class="detail-value">${field.value}</div>
-                    `;
+                    
+                    const label = document.createElement('div');
+                    label.className = 'detail-label';
+                    label.textContent = `${field}:`;
+                    
+                    const value = document.createElement('div');
+                    value.className = 'detail-value';
+                    value.textContent = employee[field];
+                    
+                    row.appendChild(label);
+                    row.appendChild(value);
                     detailsContent.appendChild(row);
                 }
             });
@@ -425,23 +407,18 @@
             employeeDetails.style.display = 'block';
         }
         
-        // التحقق من صحة الإدخال
-        searchInput.addEventListener('input', function() {
-            // السماح بالأرقام فقط
-            this.value = this.value.replace(/\D/g, '');
-            
-            // إخفاء رسالة الخطأ إذا كان الإدخال صحيحًا
-            if (this.value.replace(/^0/, '').length >= 8) {
-                errorMessage.style.display = 'none';
+        // تسجيل الخروج
+        logoutButton.addEventListener('click', function() {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                location.reload();
             }
         });
         
-        // أحداث البحث
-        searchButton.addEventListener('click', performSearch);
-        
-        searchInput.addEventListener('keyup', function(e) {
-            if (e.key === 'Enter') {
-                performSearch();
+        // إدخال الرقم الوطني
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '');
+            if (this.value.replace(/^0/, '').length >= 8) {
+                errorMessage.style.display = 'none';
             }
         });
     </script>
