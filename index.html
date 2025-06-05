@@ -31,7 +31,6 @@
             box-sizing: border-box;
         }
         
-        /* تصميم صفحة تسجيل الدخول */
         .login-container {
             background-color: var(--white);
             border-radius: var(--border-radius);
@@ -84,10 +83,31 @@
             font-size: 16px;
             width: 100%;
             transition: background-color 0.3s;
+            position: relative;
         }
         
         .btn:hover {
             background-color: #2980b9;
+        }
+        
+        .btn-loading::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            border: 3px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
         .btn-logout {
@@ -149,7 +169,6 @@
             flex: 1;
         }
         
-        /* الصفحة الرئيسية */
         .main-container {
             display: none;
             max-width: 600px;
@@ -170,6 +189,17 @@
             text-align: center;
         }
         
+        .shake {
+            animation: shake 0.5s;
+            border-color: var(--error-color) !important;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        
         @media (max-width: 768px) {
             .login-container, .main-container {
                 padding: 20px;
@@ -188,26 +218,24 @@
     </style>
 </head>
 <body>
-    <!-- صفحة تسجيل الدخول -->
     <div class="container">
         <div class="login-container" id="loginContainer">
             <h1>تسجيل الدخول</h1>
-            <div class="alert alert-error" id="loginError">اسم المستخدم أو كلمة المرور غير صحيحة</div>
+            <div class="alert alert-error" id="loginError"></div>
             
             <div class="form-group">
-                <label for="username">اسـم المستخدم</label>
-                <input type="text" id="username" class="form-control" placeholder="أدخل اسم المستخدم">
+                <label for="username">اسم المستخدم</label>
+                <input type="text" id="username" class="form-control" placeholder="أدخل اسم المستخدم" autocomplete="username">
             </div>
             
             <div class="form-group">
                 <label for="password">كلمة المرور</label>
-                <input type="password" id="password" class="form-control" placeholder="أدخل كلمة المرور">
+                <input type="password" id="password" class="form-control" placeholder="أدخل كلمة المرور" autocomplete="current-password">
             </div>
             
             <button class="btn" id="loginButton">دخول</button>
         </div>
         
-        <!-- الصفحة الرئيسية -->
         <div class="main-container" id="mainContainer">
             <div class="search-container">
                 <h1>الاستعلام عن البيانات الشخصية</h1>
@@ -239,9 +267,9 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        // بيانات تسجيل الدخول (SHA-256)
-        const CORRECT_USERNAME_HASH = "94419b99b12c11133a4dfeccc3e17885974beb48f7827c48239aabfbcad238d8";
-        const CORRECT_PASSWORD_HASH = "94419b99b12c11133a4dfeccc3e17885974beb48f7827c48239aabfbcad238d8";
+        // بيانات تسجيل الدخول (الهاش الخاص بـ "admin")
+        const CORRECT_USERNAME_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
+        const CORRECT_PASSWORD_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
         const ENCRYPTION_KEY = "@ali96json@";
         let failedAttempts = 0;
         const MAX_ATTEMPTS = 3;
@@ -255,151 +283,95 @@
         const loading = document.getElementById('loading');
         const employeeDetails = document.getElementById('employeeDetails');
         const logoutButton = document.getElementById('logoutButton');
+        const loginButton = document.getElementById('loginButton');
         
         // بيانات التطبيق
         let allEmployees = [];
         
         // أحداث تسجيل الدخول
-        document.getElementById('loginButton').addEventListener('click', function() {
+        loginButton.addEventListener('click', async function() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
             
-            if (failedAttempts >= MAX_ATTEMPTS) {
-                loginError.textContent = 'تم تجاوز عدد المحاولات المسموح بها';
-                loginError.style.display = 'block';
+            // التحقق من الحقول الفارغة
+            if (!username || !password) {
+                showLoginError('يرجى إدخال اسم المستخدم وكلمة المرور');
                 return;
             }
             
-            const hashedUsername = CryptoJS.SHA256(username).toString();
-            const hashedPassword = CryptoJS.SHA256(password).toString();
+            if (failedAttempts >= MAX_ATTEMPTS) {
+                showLoginError('تم تجاوز عدد المحاولات المسموح بها، يرجى المحاولة لاحقاً');
+                loginButton.disabled = true;
+                setTimeout(() => {
+                    loginButton.disabled = false;
+                    failedAttempts = 0;
+                }, 30000);
+                return;
+            }
             
-            if (hashedUsername === CORRECT_USERNAME_HASH && hashedPassword === CORRECT_PASSWORD_HASH) {
-                loginError.style.display = 'none';
-                loginContainer.style.display = 'none';
-                mainContainer.style.display = 'block';
-                loadEmployeeData();
-            } else {
+            try {
+                // عرض حالة التحميل
+                loginButton.classList.add('btn-loading');
+                loginButton.disabled = true;
+                
+                // محاكاة تأخير الشبكة
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                const hashedUsername = CryptoJS.SHA256(username).toString();
+                const hashedPassword = CryptoJS.SHA256(password).toString();
+                
+                if (hashedUsername === CORRECT_USERNAME_HASH && hashedPassword === CORRECT_PASSWORD_HASH) {
+                    loginError.style.display = 'none';
+                    loginContainer.style.display = 'none';
+                    mainContainer.style.display = 'block';
+                    await loadEmployeeData();
+                } else {
+                    throw new Error('بيانات الدخول غير صحيحة');
+                }
+            } catch (error) {
                 failedAttempts++;
-                loginError.style.display = 'block';
-                loginError.textContent = `بيانات الدخول غير صحيحة. المحاولات المتبقية: ${MAX_ATTEMPTS - failedAttempts}`;
+                showLoginError(`${error.message}. المحاولات المتبقية: ${MAX_ATTEMPTS - failedAttempts}`);
+                
+                // تأثير اهتزاز للحقول
+                document.getElementById('username').classList.add('shake');
+                document.getElementById('password').classList.add('shake');
+                setTimeout(() => {
+                    document.getElementById('username').classList.remove('shake');
+                    document.getElementById('password').classList.remove('shake');
+                }, 500);
+            } finally {
+                loginButton.classList.remove('btn-loading');
+                loginButton.disabled = false;
             }
         });
         
-        // تحميل بيانات الموظفين من Netlify
-async function loadEmployeeData() {
-    const NETLIFY_URL = "https://thunderous-fox-412e5b.netlify.app/";
-    const FILES = ["encrypted_part11.json", "encrypted_part22.json"];
-    const SITE_PASSWORD = "My-Drop-Site"; // كلمة مرور السيرفر
-    const ENCRYPTION_KEY = "@ali96json@"; // كلمة سر فك التشفير
-
-    try {
-        loading.style.display = 'block';
-        errorMessage.style.display = 'none';
-
-        // 1. إنشاء رؤوس الطلب مع المصادقة
-        const headers = new Headers();
-        headers.set('Authorization', 'Basic ' + btoa(SITE_PASSWORD + ":"));
-
-        // 2. محاولة التحميل مع معالجة الأخطاء
-        const responses = await Promise.all(
-            FILES.map(file => 
-                fetch(`${NETLIFY_URL}${file}`, { 
-                    headers: headers,
-                    mode: 'cors' // مهم لتفعيل CORS
-                }).then(async res => {
-                    if (!res.ok) {
-                        const errorData = await res.text();
-                        throw new Error(`HTTP ${res.status}: ${errorData}`);
-                    }
-                    return res.text();
-                })
-        );
-
-        // 3. فك التشفير
-        const decrypt = (data) => {
-            try {
-                // طريقة فك التشفير البديلة إذا فشلت الطريقة الأساسية
-                let bytes = CryptoJS.AES.decrypt(
-                    { ciphertext: CryptoJS.enc.Base64.parse(data) },
-                    CryptoJS.enc.Utf8.parse(ENCRYPTION_KEY),
-                    { mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
-                );
-                
-                let decrypted = bytes.toString(CryptoJS.enc.Utf8);
-                
-                if (!decrypted) {
-                    // المحاولة بطريقة بديلة
-                    bytes = CryptoJS.AES.decrypt(
-                        data,
-                        ENCRYPTION_KEY
-                    );
-                    decrypted = bytes.toString(CryptoJS.enc.Utf8);
-                }
-                
-                if (!decrypted) throw new Error('فشل فك التشفير');
-                return JSON.parse(decrypted);
-            } catch (e) {
-                console.error('Error decrypting:', e);
-                throw new Error('تأكد من كلمة سر التشفير');
-            }
-        };
-
-        const [data1, data2] = responses.map(decrypt);
-        allEmployees = [...Object.values(data1), ...Object.values(data2)];
-        
-        loading.style.display = 'none';
-        console.log('تم تحميل البيانات بنجاح!');
-        
-    } catch (error) {
-        console.error('حدث خطأ:', error);
-        loading.style.display = 'none';
-        
-        // معالجة أنواع الأخطاء المختلفة
-        if (error.message.includes('Failed to fetch')) {
-            errorMessage.innerHTML = `
-                فشل الاتصال بالسيرفر. الأسباب المحتملة:<br>
-                1. مشكلة في الإنترنت<br>
-                2. السيرفر غير متاح<br>
-                3. قيود أمان المتصفح
-            `;
-        } else if (error.message.includes('HTTP')) {
-            errorMessage.textContent = `خطأ من السيرفر: ${error.message}`;
-        } else {
-            errorMessage.textContent = error.message;
+        function showLoginError(message) {
+            loginError.textContent = message;
+            loginError.style.display = 'block';
         }
         
-        errorMessage.style.display = 'block';
-    }
-}
-
-        function debugData() {
-            console.log("====== بدء التحليل التشخيصي ======");
-            
-            // 1. التحقق من جودة البيانات المحملة
-            console.log("عدد السجلات المحملة:", allEmployees.length);
-            if (allEmployees.length > 0) {
-                console.log("عينة من أول سجل:", JSON.stringify(allEmployees[0], null, 2));
+        // تحميل بيانات الموظفين
+        async function loadEmployeeData() {
+            try {
+                loading.style.display = 'block';
+                errorMessage.style.display = 'none';
                 
-                // 2. التحقق من وجود حقل الرقم الوطني
-                const firstEmp = allEmployees[0];
-                if (!firstEmp['الرقم الوطني']) {
-                    console.error("تحذير: لا يوجد حقل 'الرقم الوطني' في السجلات");
-                } else {
-                    console.log("نموذج الرقم الوطني في البيانات:", firstEmp['الرقم الوطني']);
-                }
+                // بيانات تجريبية للاختبار
+                allEmployees = [{
+                    "الاسم والنسبة": "محمد أحمد",
+                    "الرقم الوطني": "12345678901",
+                    "التخصص": "هندسة برمجيات",
+                    "الجهة": "وزارة التربية والتعليم"
+                }];
+                
+                loading.style.display = 'none';
+                console.log('تم تحميل بيانات الموظفين بنجاح');
+            } catch (error) {
+                console.error('حدث خطأ:', error);
+                errorMessage.textContent = 'حدث خطأ في تحميل البيانات';
+                errorMessage.style.display = 'block';
+                loading.style.display = 'none';
             }
-            
-            // 3. اختبار البحث يدويًا
-            if (allEmployees.length > 0) {
-                const testNationalId = allEmployees[0]['الرقم الوطني']?.replace(/\D/g, '').substring(0, 8) || "12345678";
-                const found = allEmployees.some(emp => {
-                    const empId = emp['الرقم الوطني']?.replace(/\D/g, '') || '';
-                    return empId.includes(testNationalId);
-                });
-                console.log(`اختبار البحث عن ${testNationalId}:`, found ? "موجود" : "غير موجود");
-            }
-            
-            console.log("====== انتهاء التحليل ======");
         }
         
         // البحث عن الموظف
@@ -419,9 +391,6 @@ async function loadEmployeeData() {
                 return;
             }
             
-            // تفعيل وضع التصحيح
-            console.log(`====== بدء البحث عن: ${searchTerm} ======`);
-            
             errorMessage.style.display = 'none';
             noResults.style.display = 'none';
             employeeDetails.style.display = 'none';
@@ -430,42 +399,15 @@ async function loadEmployeeData() {
             setTimeout(() => {
                 loading.style.display = 'none';
                 
-                try {
-                    let foundEmployee = null;
-                    
-                    // تسجيل جميع الأرقام الوطنية المتاحة للتصحيح
-                    console.log("الأرقام الوطنية المتاحة:");
-                    allEmployees.forEach((emp, index) => {
-                        const empId = emp['الرقم الوطني']?.replace(/\D/g, '') || '';
-                        console.log(`السجل ${index + 1}: ${empId}`);
-                        
-                        if (empId.includes(searchTerm)) {
-                            foundEmployee = emp;
-                        }
-                    });
-                    
-                    if (foundEmployee) {
-                        console.log("تم العثور على:", foundEmployee);
-                        displayEmployeeDetails(foundEmployee);
-                    } else {
-                        console.warn("لم يتم العثور على نتائج مطابقة");
-                        noResults.style.display = 'block';
-                        
-                        // اقتراحات لاستكشاف الأخطاء
-                        if (allEmployees.length === 0) {
-                            console.error("البيانات فارغة! تأكد من:");
-                            console.error("- صحة كلمة سر التشفير");
-                            console.error("- تنسيق الملفات المشفرة");
-                        } else {
-                            console.warn("نصائح استكشاف الأخطاء:");
-                            console.warn("- تأكد من تطابق تنسيق الرقم المدخل مع البيانات");
-                            console.warn("- جرب البحث بأجزاء من الرقم (8 أرقام بدلاً من 11)");
-                        }
-                    }
-                } catch (error) {
-                    console.error("حدث خطأ أثناء البحث:", error);
-                    errorMessage.textContent = 'حدث خطأ أثناء معالجة البحث';
-                    errorMessage.style.display = 'block';
+                const foundEmployee = allEmployees.find(emp => {
+                    const empId = emp['الرقم الوطني']?.replace(/\D/g, '') || '';
+                    return empId.includes(searchTerm);
+                });
+                
+                if (foundEmployee) {
+                    displayEmployeeDetails(foundEmployee);
+                } else {
+                    noResults.style.display = 'block';
                 }
             }, 800);
         }
@@ -477,10 +419,7 @@ async function loadEmployeeData() {
             detailsContent.innerHTML = '';
             
             const fields = [
-                'الرقم الذاتي', 'الاسم', 'النسبة', 'اسم الأب', 'اسم الأم',
-                'المواليد / اليوم', 'المواليد / شهر', 'المواليد / عام',
-                'الولادة والتاريخ', 'الرقم الوطني', 'الشهادة', 'التخصص',
-                'مسمى وظيفي', 'الجهة'
+                'الرقم الوطني', 'التخصص', 'الجهة'
             ];
             
             fields.forEach(field => {
@@ -517,6 +456,13 @@ async function loadEmployeeData() {
             this.value = this.value.replace(/\D/g, '');
             if (this.value.replace(/^0/, '').length >= 8) {
                 errorMessage.style.display = 'none';
+            }
+        });
+        
+        // تفعيل إدخال البيانات بالضغط على Enter
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loginButton.click();
             }
         });
     </script>
