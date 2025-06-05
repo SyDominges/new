@@ -358,13 +358,7 @@ async function loadEmployeeData() {
                     loading.style.display = 'none';
                 }
             })
-            .catch(error => {
-                console.error('Fetch error:', error);
-                errorMessage.textContent = 'فشل في تحميل الملفات';
-                errorMessage.style.display = 'block';
-                loading.style.display = 'none';
-            });
-        }
+
         
         // البحث عن الموظف
         document.getElementById('searchButton').addEventListener('click', performSearch);
