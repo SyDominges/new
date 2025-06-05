@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.github.io https://*.githubusercontent.com;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام الاستعلام عن البيانات الشخصية</title>
@@ -147,6 +148,13 @@
             font-size: 14px;
             margin-bottom: 20px;
         }
+        .logout-btn {
+            margin-top: 20px;
+            background-color: #e74c3c;
+        }
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
         @media (max-width: 768px) {
             .main-container, .login-container {
                 padding: 20px;
@@ -189,12 +197,18 @@
             <h2 id="employeeName">بيانات الموظف</h2>
             <div id="detailsContent"></div>
         </div>
+        
+        <button class="login-button logout-btn" id="logoutButton">تسجيل الخروج</button>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        // بيانات تسجيل الدخول
-        const CORRECT_USERNAME = "admin";
-        const CORRECT_PASSWORD = "5-6-2025";
+        // بيانات تسجيل الدخول (SHA-256 لـ "admin" و "5-6-2025")
+        const CORRECT_USERNAME_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
+        const CORRECT_PASSWORD_HASH = "a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e";
+        const ENCRYPTION_KEY = "@ali96json@"; // كلمة سر التشفير الجديدة
+        let failedAttempts = 0;
+        const MAX_ATTEMPTS = 3;
         
         // عناصر تسجيل الدخول
         const loginContainer = document.getElementById('loginContainer');
@@ -203,6 +217,7 @@
         const loginButton = document.getElementById('loginButton');
         const loginError = document.getElementById('loginError');
         const mainContainer = document.getElementById('mainContainer');
+        const logoutButton = document.getElementById('logoutButton');
         
         // عناصر الصفحة الرئيسية
         const searchInput = document.getElementById('searchInput');
@@ -219,33 +234,108 @@
         
         // حدث تسجيل الدخول
         loginButton.addEventListener('click', function() {
+            if (failedAttempts >= MAX_ATTEMPTS) {
+                loginError.textContent = 'تم تجاوز عدد المحاولات المسموح بها';
+                loginButton.disabled = true;
+                return;
+            }
+            
             const username = usernameInput.value.trim();
             const password = passwordInput.value.trim();
             
-            if (username === CORRECT_USERNAME && password === CORRECT_PASSWORD) {
+            const hashedUsername = CryptoJS.SHA256(username).toString();
+            const hashedPassword = CryptoJS.SHA256(password).toString();
+            
+            if (hashedUsername === CORRECT_USERNAME_HASH && hashedPassword === CORRECT_PASSWORD_HASH) {
                 loginError.style.display = 'none';
                 loginContainer.style.display = 'none';
                 mainContainer.style.display = 'block';
-                
-                // تحميل بيانات الموظفين بعد تسجيل الدخول بنجاح
                 loadEmployeeData();
             } else {
+                failedAttempts++;
+                loginError.textContent = `بيانات غير صحيحة. المحاولات المتبقية: ${MAX_ATTEMPTS - failedAttempts}`;
                 loginError.style.display = 'block';
+            }
+        });
+        
+        // حدث تسجيل الخروج
+        logoutButton.addEventListener('click', function() {
+            if (confirm("هل أنت متأكد من تسجيل الخروج؟")) {
+                sessionStorage.clear();
+                location.reload();
             }
         });
         
         // تحميل بيانات الموظفين
         function loadEmployeeData() {
-            fetch('8jfh0-7m5vq.json')
-                .then(response => response.json())
-                .then(data => {
-                    allEmployees = data;
-                })
-                .catch(error => {
-                    console.error('Error loading JSON data:', error);
-                    errorMessage.textContent = 'حدث خطأ أثناء تحميل البيانات';
-                    errorMessage.style.display = 'block';
-                });
+            loading.style.display = 'block';
+            errorMessage.style.display = 'none';
+            
+            // روابط الملفات المعدلة
+            const baseUrl = 'https://raw.githubusercontent.com/SyDominges/test/3efb71c979f0e711536dbfa006ffe76898f26bc2/';
+            
+            Promise.all([
+                fetch(`${baseUrl}encrypted_part11.json?t=${Date.now()}`)
+                    .then(res => {
+                        if (!res.ok) throw new Error('Failed to load part11');
+                        return res.text();
+                    }),
+                fetch(`${baseUrl}encrypted_part22.json?t=${Date.now()}`)
+                    .then(res => {
+                        if (!res.ok) throw new Error('Failed to load part22');
+                        return res.text();
+                    })
+            ])
+            .then(([part1, part2]) => {
+                try {
+                    // فك التشفير مع خيارات محددة
+                    const decrypt = (data) => {
+                        const bytes = CryptoJS.AES.decrypt(
+                            data.trim(),
+                            CryptoJS.enc.Utf8.parse(ENCRYPTION_KEY),
+                            {
+                                mode: CryptoJS.mode.CBC,
+                                padding: CryptoJS.pad.Pkcs7
+                            }
+                        );
+                        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                        if (!decrypted) throw new Error('فشل فك التشفير');
+                        return JSON.parse(decrypted);
+                    };
+
+                    const data1 = decrypt(part1);
+                    const data2 = decrypt(part2);
+                    
+                    // دمج البيانات مع التحقق
+                    allEmployees = [...Object.values(data1), ...Object.values(data2)];
+                    
+                    if (allEmployees.length === 0) {
+                        throw new Error('البيانات فارغة بعد الفك');
+                    }
+                    
+                    console.log('تم تحميل:', allEmployees.length, 'سجلاً');
+                    showStatus("تم تحميل البيانات بنجاح", true);
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    showStatus(`خطأ: ${error.message}`, false);
+                    console.log('محتوى part1:', part1.substring(0, 100));
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                showStatus(`خطأ في تحميل الملفات: ${error.message}`, false);
+            })
+            .finally(() => {
+                loading.style.display = 'none';
+            });
+        }
+        
+        // عرض حالة التحميل
+        function showStatus(message, isSuccess) {
+            errorMessage.textContent = message;
+            errorMessage.style.color = isSuccess ? '#27ae60' : '#e74c3c';
+            errorMessage.style.display = 'block';
         }
         
         // وظيفة البحث
