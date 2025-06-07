@@ -2,62 +2,55 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>البحث عن طريق الرقم الوطني</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <title>بحث في ملف Excel</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    body { font-family: Arial; padding: 20px; direction: rtl; }
+    body { font-family: Arial; direction: rtl; padding: 20px; }
     input, button { padding: 10px; font-size: 16px; margin: 5px; }
-    #result { margin-top: 20px; }
+    #result { margin-top: 20px; white-space: pre-wrap; }
   </style>
 </head>
 <body>
 
-  <h2>البحث عن المعلومات بواسطة الرقم الوطني</h2>
+  <h2>بحث بالرقم الوطني في ملف Excel</h2>
   <input type="text" id="nationalId" placeholder="أدخل الرقم الوطني">
   <button onclick="search()">بحث</button>
 
-  <div id="result"></div>
+  <div id="result">جاري تحميل البيانات...</div>
 
   <script>
-    const FILE_URL = "https://joyful-caramel-f0cac9.netlify.app/encrypted_part11.json";
-    const PASSWORD = "@ali96json@";
+    const FILE_URL = "https://sydominges.github.io/new/ex.xlsx";
+    let excelData = [];
 
-    let decryptedData = [];
-
-    // تحميل وفك تشفير الملف
-    async function loadData() {
+    async function loadExcel() {
       const res = await fetch(FILE_URL);
-      const encryptedText = await res.text();
-      try {
-        const bytes = CryptoJS.AES.decrypt(encryptedText, PASSWORD);
-        const jsonString = bytes.toString(CryptoJS.enc.Utf8);
-        decryptedData = JSON.parse(jsonString);
-      } catch (err) {
-        document.getElementById("result").innerHTML = "خطأ في فك التشفير أو تنسيق الملف.";
-      }
+      const arrayBuffer = await res.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
+      const sheetName = workbook.SheetNames[0]; // أول ورقة عمل
+      const worksheet = workbook.Sheets[sheetName];
+
+      excelData = XLSX.utils.sheet_to_json(worksheet); // تحويل إلى JSON
+      document.getElementById("result").textContent = "تم تحميل البيانات بنجاح.";
     }
 
-    // البحث وعرض النتائج
     function search() {
       const nationalId = document.getElementById("nationalId").value.trim();
-      const person = decryptedData.find(p => p.الرقم_الوطني === nationalId);
+      const person = excelData.find(row => row["الرقم الوطني"] == nationalId);
       const resultDiv = document.getElementById("result");
 
       if (person) {
-        resultDiv.innerHTML = `
-          <p><strong>الرقم الذاتي:</strong> ${person.الرقم_الذاتي}</p>
-          <p><strong>الاسم:</strong> ${person.الاسم}</p>
-          <p><strong>اسم الأب:</strong> ${person.اسم_الأب}</p>
-          <p><strong>اسم الأم:</strong> ${person.اسم_الأم}</p>
-          <p><strong>الرقم الوطني:</strong> ${person.الرقم_الوطني}</p>
-        `;
+        let output = "";
+        for (let key in person) {
+          output += `${key}: ${person[key]}\n`;
+        }
+        resultDiv.textContent = output;
       } else {
-        resultDiv.innerHTML = "لم يتم العثور على الرقم الوطني.";
+        resultDiv.textContent = "لم يتم العثور على الرقم الوطني.";
       }
     }
 
-    // تحميل البيانات عند التشغيل
-    loadData();
+    loadExcel();
   </script>
 
 </body>
