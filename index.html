@@ -224,7 +224,7 @@
             <div class="alert alert-error" id="loginError"></div>
             
             <div class="form-group">
-                <label for="username">اسم المستخدم</label>
+                <label for="username">اســم المستخدم</label>
                 <input type="text" id="username" class="form-control" placeholder="أدخل اسم المستخدم" autocomplete="username">
             </div>
             
@@ -352,106 +352,100 @@
         
         // تحميل بيانات الموظفين
         async function loadEmployeeData() {
-    const NETLIFY_URL = "https://thunderous-fox-412e5b.netlify.app/";
-    const FILES = ["encrypted_part11.json", "encrypted_part22.json"];
-    const SITE_PASSWORD = "My-Drop-Site";
-    const ENCRYPTION_KEY = "@ali96json@";
+            const NETLIFY_URL = "https://thunderous-fox-412e5b.netlify.app/";
+            const FILES = ["encrypted_part11.json", "encrypted_part22.json"];
+            const SITE_PASSWORD = "My-Drop-Site";
+            const ENCRYPTION_KEY = "@ali96json@";
 
-    try {
-        loading.style.display = 'block';
-        errorMessage.style.display = 'none';
-
-        // 1. تحميل الملفات مع المصادقة
-        const responses = await Promise.all(
-            FILES.map(file => 
-                fetch(`${NETLIFY_URL}${file}`, {
-                    headers: {
-                        'Authorization': 'Basic ' + btoa(SITE_PASSWORD + ":")
-                    }
-                }).then(async res => {
-                    if (!res.ok) throw new Error(`فشل التحميل: ${res.status}`);
-                    return res.text();
-                })
-            )
-        );
-
-        // 2. فك التشفير بطرق مختلفة
-        const decrypt = (data) => {
             try {
-                // الطريقة الأساسية
-                let bytes = CryptoJS.AES.decrypt(
-                    { ciphertext: CryptoJS.enc.Base64.parse(data) },
-                    CryptoJS.enc.Utf8.parse(ENCRYPTION_KEY),
-                    { mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
+                loading.style.display = 'block';
+                errorMessage.style.display = 'none';
+
+                // 1. تحميل الملفات مع المصادقة
+                const responses = await Promise.all(
+                    FILES.map(file => 
+                        fetch(`${NETLIFY_URL}${file}`, {
+                            headers: {
+                                'Authorization': 'Basic ' + btoa(SITE_PASSWORD + ":")
+                            }
+                        }).then(async res => {
+                            if (!res.ok) throw new Error(`فشل التحميل: ${res.status}`);
+                            return res.text();
+                        })
+                    )
+                );
+
+                // 2. فك التشفير بطرق مختلفة
+                const decrypt = (data) => {
+                    try {
+                        // الطريقة الأساسية
+                        let bytes = CryptoJS.AES.decrypt(
+                            { ciphertext: CryptoJS.enc.Base64.parse(data) },
+                            CryptoJS.enc.Utf8.parse(ENCRYPTION_KEY),
+                            { mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
+                        );
+                        
+                        let decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                        
+                        // إذا فشلت، جرب طريقة بديلة
+                        if (!decrypted) {
+                            bytes = CryptoJS.AES.decrypt(
+                                data,
+                                ENCRYPTION_KEY
+                            );
+                            decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                        }
+                        
+                        if (!decrypted) throw new Error('فشل فك التشفير');
+                        return JSON.parse(decrypted);
+                    } catch (e) {
+                        console.error('خطأ فك التشفير:', e);
+                        throw new Error('تأكد من كلمة سر التشفير');
+                    }
+                };
+
+                // 3. معالجة البيانات
+                const [data1, data2] = await Promise.all(
+                    responses.map(res => decrypt(res))
                 );
                 
-                let decrypted = bytes.toString(CryptoJS.enc.Utf8);
-                
-                // إذا فشلت، جرب طريقة بديلة
-                if (!decrypted) {
-                    bytes = CryptoJS.AES.decrypt(
-                        data,
-                        ENCRYPTION_KEY
-                    );
-                    decrypted = bytes.toString(CryptoJS.enc.Utf8);
+                allEmployees = [
+                    ...Object.values(data1 || {}),
+                    ...Object.values(data2 || {})
+                ].filter(Boolean);
+
+                if (allEmployees.length === 0) {
+                    throw new Error('لا توجد بيانات بعد الفك');
                 }
+
+                console.log('تم تحميل البيانات بنجاح:', allEmployees.length, 'سجلاً');
                 
-                if (!decrypted) throw new Error('فشل فك التشفير');
-                return JSON.parse(decrypted);
-            } catch (e) {
-                console.error('خطأ فك التشفير:', e);
-                throw new Error('تأكد من كلمة سر التشفير');
-            }
-        };
-
-        // 3. معالجة البيانات
-        const [data1, data2] = await Promise.all(
-            responses.map(res => decrypt(res))
-        );
-        
-        allEmployees = [
-            ...Object.values(data1 || {}),
-            ...Object.values(data2 || {})
-        ].filter(Boolean);
-
-        if (allEmployees.length === 0) {
-            throw new Error('لا توجد بيانات بعد الفك');
-        loading.style.display = 'none';
-        console.log('تم تحميل البيانات بنجاح:', allEmployees.length, 'سجلاً');
-        
-    } catch (error) {
-        console.error('حدث خطأ:', error);
-        loading.style.display = 'none';
-        
-        if (error.message.includes('Failed to fetch')) {
-            errorMessage.innerHTML = `
-                فشل الاتصال بالسيرفر. الأسباب:<br>
-                1. تأكد من اتصال الإنترنت<br>
-                2. الملفات غير موجودة في المسار المحدد<br>
-                3. كلمة المرور غير صحيحة
-            `;
-        } else {
-            errorMessage.textContent = error.message;
-        }
-        
-        errorMessage.style.display = 'block';
-        
-        // استخدام بيانات تجريبية كحل بديل
-        allEmployees = [{
-            "الاسم والنسبة": "بيانات تجريبية",
-            "الرقم الوطني": "12345678901",
-            "التخصص": "اختبار",
-            "الجهة": "نظام الاستعلام"
-        }]
-    };
-                loading.style.display = 'none';
-                console.log('تم تحميل بيانات الموظفين بنجاح');
             } catch (error) {
                 console.error('حدث خطأ:', error);
-                errorMessage.textContent = 'حدث خطأ في تحميل البيانات';
+                
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage.innerHTML = `
+                        فشل الاتصال بالسيرفر. الأسباب:<br>
+                        1. تأكد من اتصال الإنترنت<br>
+                        2. الملفات غير موجودة في المسار المحدد<br>
+                        3. كلمة المرور غير صحيحة
+                    `;
+                } else {
+                    errorMessage.textContent = error.message;
+                }
+                
                 errorMessage.style.display = 'block';
-                loading.style.display = 'none';
+                
+                // استخدام بيانات تجريبية كحل بديل
+                allEmployees = [{
+                    "الاسم والنسبة": "بيانات تجريبية",
+                    "الرقم الوطني": "12345678901",
+                    "التخصص": "اختبار",
+                    "الجهة": "نظام الاستعلام"
+                }];
             }
+            
+            loading.style.display = 'none';
         }
         
         // البحث عن الموظف
