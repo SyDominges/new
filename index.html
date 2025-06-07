@@ -351,29 +351,18 @@
         }
         
         // تحميل بيانات الموظفين
-        async function loadEmployeeData() {
-            const NETLIFY_URL = "https://joyful-caramel-f0cac9.netlify.app/";
-            const FILES = ["encrypted_part11.json", "encrypted_part22.json"];
-            const ENCRYPTION_KEY = "@ali96json@";
-
-            try {
-                loading.style.display = 'block';
-                errorMessage.style.display = 'none';
-
-                // 1. تحميل الملفات مع المصادقة
-                const responses = await Promise.all(
-                    FILES.map(file => 
-                        fetch(`${NETLIFY_URL}${file}`, {
-                            headers: {
-                                'Authorization': 'Basic ' + btoa(SITE_PASSWORD + ":")
-                            }
-                        }).then(async res => {
-                            if (!res.ok) throw new Error(`فشل التحميل: ${res.status}`);
-                            return res.text();
-                        })
-                    )
-                );
-
+async function loadEmployeeData() {
+    const NETLIFY_URL = "https://joyful-caramel-f0cac9.netlify.app/";
+    const FILES = ["encrypted_part11.json", "encrypted_part22.json"];
+        try {
+        loading.style.display = 'block';
+        
+        // إزالة مصادقة Basic Auth
+        const responses = await Promise.all(
+            FILES.map(file => 
+                fetch(`${NETLIFY_URL}${file}`)
+                .then(res => res.text())
+            );
                 // 2. فك التشفير بطرق مختلفة
                 const decrypt = (data) => {
                     try {
