@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>البحث عن طريق الرقم الوطني</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; direction: rtl; }
+    input, button { padding: 10px; font-size: 16px; margin: 5px; }
+    #result { margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <h2>البحث عن المعلومات بواسطة الرقم الوطني</h2>
+  <input type="text" id="nationalId" placeholder="أدخل الرقم الوطني">
+  <button onclick="search()">بحث</button>
+
+  <div id="result"></div>
+
+  <script>
+    const FILE_URL = "https://joyful-caramel-f0cac9.netlify.app/encrypted_part11.json";
+    const PASSWORD = "@ali96json@";
+
+    let decryptedData = [];
+
+    // تحميل وفك تشفير الملف
+    async function loadData() {
+      const res = await fetch(FILE_URL);
+      const encryptedText = await res.text();
+      try {
+        const bytes = CryptoJS.AES.decrypt(encryptedText, PASSWORD);
+        const jsonString = bytes.toString(CryptoJS.enc.Utf8);
+        decryptedData = JSON.parse(jsonString);
+      } catch (err) {
+        document.getElementById("result").innerHTML = "خطأ في فك التشفير أو تنسيق الملف.";
+      }
+    }
+
+    // البحث وعرض النتائج
+    function search() {
+      const nationalId = document.getElementById("nationalId").value.trim();
+      const person = decryptedData.find(p => p.الرقم_الوطني === nationalId);
+      const resultDiv = document.getElementById("result");
+
+      if (person) {
+        resultDiv.innerHTML = `
+          <p><strong>الرقم الذاتي:</strong> ${person.الرقم_الذاتي}</p>
+          <p><strong>الاسم:</strong> ${person.الاسم}</p>
+          <p><strong>اسم الأب:</strong> ${person.اسم_الأب}</p>
+          <p><strong>اسم الأم:</strong> ${person.اسم_الأم}</p>
+          <p><strong>الرقم الوطني:</strong> ${person.الرقم_الوطني}</p>
+        `;
+      } else {
+        resultDiv.innerHTML = "لم يتم العثور على الرقم الوطني.";
+      }
+    }
+
+    // تحميل البيانات عند التشغيل
+    loadData();
+  </script>
+
+</body>
+</html>
