@@ -12,7 +12,7 @@ let lastAttemptTime = 0;
 let sessionTimeout;
 
 // التحقق من صحة بيانات الدخول
-const authenticate = (username, password) => {
+function authenticate(username, password) {
     if (typeof CryptoJS === 'undefined') {
         throw new Error('مكتبة التشفير غير متوفرة');
     }
@@ -42,10 +42,10 @@ const authenticate = (username, password) => {
     failedAttempts++;
     lastAttemptTime = currentTime;
     throw new Error(`بيانات الدخول غير صحيحة. المحاولات المتبقية: ${AUTH_CONFIG.MAX_ATTEMPTS - failedAttempts}`);
-};
+}
 
 // بدء مؤقت الجلسة
-const startSessionTimer = () => {
+function startSessionTimer() {
     clearTimeout(sessionTimeout);
     sessionTimeout = setTimeout(() => {
         if (confirm('انتهت مدة الجلسة. هل ترغب في تمديدها؟')) {
@@ -54,24 +54,24 @@ const startSessionTimer = () => {
             logout();
         }
     }, AUTH_CONFIG.SESSION_TIMEOUT);
-};
+}
 
 // تسجيل الخروج
-const logout = () => {
+function logout() {
     clearTimeout(sessionTimeout);
     window.location.reload();
-};
+}
 
 // التحقق من تأمين الحساب
-const isAccountLocked = () => {
+function isAccountLocked() {
     return failedAttempts >= AUTH_CONFIG.MAX_ATTEMPTS && 
            (Date.now() - lastAttemptTime) < AUTH_CONFIG.LOCK_TIME;
-};
+}
 
 // الحصول على المحاولات المتبقية
-const getRemainingAttempts = () => {
+function getRemainingAttempts() {
     return AUTH_CONFIG.MAX_ATTEMPTS - failedAttempts;
-};
+}
 
 // تصدير الدوال
 window.auth = {
