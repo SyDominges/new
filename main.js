@@ -11,7 +11,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // بيانات الموظفين (سيتم ملؤها عند تسجيل الدخول)
     let employeesData = [];
-
+// داخل حدث تسجيل الدخول الناجح
+if (isAuthenticated) {
+    loginError.style.display = 'none';
+    loginContainer.style.display = 'none';
+    mainContainer.style.display = 'block';
+    
+    // تحميل بيانات الموظفين
+    const { success } = await data.loadEmployeeData();
+    if (!success) {
+        errorMessage.textContent = 'تم تحميل بيانات تجريبية بسبب خطأ في الاتصال';
+        errorMessage.style.display = 'block';
+    }
+    employeesData = data.getEmployees();
+    console.log('تم تحميل بيانات', employeesData.length, 'موظف');
+}
     // حدث النقر على زر الاستعلام
     searchButton.addEventListener('click', async () => {
         try {
