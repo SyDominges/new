@@ -1,3 +1,6 @@
+// تعريف المتغيرات العامة
+let allEmployees = [];
+
 document.addEventListener('DOMContentLoaded', () => {
     // أحداث تسجيل الدخول
     UI_ELEMENTS.loginButton.addEventListener('click', async () => {
@@ -5,35 +8,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('password').value.trim();
         
         if (!username || !password) {
-            showError(UI_ELEMENTS.loginError, 'يرجى إدخال اسم المستخدم وكلمة المرور');
-            shakeElement(UI_ELEMENTS.username);
-            shakeElement(UI_ELEMENTS.password);
+            ui.showError(ui.elements.loginError, 'يرجى إدخال اسم المستخدم وكلمة المرور');
+            ui.shakeElement(ui.elements.username);
+            ui.shakeElement(ui.elements.password);
             return;
         }
         
         try {
-            toggleLoginButton(true);
+            ui.toggleLoginButton(true);
             
             // محاكاة تأخير الشبكة
             await new Promise(resolve => setTimeout(resolve, 800));
             
-            if (authenticate(username, password)) {
-                hideError(UI_ELEMENTS.loginError);
-                UI_ELEMENTS.loginContainer.style.display = 'none';
-                UI_ELEMENTS.mainContainer.style.display = 'block';
+            if (auth.authenticate(username, password)) {
+                ui.hideError(ui.elements.loginError);
+                ui.elements.loginContainer.style.display = 'none';
+                ui.elements.mainContainer.style.display = 'block';
                 
                 // تحميل بيانات الموظفين
-                const { success, error } = await loadEmployeeData();
+                const { success, error } = await data.loadEmployeeData();
                 if (!success) {
-                    showError(UI_ELEMENTS.errorMessage, error || 'تم تحميل بيانات تجريبية بسبب خطأ في الاتصال');
+                    ui.showError(ui.elements.errorMessage, error || 'تم تحميل بيانات تجريبية بسبب خطأ في الاتصال');
+                }
+                
+                // تخزين البيانات المحملة
+                allEmployees = data.getSampleData();
+                if (success) {
+                    allEmployees = window.allEmployees || data.getSampleData();
                 }
             }
         } catch (error) {
-            showError(UI_ELEMENTS.loginError, error.message);
-            shakeElement(UI_ELEMENTS.username);
-            shakeElement(UI_ELEMENTS.password);
+            ui.showError(ui.elements.loginError, error.message);
+            ui.shakeElement(ui.elements.username);
+            ui.shakeElement(ui.elements.password);
         } finally {
-            toggleLoginButton(false);
+            ui.toggleLoginButton(false);
         }
     });
     
@@ -43,42 +52,47 @@ document.addEventListener('DOMContentLoaded', () => {
         const cleanId = searchTerm.replace(/\D/g, '');
         
         if (cleanId.length < 8) {
-            showError(UI_ELEMENTS.errorMessage, 'الرجاء إدخال 8 أرقام على الأقل');
-            shakeElement(UI_ELEMENTS.searchInput);
+            ui.showError(ui.elements.errorMessage, 'الرجاء إدخال 8 أرقام على الأقل');
+            ui.shakeElement(ui.elements.searchInput);
             return;
         }
         
-        // التحقق من تحميل البيانات
-        if (allEmployees.length === 0) {
-            const { success } = await loadEmployeeData();
-            if (!success) {
-                showError(UI_ELEMENTS.errorMessage, 'فشل تحميل بيانات الموظفين');
-                return;
+        // إخفاء الرسائل السابقة
+        ui.hideError(ui.elements.errorMessage);
+        ui.hideError(ui.elements.noResults);
+        ui.elements.employeeDetails.style.display = 'none';
+        ui.showLoading(true);
+        
+        try {
+            // التحقق من تحميل البيانات
+            if (allEmployees.length === 0) {
+                const { success } = await data.loadEmployeeData();
+                if (!success) {
+                    ui.showError(ui.elements.errorMessage, 'جاري استخدام بيانات تجريبية');
+                }
             }
-        }
-        
-        hideError(UI_ELEMENTS.errorMessage);
-        hideError(UI_ELEMENTS.noResults);
-        UI_ELEMENTS.employeeDetails.style.display = 'none';
-        showLoading(true);
-        
-        // محاكاة تأخير البحث
-        setTimeout(() => {
-            showLoading(false);
-            const employee = searchEmployee(searchTerm);
+            
+            // إعطاء وقت كافي لعرض رسالة التحميل
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            const employee = data.searchEmployee(searchTerm);
             
             if (employee) {
-                displayEmployeeDetails(employee);
+                ui.displayEmployeeDetails(employee);
             } else {
-                showError(UI_ELEMENTS.noResults, 'لا توجد بيانات مطابقة للرقم الوطني المدخل');
+                ui.showError(ui.elements.noResults, 'لا توجد بيانات مطابقة للرقم الوطني المدخل');
             }
-        }, 800);
+        } catch (error) {
+            ui.showError(ui.elements.errorMessage, 'حدث خطأ أثناء البحث: ' + error.message);
+        } finally {
+            ui.showLoading(false);
+        }
     });
     
     // أحداث أخرى
     UI_ELEMENTS.logoutButton.addEventListener('click', () => {
         if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
-            logout();
+            auth.logout();
         }
     });
     
@@ -86,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
     UI_ELEMENTS.searchInput.addEventListener('input', function() {
         this.value = this.value.replace(/\D/g, '');
         if (this.value.length >= 8) {
-            hideError(UI_ELEMENTS.errorMessage);
+            ui.hideError(ui.elements.errorMessage);
         }
     });
     
