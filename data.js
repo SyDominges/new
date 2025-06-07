@@ -10,7 +10,7 @@ let allEmployees = [];
 let lastLoadTime = 0;
 
 // تحميل بيانات الموظفين
-const loadEmployeeData = async () => {
+async function loadEmployeeData() {
     try {
         // التحقق من وجود بيانات حديثة في الذاكرة المؤقتة
         const currentTime = Date.now();
@@ -74,36 +74,41 @@ const loadEmployeeData = async () => {
         allEmployees = getSampleData();
         return { success: false, error: error.message };
     }
-};
+}
 
 // بيانات تجريبية
-const getSampleData = () => [{
-    "الاسم والنسبة": "بيانات تجريبية",
-    "الرقم الوطني": "1234567890",
-    "التخصص": "اختبار النظام",
-    "الجهة": "نظام الاستعلام",
-    "الدرجة": "عاشر",
-    "تاريخ التعيين": "01/01/2023",
-    "الحالة الوظيفية": "على رأس العمل"
-}];
+function getSampleData() {
+    return [{
+        "الاسم والنسبة": "بيانات تجريبية",
+        "الرقم الوطني": "1234567890",
+        "التخصص": "اختبار النظام",
+        "الجهة": "نظام الاستعلام",
+        "الدرجة": "عاشر",
+        "تاريخ التعيين": "01/01/2023",
+        "الحالة الوظيفية": "على رأس العمل"
+    }];
+}
 
 // البحث عن موظف بالرقم الوطني
-const searchEmployee = (nationalId) => {
+function searchEmployee(nationalId) {
     if (!nationalId || nationalId.replace(/\D/g, '').length < 8) {
         return null;
     }
 
     const cleanId = nationalId.replace(/\D/g, '');
+    
+    // البحث في البيانات الفعلية
     const foundEmployee = allEmployees.find(emp => 
         emp['الرقم الوطني'] && emp['الرقم الوطني'].toString().includes(cleanId)
     );
     
-    return foundEmployee || getSampleData()[0];
-};
+    return foundEmployee || null;
+}
 
 // تصدير الدوال
 window.data = {
     loadEmployeeData,
     searchEmployee,
-    getEmployeeCount: () => allEmployees.length
+    getEmployeeCount: () => allEmployees.length,
+    getSampleData
 };
