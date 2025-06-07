@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 detailsContent.innerHTML = '';
                 
                 // إضافة الحقول المتاحة
-                ['الرقم الوطني', 'التخصص', 'الجهة'].forEach(field => {
+                ['الرقم الوطني', 'التخصص', 'الجهة' ,'الرقم الذاتي' ,'الولادة والتاريخ' ,'المواليد / اليوم' ,'المواليد / عام' ,'مسمى وظيفي'].forEach(field => {
                     if (employee[field]) {
                         const row = document.createElement('div');
                         row.className = 'detail-row';
