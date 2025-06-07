@@ -248,6 +248,7 @@ h2 {
 .loading .spinner {
   font-size: 24px;
   color: var(--secondary-color);
+  display: block;
 }
 
 /* Employee Details */
@@ -278,6 +279,14 @@ h2 {
   word-break: break-word;
 }
 
+.empty-message {
+  width: 100%;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 10px 0;
+}
+
 /* Animations */
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -295,12 +304,33 @@ h2 {
 }
 
 .fade-in {
-  animation: fadeIn 0.5s;
+  animation: fadeIn 0.5s forwards;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Message Transitions */
+#noResults, #errorMessage, #loginError {
+  transition: all 0.3s ease;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 15px;
+  margin-bottom: 0;
+}
+
+#noResults.show, #errorMessage.show, #loginError.show {
+  opacity: 1;
+  max-height: 100px;
+  padding: 12px 15px;
+  margin-bottom: 20px;
+}
+
+.loading {
+  transition: all 0.3s ease;
 }
 
 /* Responsive Design */
