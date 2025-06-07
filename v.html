@@ -5,49 +5,63 @@
   <title>بحث في ملف Excel</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    body { font-family: Arial; direction: rtl; padding: 20px; }
-    input, button { padding: 10px; font-size: 16px; margin: 5px; }
-    #result { margin-top: 20px; white-space: pre-wrap; }
+    body { font-family: Arial, direction: rtl; padding: 20px; }
+    input, button { padding: 8px; margin: 5px; font-size: 16px; }
+    table { border-collapse: collapse; margin-top: 15px; width: 100%; }
+    th, td { border: 1px solid #aaa; padding: 8px; text-align: right; }
+    th { background: #f0f0f0; }
   </style>
 </head>
 <body>
 
-  <h2>بحث بالرقم الوطني في ملف Excel</h2>
+  <h2>البحث بواسطة الرقم الوطني</h2>
   <input type="text" id="nationalId" placeholder="أدخل الرقم الوطني">
-  <button onclick="search()">بحث</button>
+  <button onclick="search()">🔍 بحث</button>
 
-  <div id="result">جاري تحميل البيانات...</div>
+  <div id="message">... جاري تحميل البيانات</div>
+  <div id="result"></div>
 
   <script>
     const FILE_URL = "https://sydominges.github.io/new/ex.xlsx";
     let excelData = [];
 
     async function loadExcel() {
-      const res = await fetch(FILE_URL);
-      const arrayBuffer = await res.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: "array" });
-
-      const sheetName = workbook.SheetNames[0]; // أول ورقة عمل
-      const worksheet = workbook.Sheets[sheetName];
-
-      excelData = XLSX.utils.sheet_to_json(worksheet); // تحويل إلى JSON
-      document.getElementById("result").textContent = "تم تحميل البيانات بنجاح.";
+      try {
+        const res = await fetch(FILE_URL);
+        const buffer = await res.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        excelData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+        document.getElementById("message").textContent = "✅ البيانات جاهزة للبحث";
+      } catch (e) {
+        document.getElementById("message").textContent = "❌ فشل تحميل أو تحليل الملف";
+        console.error(e);
+      }
     }
 
     function search() {
-      const nationalId = document.getElementById("nationalId").value.trim();
-      const person = excelData.find(row => row["الرقم الوطني"] == nationalId);
+      const id = document.getElementById("nationalId").value.trim();
       const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "";
 
-      if (person) {
-        let output = "";
-        for (let key in person) {
-          output += `${key}: ${person[key]}\n`;
-        }
-        resultDiv.textContent = output;
-      } else {
-        resultDiv.textContent = "لم يتم العثور على الرقم الوطني.";
+      if (!id) {
+        alert("يرجى إدخال الرقم الوطني!");
+        return;
       }
+
+      const row = excelData.find(r => String(r["الرقم الوطني"]) === id);
+      if (!row) {
+        resultDiv.textContent = "لا توجد معلومات للرقم الوطني المدخل.";
+        return;
+      }
+
+      // بناء جدول عرض للصف
+      let html = "<table><tr>";
+      Object.keys(row).forEach(h => { html += `<th>${h}</th>`; });
+      html += "</tr><tr>";
+      Object.values(row).forEach(v => { html += `<td>${v}</td>`; });
+      html += "</tr></table>";
+      resultDiv.innerHTML = html;
     }
 
     loadExcel();
