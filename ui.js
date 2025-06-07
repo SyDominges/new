@@ -18,65 +18,85 @@ const UI_ELEMENTS = {
 };
 
 // عرض/إخفاء تحميل
-const showLoading = (show) => {
+function showLoading(show) {
     if (show) {
         UI_ELEMENTS.loading.style.display = 'flex';
-        UI_ELEMENTS.loading.classList.add('fade-in');
     } else {
         UI_ELEMENTS.loading.style.display = 'none';
-        UI_ELEMENTS.loading.classList.remove('fade-in');
     }
-};
+}
 
 // عرض رسالة خطأ
-const showError = (element, message) => {
+function showError(element, message) {
     element.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
     element.style.display = 'flex';
     element.classList.add('fade-in');
-};
+    setTimeout(() => element.classList.add('show'), 10);
+}
 
 // إخفاء رسالة خطأ
-const hideError = (element) => {
-    element.style.display = 'none';
-    element.classList.remove('fade-in');
-};
+function hideError(element) {
+    element.classList.remove('show');
+    setTimeout(() => {
+        element.style.display = 'none';
+        element.classList.remove('fade-in');
+    }, 300);
+}
 
 // عرض تفاصيل الموظف
-const displayEmployeeDetails = (employee) => {
-    UI_ELEMENTS.employeeName.innerHTML = `<i class="fas fa-user-tie"></i> ${employee['الاسم والنسبة'] || 'بيانات الموظف'}`;
+function displayEmployeeDetails(employee) {
+    // مسح المحتوى السابق
     UI_ELEMENTS.detailsContent.innerHTML = '';
     
+    // عرض اسم الموظف
+    UI_ELEMENTS.employeeName.innerHTML = `<i class="fas fa-user-tie"></i> ${employee['الاسم والنسبة'] || 'بيانات الموظف'}`;
+    
+    // قائمة الحقول المطلوبة
     const fieldsToShow = [
         'الرقم الوطني', 'التخصص', 'الجهة', 
         'الدرجة', 'تاريخ التعيين', 'الحالة الوظيفية'
     ];
     
+    // إضافة الحقول المتاحة
+    let hasData = false;
     fieldsToShow.forEach(field => {
         if (employee[field]) {
+            hasData = true;
             const row = document.createElement('div');
             row.className = 'detail-row fade-in';
-            
             row.innerHTML = `
                 <div class="detail-label">${field}:</div>
                 <div class="detail-value">${employee[field]}</div>
             `;
-            
             UI_ELEMENTS.detailsContent.appendChild(row);
         }
     });
     
+    // إذا لم توجد بيانات، عرض رسالة
+    if (!hasData) {
+        const noDataRow = document.createElement('div');
+        noDataRow.className = 'detail-row fade-in';
+        noDataRow.innerHTML = `
+            <div class="detail-value empty-message">
+                لا توجد بيانات متاحة لهذا الموظف
+            </div>
+        `;
+        UI_ELEMENTS.detailsContent.appendChild(noDataRow);
+    }
+    
+    // عرض قسم التفاصيل
     UI_ELEMENTS.employeeDetails.style.display = 'block';
     UI_ELEMENTS.employeeDetails.classList.add('fade-in');
-};
+}
 
 // اهتزاز العنصر للإشارة إلى خطأ
-const shakeElement = (element) => {
+function shakeElement(element) {
     element.classList.add('shake');
     setTimeout(() => element.classList.remove('shake'), 500);
-};
+}
 
 // تبديل حالة زر الدخول
-const toggleLoginButton = (isLoading) => {
+function toggleLoginButton(isLoading) {
     if (isLoading) {
         UI_ELEMENTS.loginText.style.display = 'none';
         UI_ELEMENTS.loginSpinner.style.display = 'inline-block';
@@ -86,7 +106,7 @@ const toggleLoginButton = (isLoading) => {
         UI_ELEMENTS.loginSpinner.style.display = 'none';
         UI_ELEMENTS.loginButton.disabled = false;
     }
-};
+}
 
 // تصدير الدوال
 window.ui = {
