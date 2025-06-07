@@ -1,32 +1,94 @@
 document.addEventListener('DOMContentLoaded', () => {
     // تعريف العناصر
+    const loginButton = document.getElementById('loginButton');
     const searchButton = document.getElementById('searchButton');
+    const logoutButton = document.getElementById('logoutButton');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
     const searchInput = document.getElementById('searchInput');
+    const loginError = document.getElementById('loginError');
     const errorMessage = document.getElementById('errorMessage');
     const noResults = document.getElementById('noResults');
-    const employeeDetails = document.getElementById('employeeDetails');
     const loading = document.getElementById('loading');
+    const employeeDetails = document.getElementById('employeeDetails');
     const detailsContent = document.getElementById('detailsContent');
     const employeeName = document.getElementById('employeeName');
+    const loginContainer = document.getElementById('loginContainer');
+    const mainContainer = document.getElementById('mainContainer');
+    const loginText = document.getElementById('loginText');
+    const loginSpinner = document.getElementById('loginSpinner');
 
-    // بيانات الموظفين (سيتم ملؤها عند تسجيل الدخول)
+    // بيانات الموظفين
     let employeesData = [];
-// داخل حدث تسجيل الدخول الناجح
-if (isAuthenticated) {
-    loginError.style.display = 'none';
-    loginContainer.style.display = 'none';
-    mainContainer.style.display = 'block';
-    
-    // تحميل بيانات الموظفين
-    const { success } = await data.loadEmployeeData();
-    if (!success) {
-        errorMessage.textContent = 'تم تحميل بيانات تجريبية بسبب خطأ في الاتصال';
-        errorMessage.style.display = 'block';
-    }
-    employeesData = data.getEmployees();
-    console.log('تم تحميل بيانات', employeesData.length, 'موظف');
-}
-    // حدث النقر على زر الاستعلام
+
+    // حدث تسجيل الدخول
+    loginButton.addEventListener('click', async () => {
+        try {
+            // إظهار حالة التحميل
+            loginText.style.display = 'none';
+            loginSpinner.style.display = 'inline-block';
+            loginButton.disabled = true;
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            // التحقق من إدخال البيانات
+            if (!username || !password) {
+                throw new Error('يرجى إدخال اسم المستخدم وكلمة المرور');
+            }
+            
+            // تنفيذ المصادقة
+            const isAuthenticated = await new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    try {
+                        const result = auth.authenticate(username, password);
+                        resolve(result);
+                    } catch (error) {
+                        reject(error);
+                    }
+                }, 800);
+            });
+            
+            if (isAuthenticated) {
+                // إخفاء رسائل الخطأ
+                loginError.style.display = 'none';
+                
+                // تبديل الواجهات
+                loginContainer.style.display = 'none';
+                mainContainer.style.display = 'block';
+                
+                // تحميل بيانات الموظفين
+                const { success, error } = await data.loadEmployeeData();
+                employeesData = data.getEmployees();
+                
+                if (!success) {
+                    errorMessage.textContent = error || 'تم تحميل بيانات تجريبية';
+                    errorMessage.style.display = 'block';
+                }
+            }
+        } catch (error) {
+            // عرض رسالة الخطأ
+            loginError.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
+            loginError.style.display = 'flex';
+            
+            // تأثير الاهتزاز
+            usernameInput.classList.add('shake');
+            passwordInput.classList.add('shake');
+            setTimeout(() => {
+                usernameInput.classList.remove('shake');
+                passwordInput.classList.remove('shake');
+            }, 500);
+            
+            console.error('فشل تسجيل الدخول:', error);
+        } finally {
+            // إعادة تعيين حالة الزر
+            loginText.style.display = 'inline-block';
+            loginSpinner.style.display = 'none';
+            loginButton.disabled = false;
+        }
+    });
+
+    // حدث البحث
     searchButton.addEventListener('click', async () => {
         try {
             // إخفاء الرسائل السابقة
@@ -50,9 +112,7 @@ if (isAuthenticated) {
             await new Promise(resolve => setTimeout(resolve, 800));
             
             // البحث في البيانات
-            const employee = employeesData.find(emp => 
-                emp['الرقم الوطني'] && emp['الرقم الوطني'].toString().includes(cleanId)
-            );
+            const employee = data.searchEmployee(searchTerm);
             
             if (employee) {
                 // عرض النتائج
@@ -93,7 +153,14 @@ if (isAuthenticated) {
         }
     });
 
-    // حدث الإدخال للتحقق من الصحة أثناء الكتابة
+    // حدث تسجيل الخروج
+    logoutButton.addEventListener('click', () => {
+        if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+            window.location.reload();
+        }
+    });
+
+    // التحقق من صحة الإدخال أثناء الكتابة
     searchInput.addEventListener('input', function() {
         this.value = this.value.replace(/\D/g, '');
         if (this.value.length >= 8) {
@@ -107,4 +174,7 @@ if (isAuthenticated) {
             searchButton.click();
         }
     });
+
+    // التركيز على حقل اسم المستخدم عند التحميل
+    usernameInput.focus();
 });
