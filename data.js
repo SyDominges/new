@@ -3,6 +3,7 @@ const DATA_CONFIG = {
 };
 
 let allEmployees = [];
+let usingSampleData = false; // متغير لتتبع استخدام البيانات التجريبية
 
 async function loadEmployeeData() {
     try {
@@ -22,11 +23,13 @@ async function loadEmployeeData() {
             throw new Error('ملف البيانات فارغ أو غير صالح');
         }
         
+        usingSampleData = false;
         console.log('تم تحميل بيانات', allEmployees.length, 'موظف بنجاح');
         return { success: true, count: allEmployees.length };
     } catch (error) {
         console.error("خطأ في تحميل البيانات:", error);
         allEmployees = getSampleData();
+        usingSampleData = true;
         return { 
             success: false, 
             error: error.message,
@@ -73,5 +76,5 @@ window.data = {
     loadEmployeeData,
     searchEmployee,
     getEmployees: () => allEmployees,
-    isUsingSampleData: () => allEmployees === getSampleData()
+    isUsingSampleData: () => usingSampleData
 };
