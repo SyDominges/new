@@ -372,3 +372,80 @@ h2 {
     padding: 10px 15px;
   }
 }
+.employee-card {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    line-height: 1.8;
+    font-size: 16px;
+    direction: rtl;
+}
+
+.employee-card .main-info {
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.employee-card hr {
+    margin: 10px 0;
+    border: none;
+    border-top: 1px solid #ccc;
+}
+
+.employee-card .extra-info p {
+    margin: 6px 0;
+}
+
+/* طباعة */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .employee-card, .employee-card * {
+        visibility: visible;
+    }
+
+    .employee-card {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        margin: auto;
+    }
+}
+.btn-print {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background-color: #28a745; /* أخضر */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-print:hover {
+    background-color: #218838;
+}
+
+/* طباعة - كما في السابق */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .employee-card, .employee-card * {
+        visibility: visible;
+    }
+
+    .employee-card {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        margin: auto;
+    }
+}
