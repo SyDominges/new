@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // تعريف العناصر
     const loginButton = document.getElementById('loginButton');
     const searchButton = document.getElementById('searchButton');
     const logoutButton = document.getElementById('logoutButton');
@@ -18,10 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginText = document.getElementById('loginText');
     const loginSpinner = document.getElementById('loginSpinner');
 
-    // بيانات الموظفين
     let employeesData = [];
 
-    // حدث تسجيل الدخول
+    // تابع لطباعة الصفحة
+    function printPage() {
+        window.print();
+    }
+
     loginButton.addEventListener('click', async () => {
         try {
             loginText.style.display = 'none';
@@ -69,6 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 usernameInput.classList.remove('shake');
                 passwordInput.classList.remove('shake');
             }, 500);
+
+            console.error('فشل تسجيل الدخول:', error);
         } finally {
             loginText.style.display = 'inline-block';
             loginSpinner.style.display = 'none';
@@ -76,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // حدث البحث
     searchButton.addEventListener('click', async () => {
         try {
             errorMessage.style.display = 'none';
@@ -96,29 +99,37 @@ document.addEventListener('DOMContentLoaded', () => {
             const employee = data.searchEmployee(searchTerm);
 
             if (employee) {
-                employeeName.textContent = employee['الاسم والنسبة'] || 'بيانات الموظف';
-                detailsContent.innerHTML = '';
+                const clean = str => (str || '').replace(/'/g, '').trim();
+                const fullName = `${clean(employee["الاسم"])} ${clean(employee["اسم الأب"])} ${clean(employee["النسبة"])}`;
+                const birthDate = `${employee["المواليد / اليوم"]}/${employee["المواليد / شهر"]}/${employee["المواليد / عام"]}`;
 
-                const fieldsToDisplay = [
-                    "الاسم والنسبة", "الاسم", "النسبة", "اسم الأب", "اسم الأم",
-                    "الولادة والتاريخ", "المواليد / اليوم", "المواليد / شهر", "المواليد / عام",
-                    "الرقم الوطني", "الرقم الذاتي", "القيد والخانة", "الجهة", "الشهادة",
-                    "التخصص", "مسمى وظيفي", "الدرجة", "تاريخ التعيين", "الحالة الوظيفية"
-                ];
-
-                fieldsToDisplay.forEach(field => {
-                    if (employee[field]) {
-                        const row = document.createElement('div');
-                        row.className = 'detail-row';
-                        row.innerHTML = `
-                            <div class="detail-label">${field}:</div>
-                            <div class="detail-value">${employee[field]}</div>
-                        `;
-                        detailsContent.appendChild(row);
-                    }
-                });
+                employeeName.innerHTML = `<i class="fas fa-user-tie"></i> ${fullName}`;
+                detailsContent.innerHTML = `
+                    <div class="employee-card">
+                        <div class="main-info">
+                            <p><strong>اسم الأم:</strong> ${clean(employee["اسم الأم"])}</p>
+                            <p><strong>تاريخ الميلاد:</strong> ${birthDate}</p>
+                        </div>
+                        <hr>
+                        <div class="extra-info">
+                            <p><strong>الرقم الوطني:</strong> ${employee["الرقم الوطني"] || '-'}</p>
+                            <p><strong>الرقم الذاتي:</strong> ${employee["الرقم الذاتي"] || '-'}</p>
+                            <p><strong>القيد والخانة:</strong> ${clean(employee["القيد والخانة"])}</p>
+                            <p><strong>الجهة:</strong> ${clean(employee["الجهة"])}</p>
+                            <p><strong>الشهادة:</strong> ${clean(employee["الشهادة"])}</p>
+                            <p><strong>التخصص:</strong> ${clean(employee["التخصص"])}</p>
+                            <p><strong>مسمى وظيفي:</strong> ${clean(employee["مسمى وظيفي"])}</p>
+                        </div>
+                        <button id="printButton" class="btn btn-print">طباعة</button>
+                    </div>
+                `;
 
                 employeeDetails.style.display = 'block';
+
+                // تفعيل زر الطباعة
+                const printBtn = document.getElementById('printButton');
+                printBtn.addEventListener('click', printPage);
+
             } else {
                 throw new Error('لا توجد بيانات مطابقة للرقم الوطني المدخل');
             }
@@ -130,19 +141,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 noResults.textContent = error.message;
                 noResults.style.display = 'block';
             }
+
+            console.error('خطأ في البحث:', error);
         } finally {
             loading.style.display = 'none';
         }
     });
 
-    // حدث تسجيل الخروج
     logoutButton.addEventListener('click', () => {
         if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
             window.location.reload();
         }
     });
 
-    // التحقق من صحة الإدخال أثناء الكتابة
     searchInput.addEventListener('input', function () {
         this.value = this.value.replace(/\D/g, '');
         if (this.value.length >= 8) {
@@ -150,13 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // البحث عند الضغط على Enter
     searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             searchButton.click();
         }
     });
 
-    // تركيز المؤشر عند التحميل
     usernameInput.focus();
 });
