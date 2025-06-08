@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // تعريف العناصر
     const loginButton = document.getElementById('loginButton');
     const searchButton = document.getElementById('searchButton');
     const logoutButton = document.getElementById('logoutButton');
@@ -17,13 +18,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginText = document.getElementById('loginText');
     const loginSpinner = document.getElementById('loginSpinner');
 
+    // بيانات الموظفين
     let employeesData = [];
 
-    // تابع لطباعة الصفحة
-    function printPage() {
-        window.print();
+    // دالة لتنظيف النصوص غير معروفة (اختياري)
+    function clean(text) {
+        return text ? text.trim() : '-';
     }
 
+    // دالة لتحويل التاريخ من yyyy-mm-dd إلى dd/mm/yyyy (أو حسب الحاجة)
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        if (isNaN(date)) return dateString; // لو التاريخ غير صالح يرجع النص كما هو
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    // حدث تسجيل الدخول
     loginButton.addEventListener('click', async () => {
         try {
             loginText.style.display = 'none';
@@ -80,11 +94,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // حدث البحث
     searchButton.addEventListener('click', async () => {
         try {
             errorMessage.style.display = 'none';
             noResults.style.display = 'none';
             employeeDetails.style.display = 'none';
+
             loading.style.display = 'flex';
 
             const searchTerm = searchInput.value.trim();
@@ -99,40 +115,55 @@ document.addEventListener('DOMContentLoaded', () => {
             const employee = data.searchEmployee(searchTerm);
 
             if (employee) {
-                const clean = str => (str || '').replace(/'/g, '').trim();
-                const fullName = `${clean(employee["الاسم"])} ${clean(employee["اسم الأب"])} ${clean(employee["النسبة"])}`;
-                const birthDate = `${employee["المواليد / اليوم"]}/${employee["المواليد / شهر"]}/${employee["المواليد / عام"]}`;
+                // استخراج الاسم الكامل
+                const fullName = employee['الاسم والنسبة'] || 'بيانات الموظف';
 
-                employeeName.innerHTML = `<i class="fas fa-user-tie"></i> ${fullName}`;
+                // تحضير بعض الحقول للعرض
+                const birthDate = formatDate(employee['تاريخ الميلاد']);
+                const motherName = clean(employee['اسم الأم']);
+                const natId = clean(employee['الرقم الوطني']);
+                const selfId = clean(employee['الرقم الذاتي']);
+                const registry = clean(employee['القيد والخانة']);
+                const entity = clean(employee['الجهة']);
+                const degree = clean(employee['الشهادة']);
+                const specialty = clean(employee['التخصص']);
+                const jobTitle = clean(employee['مسمى وظيفي']);
+
+                employeeName.textContent = fullName;
+
                 detailsContent.innerHTML = `
                     <div class="employee-card">
+                        <h2>${fullName}</h2>
                         <div class="main-info">
-                            <p><strong>اسم الأم:</strong> ${clean(employee["اسم الأم"])}</p>
+                            <p><strong>اسم الأم:</strong> ${motherName}</p>
                             <p><strong>تاريخ الميلاد:</strong> ${birthDate}</p>
                         </div>
                         <hr>
                         <div class="extra-info">
-                            <p><strong>الرقم الوطني:</strong> ${employee["الرقم الوطني"] || '-'}</p>
-                            <p><strong>الرقم الذاتي:</strong> ${employee["الرقم الذاتي"] || '-'}</p>
-                            <p><strong>القيد والخانة:</strong> ${clean(employee["القيد والخانة"])}</p>
-                            <p><strong>الجهة:</strong> ${clean(employee["الجهة"])}</p>
-                            <p><strong>الشهادة:</strong> ${clean(employee["الشهادة"])}</p>
-                            <p><strong>التخصص:</strong> ${clean(employee["التخصص"])}</p>
-                            <p><strong>مسمى وظيفي:</strong> ${clean(employee["مسمى وظيفي"])}</p>
+                            <p><strong>الرقم الوطني:</strong> ${natId}</p>
+                            <p><strong>الرقم الذاتي:</strong> ${selfId}</p>
+                            <p><strong>القيد والخانة:</strong> ${registry}</p>
+                            <p><strong>الجهة:</strong> ${entity}</p>
+                            <p><strong>الشهادة:</strong> ${degree}</p>
+                            <p><strong>التخصص:</strong> ${specialty}</p>
+                            <p><strong>مسمى وظيفي:</strong> ${jobTitle}</p>
                         </div>
-                        <button id="printButton" class="btn btn-print">طباعة</button>
+                        <button id="printButton" class="btn-print">طباعة</button>
                     </div>
                 `;
 
                 employeeDetails.style.display = 'block';
 
-                // تفعيل زر الطباعة
-                const printBtn = document.getElementById('printButton');
-                printBtn.addEventListener('click', printPage);
+                // إضافة حدث طباعة
+                const printButton = document.getElementById('printButton');
+                printButton.addEventListener('click', () => {
+                    window.print();
+                });
 
             } else {
                 throw new Error('لا توجد بيانات مطابقة للرقم الوطني المدخل');
             }
+
         } catch (error) {
             if (error.message.includes('8 أرقام')) {
                 errorMessage.textContent = error.message;
@@ -148,12 +179,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // حدث تسجيل الخروج
     logoutButton.addEventListener('click', () => {
         if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
             window.location.reload();
         }
     });
 
+    // التحقق من صحة الإدخال أثناء الكتابة
     searchInput.addEventListener('input', function () {
         this.value = this.value.replace(/\D/g, '');
         if (this.value.length >= 8) {
@@ -161,11 +194,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // البحث عند الضغط على Enter
     searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             searchButton.click();
         }
     });
 
+    // التركيز على حقل اسم المستخدم عند التحميل
     usernameInput.focus();
 });
