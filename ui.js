@@ -31,11 +31,31 @@ function hideError(element) {
     element.classList.remove('fade-in');
 }
 
+// ... (بقية الكود يبقى كما هو)
+
 function displayEmployeeDetails(employee) {
     UI_ELEMENTS.employeeName.textContent = employee['الاسم والنسبة'] || 'بيانات الموظف';
     UI_ELEMENTS.detailsContent.innerHTML = '';
     
-    ['الرقم الوطني', 'التخصص', 'الجهة'].forEach(field => {
+    // قائمة بجميع الحقول المطلوبة
+    const fieldsToShow = [
+        'الرقم الذاتي',
+        'اسم الأم',
+        'الولادة والتاريخ',
+        'اليوم',
+        'الشهر',
+        'العام',
+        'الشهادة',
+        'التخصص',
+        'المسمى الوظيفي',
+        'الجهة',
+        'الدرجة',
+        'تاريخ التعيين',
+        'الحالة الوظيفية'
+    ];
+    
+    // إضافة جميع الحقول المتاحة
+    fieldsToShow.forEach(field => {
         if (employee[field]) {
             const row = document.createElement('div');
             row.className = 'detail-row';
@@ -46,6 +66,18 @@ function displayEmployeeDetails(employee) {
             UI_ELEMENTS.detailsContent.appendChild(row);
         }
     });
+    
+    // إذا لم توجد بيانات، عرض رسالة
+    if (UI_ELEMENTS.detailsContent.children.length === 0) {
+        const noDataRow = document.createElement('div');
+        noDataRow.className = 'detail-row';
+        noDataRow.innerHTML = `
+            <div class="detail-value" style="width:100%; text-align:center; color:#666;">
+                لا توجد بيانات متاحة لهذا الموظف
+            </div>
+        `;
+        UI_ELEMENTS.detailsContent.appendChild(noDataRow);
+    }
     
     UI_ELEMENTS.employeeDetails.style.display = 'block';
 }
