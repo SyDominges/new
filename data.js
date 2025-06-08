@@ -12,23 +12,37 @@ async function loadEmployeeData() {
         if (!response.ok) {
             throw new Error(`فشل تحميل ملف البيانات: ${DATA_CONFIG.DATA_FILE}`);
         }
-        
+
         const data = await response.json();
         
         // تحويل البيانات إلى مصفوفة
-        allEmployees = Array.isArray(data) ? data : Object.values(data);
+        let rawEmployees = Array.isArray(data) ? data : Object.values(data);
         
-        if (allEmployees.length === 0) {
+        if (rawEmployees.length === 0) {
             throw new Error('ملف البيانات فارغ أو غير صالح');
         }
-        
-        console.log('تم تحميل بيانات', allEmployees.length, 'موظف');
+
+        // تنظيف الحقول من المسافات وعلامات التنصيص المفردة
+        allEmployees = rawEmployees.map(emp => {
+            const cleanEmp = {};
+            for (let key in emp) {
+                let value = emp[key];
+                if (typeof value === 'string') {
+                    value = value.trim().replace(/^'+|'+$/g, ''); // يزيل علامات تنصيص مفردة
+                }
+                cleanEmp[key.trim()] = value;
+            }
+            return cleanEmp;
+        });
+
+        console.log('✅ تم تحميل بيانات', allEmployees.length, 'موظف');
         return { success: true, count: allEmployees.length };
+
     } catch (error) {
-        console.error("خطأ في تحميل البيانات:", error);
+        console.error("❌ خطأ في تحميل البيانات:", error);
         allEmployees = getSampleData();
-        return { 
-            success: false, 
+        return {
+            success: false,
             error: error.message,
             usedSampleData: true
         };
@@ -52,15 +66,21 @@ function searchEmployee(nationalId) {
         return null;
     }
 
-    const cleanId = nationalId.replace(/\D/g, '');
-    return allEmployees.find(emp => 
-        emp['الرقم الوطني'] && emp['الرقم الوطني'].toString().includes(cleanId)
-    );
+    const cleanId = nationalId.replace(/\D/g, '').trim();
+    console.log("🔍 البحث عن الرقم:", cleanId);
+
+    const match = allEmployees.find(emp => {
+        const empId = emp['الرقم الوطني']?.toString().trim();
+        return empId === cleanId;
+    });
+
+    console.log("🔎 النتيجة:", match);
+    return match;
 }
 
 window.data = {
     loadEmployeeData,
     searchEmployee,
     getEmployees: () => allEmployees,
-    isUsingSampleData: () => allEmployees === getSampleData()
+    isUsingSampleData: () => allEmployees.length === 1 && allEmployees[0]['الاسم والنسبة'] === "بيانات تجريبية"
 };
