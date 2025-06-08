@@ -3,23 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <title>نظام الاستعلام</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body {
       font-family: 'Cairo', sans-serif;
-      background-color: #f4f6f9;
-      padding: 30px;
-      color: #333;
+      background-color: #eef1f5;
+      margin: 0;
+      padding: 40px 20px;
+      color: #2c3e50;
     }
 
     h2 {
       text-align: center;
-      color: #2c3e50;
+      color: #34495e;
+      margin-bottom: 30px;
     }
 
     .search-box {
       max-width: 600px;
-      margin: 0 auto 30px;
+      margin: 0 auto 40px;
       display: flex;
       gap: 10px;
     }
@@ -28,18 +31,23 @@
       flex: 1;
       padding: 12px;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 16px;
     }
 
     .search-box button {
-      padding: 12px 20px;
+      padding: 12px 18px;
       background-color: #3498db;
-      border: none;
       color: white;
-      border-radius: 6px;
+      border: none;
+      border-radius: 8px;
       font-size: 16px;
       cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .search-box button:hover {
+      background-color: #2980b9;
     }
 
     .results {
@@ -49,11 +57,10 @@
 
     .card {
       background: white;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 
     .summary {
@@ -66,17 +73,21 @@
 
     .summary i {
       margin-left: 5px;
-      color: #2980b9;
+      color: #3498db;
     }
 
     .summary button {
-      margin-right: 10px;
+      margin-left: 10px;
       background-color: #2ecc71;
       color: white;
       border: none;
-      padding: 8px 12px;
+      padding: 8px 14px;
       border-radius: 6px;
       cursor: pointer;
+    }
+
+    .summary button:last-child {
+      background-color: #f39c12;
     }
 
     .details {
@@ -91,7 +102,7 @@
 
     .no-results {
       text-align: center;
-      color: #888;
+      color: #999;
       font-style: italic;
       margin-top: 50px;
     }
@@ -117,7 +128,7 @@
 <body>
 
 <script>
-  const password = "1234"; // كلمة المرور
+  const password = "1234"; // غيّر كلمة المرور من هنا
   if (!sessionStorage.getItem("authenticated")) {
     const entered = prompt("أدخل كلمة المرور للدخول:");
     if (entered === password) {
@@ -129,16 +140,15 @@
   }
 </script>
 
-<h2><i class="fas fa-search"></i> الاستعلام عن البيانات</h2>
+<h2><i class="fas fa-search"></i> نظام الاستعلام عن الموظفين</h2>
 
 <div class="search-box">
-  <input type="text" id="searchInput" placeholder="ابحث باسم، رقم، أو أي معلومة...">
+  <input type="text" id="searchInput" placeholder="ابحث بالاسم، الرقم الذاتي، أو أي معلومة...">
   <button onclick="search()">بحث</button>
 </div>
 
 <div class="results" id="results"></div>
-
-<div class="no-results" id="noResults" style="display: none;">لا توجد نتائج لعرضها.</div>
+<div class="no-results" id="noResults" style="display: none;">لا توجد نتائج مطابقة.</div>
 
 <script>
 let employees = [];
@@ -168,17 +178,17 @@ function search() {
   }
 
   filtered.slice(0, 10).forEach(emp => {
-    const fullName = [emp['الاسم'], emp['اسم الأب'], emp['النسبة']].filter(Boolean).join(' ');
-    const number = emp['الرقم الذاتي'] || '—';
+    const fullName = [emp["الاسم"], emp["اسم الأب"], emp["النسبة"]].filter(Boolean).join(' ');
+    const number = emp["الرقم الذاتي"] || "—";
 
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
       <div class="summary">
-        <div class="info"><i class="fas fa-user"></i> ${fullName} - <i class="fas fa-id-badge"></i> ${number}</div>
+        <div><i class="fas fa-user"></i> ${fullName} - <i class="fas fa-id-badge"></i> ${number}</div>
         <div>
           <button onclick="toggleDetails(this)">إظهار التفاصيل</button>
-          <button onclick="printCard(this)">🖨️ طباعة</button>
+          <button onclick="printCard(this)">طباعة</button>
         </div>
       </div>
       <div class="details">
@@ -202,12 +212,14 @@ function toggleDetails(button) {
 
 function printCard(button) {
   const card = button.closest(".card").cloneNode(true);
+  card.querySelector(".details").style.display = "block";
+  card.querySelectorAll("button").forEach(btn => btn.remove());
+
   const printWindow = window.open('', '', 'width=800,height=600');
   const style = `
     <style>
       body { font-family: 'Cairo', sans-serif; direction: rtl; padding: 20px; }
       .card { border: 1px solid #ccc; padding: 30px; border-radius: 10px; }
-      .summary button { display: none; }
     </style>
   `;
   printWindow.document.write(`
