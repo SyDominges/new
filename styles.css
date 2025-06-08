@@ -37,6 +37,7 @@ body {
   justify-content: center;
   align-items: center;
   padding: 20px;
+  direction: rtl;
 }
 
 /* Layout */
@@ -261,30 +262,92 @@ h2 {
   display: none;
 }
 
-.detail-row {
-  display: flex;
+.employee-card {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  line-height: 1.8;
+  font-size: 16px;
+  direction: rtl;
+}
+
+.employee-card h2 {
+  color: var(--primary-color);
   margin-bottom: 15px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #eee;
 }
 
-.detail-label {
+.employee-card .main-info {
+  margin-bottom: 10px;
   font-weight: bold;
-  width: 150px;
-  color: #555;
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
 }
 
-.detail-value {
-  flex: 1;
-  word-break: break-word;
+.employee-card .main-info p {
+  flex: 1 1 200px;
 }
 
-.empty-message {
-  width: 100%;
-  text-align: center;
-  color: #666;
-  font-style: italic;
-  padding: 10px 0;
+.employee-card hr {
+  margin: 10px 0;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+.employee-card .extra-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.employee-card .extra-info p {
+  flex: 1 1 220px;
+  margin: 6px 0;
+  background: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(44, 62, 80, 0.1);
+}
+
+/* طباعة */
+.btn-print {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-print:hover {
+  background-color: #218838;
+}
+
+/* طباعة - اجعل فقط بطاقة الموظف مرئية عند الطباعة */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .employee-card, .employee-card * {
+    visibility: visible;
+  }
+
+  .employee-card {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    margin: auto;
+    box-shadow: none;
+    background: white;
+    border-radius: 0;
+    padding: 0;
+  }
 }
 
 /* Animations */
@@ -361,6 +424,11 @@ h2 {
   .btn-search {
     width: 100%;
   }
+
+  .employee-card .main-info,
+  .employee-card .extra-info {
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 480px) {
@@ -371,81 +439,4 @@ h2 {
   .form-control, .btn {
     padding: 10px 15px;
   }
-}
-.employee-card {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    line-height: 1.8;
-    font-size: 16px;
-    direction: rtl;
-}
-
-.employee-card .main-info {
-    margin-bottom: 10px;
-    font-weight: bold;
-}
-
-.employee-card hr {
-    margin: 10px 0;
-    border: none;
-    border-top: 1px solid #ccc;
-}
-
-.employee-card .extra-info p {
-    margin: 6px 0;
-}
-
-/* طباعة */
-@media print {
-    body * {
-        visibility: hidden;
-    }
-
-    .employee-card, .employee-card * {
-        visibility: visible;
-    }
-
-    .employee-card {
-        position: absolute;
-        top: 0;
-        right: 0;
-        left: 0;
-        margin: auto;
-    }
-}
-.btn-print {
-    margin-top: 15px;
-    padding: 10px 20px;
-    background-color: #28a745; /* أخضر */
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-}
-
-.btn-print:hover {
-    background-color: #218838;
-}
-
-/* طباعة - كما في السابق */
-@media print {
-    body * {
-        visibility: hidden;
-    }
-
-    .employee-card, .employee-card * {
-        visibility: visible;
-    }
-
-    .employee-card {
-        position: absolute;
-        top: 0;
-        right: 0;
-        left: 0;
-        margin: auto;
-    }
 }
