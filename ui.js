@@ -1,43 +1,55 @@
 const UI_ELEMENTS = {
+    // عناصر تسجيل الدخول
     loginContainer: document.getElementById('loginContainer'),
-    mainContainer: document.getElementById('mainContainer'),
+    loginButton: document.getElementById('loginButton'),
     loginError: document.getElementById('loginError'),
+    username: document.getElementById('username'),
+    password: document.getElementById('password'),
+    loginText: document.getElementById('loginText'),
+    loginSpinner: document.getElementById('loginSpinner'),
+    
+    // عناصر الصفحة الرئيسية
+    mainContainer: document.getElementById('mainContainer'),
+    logoutButton: document.getElementById('logoutButton'),
+    searchInput: document.getElementById('searchInput'),
+    searchButton: document.getElementById('searchButton'),
     errorMessage: document.getElementById('errorMessage'),
     noResults: document.getElementById('noResults'),
     loading: document.getElementById('loading'),
     employeeDetails: document.getElementById('employeeDetails'),
-    logoutButton: document.getElementById('logoutButton'),
-    loginButton: document.getElementById('loginButton'),
-    searchButton: document.getElementById('searchButton'),
-    searchInput: document.getElementById('searchInput'),
     employeeName: document.getElementById('employeeName'),
-    detailsContent: document.getElementById('detailsContent'),
-    loginText: document.getElementById('loginText'),
-    loginSpinner: document.getElementById('loginSpinner')
+    detailsContent: document.getElementById('detailsContent')
 };
 
 function showLoading(show) {
-    UI_ELEMENTS.loading.style.display = show ? 'flex' : 'none';
+    if (show) {
+        UI_ELEMENTS.loading.style.display = 'flex';
+        UI_ELEMENTS.loading.classList.add('fade-in');
+    } else {
+        UI_ELEMENTS.loading.style.display = 'none';
+        UI_ELEMENTS.loading.classList.remove('fade-in');
+    }
 }
 
 function showError(element, message) {
     element.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
     element.style.display = 'flex';
     element.classList.add('fade-in');
+    setTimeout(() => element.classList.add('show'), 10);
 }
 
 function hideError(element) {
-    element.style.display = 'none';
-    element.classList.remove('fade-in');
+    element.classList.remove('show');
+    setTimeout(() => {
+        element.style.display = 'none';
+        element.classList.remove('fade-in');
+    }, 300);
 }
 
-// ... (بقية الكود يبقى كما هو)
-
 function displayEmployeeDetails(employee) {
-    UI_ELEMENTS.employeeName.textContent = employee['الاسم والنسبة'] || 'بيانات الموظف';
+    UI_ELEMENTS.employeeName.innerHTML = `<i class="fas fa-user-tie"></i> ${employee['الاسم والنسبة'] || 'بيانات الموظف'}`;
     UI_ELEMENTS.detailsContent.innerHTML = '';
     
-    // قائمة بجميع الحقول المطلوبة
     const fieldsToShow = [
         'الرقم الذاتي',
         'اسم الأم',
@@ -54,11 +66,12 @@ function displayEmployeeDetails(employee) {
         'الحالة الوظيفية'
     ];
     
-    // إضافة جميع الحقول المتاحة
+    let hasData = false;
     fieldsToShow.forEach(field => {
         if (employee[field]) {
+            hasData = true;
             const row = document.createElement('div');
-            row.className = 'detail-row';
+            row.className = 'detail-row fade-in';
             row.innerHTML = `
                 <div class="detail-label">${field}:</div>
                 <div class="detail-value">${employee[field]}</div>
@@ -67,12 +80,11 @@ function displayEmployeeDetails(employee) {
         }
     });
     
-    // إذا لم توجد بيانات، عرض رسالة
-    if (UI_ELEMENTS.detailsContent.children.length === 0) {
+    if (!hasData) {
         const noDataRow = document.createElement('div');
-        noDataRow.className = 'detail-row';
+        noDataRow.className = 'detail-row fade-in';
         noDataRow.innerHTML = `
-            <div class="detail-value" style="width:100%; text-align:center; color:#666;">
+            <div class="detail-value empty-message">
                 لا توجد بيانات متاحة لهذا الموظف
             </div>
         `;
@@ -80,6 +92,7 @@ function displayEmployeeDetails(employee) {
     }
     
     UI_ELEMENTS.employeeDetails.style.display = 'block';
+    UI_ELEMENTS.employeeDetails.classList.add('fade-in');
 }
 
 function shakeElement(element) {
