@@ -1,28 +1,28 @@
 const DATA_CONFIG = {
-    DATA_FILE: "8jfh0-7m5vq.json" // اسم الملف في نفس المجلد
+    DATA_FILE: "8jfh0-7m5vq.json"
 };
 
 let allEmployees = [];
 
 async function loadEmployeeData() {
     try {
-        // تحميل الملف من نفس المجلد
+        console.log('جاري تحميل بيانات الموظفين...');
         const response = await fetch(DATA_CONFIG.DATA_FILE);
         
         if (!response.ok) {
-            throw new Error(`فشل تحميل ملف البيانات: ${DATA_CONFIG.DATA_FILE}`);
+            throw new Error(`فشل تحميل ملف البيانات: ${response.status}`);
         }
         
         const data = await response.json();
         
-        // تحويل البيانات إلى مصفوفة
+        // تحويل البيانات إلى مصفوفة إذا كانت كائنًا
         allEmployees = Array.isArray(data) ? data : Object.values(data);
         
         if (allEmployees.length === 0) {
             throw new Error('ملف البيانات فارغ أو غير صالح');
         }
         
-        console.log('تم تحميل بيانات', allEmployees.length, 'موظف');
+        console.log('تم تحميل بيانات', allEmployees.length, 'موظف بنجاح');
         return { success: true, count: allEmployees.length };
     } catch (error) {
         console.error("خطأ في تحميل البيانات:", error);
@@ -36,15 +36,24 @@ async function loadEmployeeData() {
 }
 
 function getSampleData() {
-    return [{
-        "الاسم والنسبة": "بيانات تجريبية",
-        "الرقم الوطني": "1234567890",
-        "التخصص": "اختبار النظام",
-        "الجهة": "نظام الاستعلام",
-        "الدرجة": "عاشر",
-        "تاريخ التعيين": "01/01/2023",
-        "الحالة الوظيفية": "على رأس العمل"
-    }];
+    return [
+        {
+            "الاسم والنسبة": "بيانات تجريبية",
+            "الرقم الذاتي": "1234567890",
+            "اسم الأم": "فاطمة محمد",
+            "الولادة والتاريخ": "01/01/1990",
+            "اليوم": "01",
+            "الشهر": "01",
+            "العام": "1990",
+            "الشهادة": "بكالوريوس",
+            "التخصص": "علوم حاسوب",
+            "المسمى الوظيفي": "مبرمج",
+            "الجهة": "وزارة التربية",
+            "الدرجة": "عاشر",
+            "تاريخ التعيين": "01/01/2020",
+            "الحالة الوظيفية": "على رأس العمل"
+        }
+    ];
 }
 
 function searchEmployee(nationalId) {
@@ -53,9 +62,11 @@ function searchEmployee(nationalId) {
     }
 
     const cleanId = nationalId.replace(/\D/g, '');
-    return allEmployees.find(emp => 
-        emp['الرقم الوطني'] && emp['الرقم الوطني'].toString().includes(cleanId)
+    const foundEmployee = allEmployees.find(emp => 
+        emp['الرقم الذاتي'] && emp['الرقم الذاتي'].toString().includes(cleanId)
     );
+    
+    return foundEmployee || null;
 }
 
 window.data = {
