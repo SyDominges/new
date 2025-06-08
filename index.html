@@ -3,80 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الاستعلام عن البيانات الشخصية</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>نظام الاستعلام بالرقم الوطني</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .loading {
+            text-align: center;
+            display: none;
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="login-container" id="loginContainer">
-            <div class="logo">
-                <i class="fas fa-user-shield"></i>
-                <h1>نظام الاستعلام الآمن</h1>
-            </div>
-            
-            <div class="alert alert-error" id="loginError"></div>
-            
-            <div class="form-group">
-                <label for="username">اسم المستخدم</label>
-                <input type="text" id="username" class="form-control" placeholder="أدخل اسم المستخدم" autocomplete="username">
-            </div>
-            
-            <div class="form-group">
-                <label for="password">كلمة المرور</label>
-                <input type="password" id="password" class="form-control" placeholder="أدخل كلمة المرور" autocomplete="current-password">
-            </div>
-            
-            <button class="btn btn-primary" id="loginButton">
-                <span id="loginText">دخول</span>
-                <span id="loginSpinner" class="spinner"><i class="fas fa-spinner fa-spin"></i></span>
-            </button>
+        <h1>نظام الاستعلام بالرقم الوطني</h1>
+        
+        <div class="input-group">
+            <label for="nationalId">الرقم الوطني</label>
+            <input 
+                type="text" 
+                id="nationalId" 
+                placeholder="أدخل الرقم الوطني (10 أرقام)"
+                pattern="[0-9]{10}"
+                required
+            >
         </div>
         
-        <div class="main-container" id="mainContainer">
-            <div class="header">
-                <div class="logo">
-                    <i class="fas fa-database"></i>
-                    <h1>الاستعلام عن البيانات الشخصية</h1>
-                </div>
-                <button class="btn btn-logout" id="logoutButton">
-                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
-                </button>
-            </div>
-            
-            <div class="search-container">
-                <p class="instructions">الرجاء إدخال الرقم الوطني للاستعلام عن البيانات</p>
-                
-                <div class="alert alert-error" id="errorMessage"></div>
-                
-                <div class="form-group search-box">
-                    <input type="text" id="searchInput" class="form-control" placeholder="أدخل الرقم الوطني (10 أرقام)" maxlength="10">
-                    <button class="btn btn-search" id="searchButton">
-                        <i class="fas fa-search"></i> استعلام
-                    </button>
-                </div>
-            </div>
-            
-            <div class="loading" id="loading">
-                <div class="spinner"><i class="fas fa-spinner fa-spin"></i></div>
-                <p>جاري البحث عن البيانات...</p>
-            </div>
-            
-            <div class="alert alert-error" id="noResults">
-                <i class="fas fa-exclamation-circle"></i> لا توجد بيانات مطابقة للرقم الوطني المدخل
-            </div>
-            
-            <div class="employee-details" id="employeeDetails">
-                <h2 id="employeeName"><i class="fas fa-user-tie"></i> بيانات الموظف</h2>
-                <div id="detailsContent"></div>
-            </div>
+        <button onclick="handleQuery()">استعلام</button>
+        
+        <div id="loading" class="loading">
+            <img src="https://i.gifer.com/ZZ5H.gif" width="50" alt="تحميل">
+            <p>جاري البحث...</p>
         </div>
+        
+        <div id="result"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="auth.js"></script>
-    <script src="data.js"></script>
-    <script src="ui.js"></script>
-    <script src="main.js"></script>
+    <script>
+        async function handleQuery() {
+            const nationalId = document.getElementById('nationalId').value;
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            
+            // التحقق من صحة الإدخال
+            if (!/^[0-9]{10}$/.test(nationalId)) {
+                showResult('الرجاء إدخال رقم وطني صحيح (10 أرقام فقط)', 'error');
+                return;
+            }
+            
+            // إظهار حالة التحميل
+            loadingDiv.style.display = 'block';
+            resultDiv.style.display = 'none';
+            
+            try {
+                // محاكاة اتصال بالخادم (استبدل هذا بطلب API فعلي)
+                const response = await mockApiCall(nationalId);
+                
+                if (response.success) {
+                    if (response.data) {
+                        // عرض البيانات عند وجودها
+                        const dataHtml = `
+                            <h3>النتائج:</h3>
+                            <p><strong>الاسم:</strong> ${response.data.name}</p>
+                            <p><strong>تاريخ الميلاد:</strong> ${response.data.birthDate}</p>
+                            <p><strong>الجنسية:</strong> ${response.data.nationality}</p>
+                        `;
+                        showResult(dataHtml, 'success');
+                    } else {
+                        // حالة عدم وجود بيانات
+                        showResult('لا توجد بيانات مطابقة للرقم الوطني المدخل', 'error');
+                    }
+                } else {
+                    // حالة الخطأ من الخادم
+                    showResult(response.message || 'حدث خطأ في الخادم', 'error');
+                }
+            } catch (error) {
+                showResult('فشل الاتصال بالخادم. يرجى المحاولة لاحقًا', 'error');
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        }
+        
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = message;
+            resultDiv.className = type;
+            resultDiv.style.display = 'block';
+        }
+        
+        // دالة محاكاة للاتصال بالخادم (استبدلها بطلب fetch/axios فعلي)
+        function mockApiCall(nationalId) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    // محاكاة قاعدة بيانات بسيطة
+                    const mockDatabase = {
+                        '1234567890': {
+                            name: 'أحمد محمد',
+                            birthDate: '01/01/1990',
+                            nationality: 'سعودي'
+                        },
+                        '0987654321': {
+                            name: 'فاطمة علي',
+                            birthDate: '15/05/1985',
+                            nationality: 'سعودية'
+                        }
+                    };
+                    
+                    if (mockDatabase[nationalId]) {
+                        resolve({
+                            success: true,
+                            data: mockDatabase[nationalId]
+                        });
+                    } else {
+                        resolve({
+                            success: true,
+                            data: null
+                        });
+                    }
+                }, 1500); // محاكاة تأخير الشبكة
+            });
+        }
+    </script>
 </body>
 </html>
