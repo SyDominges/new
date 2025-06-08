@@ -75,6 +75,36 @@ body {
   flex-wrap: wrap;
   gap: 15px;
 }
+/* إضافة هذه الأنماط للتحكم بعرض التفاصيل */
+.detail-row {
+    display: flex;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    flex-wrap: wrap;
+}
+
+.detail-label {
+    font-weight: bold;
+    width: 150px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.detail-value {
+    flex: 1;
+    word-break: break-word;
+    margin-bottom: 5px;
+}
+
+@media (max-width: 768px) {
+    .detail-row {
+        flex-direction: column;
+    }
+    
+    .detail-label {
+        width: 100%;
+    }
 
 .logo {
   display: flex;
