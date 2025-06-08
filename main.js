@@ -1,185 +1,123 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // تعريف العناصر
-    const loginButton = document.getElementById('loginButton');
-    const searchButton = document.getElementById('searchButton');
-    const logoutButton = document.getElementById('logoutButton');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const searchInput = document.getElementById('searchInput');
-    const loginError = document.getElementById('loginError');
-    const errorMessage = document.getElementById('errorMessage');
-    const noResults = document.getElementById('noResults');
-    const loading = document.getElementById('loading');
-    const employeeDetails = document.getElementById('employeeDetails');
-    const detailsContent = document.getElementById('detailsContent');
-    const employeeName = document.getElementById('employeeName');
-    const loginContainer = document.getElementById('loginContainer');
-    const mainContainer = document.getElementById('mainContainer');
-    const loginText = document.getElementById('loginText');
-    const loginSpinner = document.getElementById('loginSpinner');
-
-    // بيانات الموظفين
+    // بيانات التطبيق
     let employeesData = [];
+    let isAuthenticated = false;
 
-    // حدث تسجيل الدخول
-    loginButton.addEventListener('click', async () => {
+    // ========== أحداث تسجيل الدخول ==========
+    UI_ELEMENTS.loginButton.addEventListener('click', async () => {
+        const username = UI_ELEMENTS.username.value.trim();
+        const password = UI_ELEMENTS.password.value.trim();
+        
+        // التحقق من إدخال البيانات
+        if (!username || !password) {
+            ui.showError(ui.elements.loginError, 'يرجى إدخال اسم المستخدم وكلمة المرور');
+            ui.shakeElement(ui.elements.username);
+            ui.shakeElement(ui.elements.password);
+            return;
+        }
+        
         try {
-            // إظهار حالة التحميل
-            loginText.style.display = 'none';
-            loginSpinner.style.display = 'inline-block';
-            loginButton.disabled = true;
+            ui.toggleLoginButton(true);
             
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-            
-            // التحقق من إدخال البيانات
-            if (!username || !password) {
-                throw new Error('يرجى إدخال اسم المستخدم وكلمة المرور');
-            }
+            // محاكاة تأخير الشبكة
+            await new Promise(resolve => setTimeout(resolve, 800));
             
             // تنفيذ المصادقة
-            const isAuthenticated = await new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    try {
-                        const result = auth.authenticate(username, password);
-                        resolve(result);
-                    } catch (error) {
-                        reject(error);
-                    }
-                }, 800);
-            });
+            isAuthenticated = auth.authenticate(username, password);
             
             if (isAuthenticated) {
-                // إخفاء رسائل الخطأ
-                loginError.style.display = 'none';
-                
-                // تبديل الواجهات
-                loginContainer.style.display = 'none';
-                mainContainer.style.display = 'block';
+                ui.hideError(ui.elements.loginError);
+                ui.elements.loginContainer.style.display = 'none';
+                ui.elements.mainContainer.style.display = 'block';
                 
                 // تحميل بيانات الموظفين
                 const { success, error } = await data.loadEmployeeData();
                 employeesData = data.getEmployees();
                 
                 if (!success) {
-                    errorMessage.textContent = error || 'تم تحميل بيانات تجريبية';
-                    errorMessage.style.display = 'block';
+                    ui.showError(ui.elements.errorMessage, error || 'تم تحميل بيانات تجريبية بسبب خطأ في الاتصال');
                 }
+                
+                console.log('تم تحميل بيانات', employeesData.length, 'موظف');
             }
         } catch (error) {
-            // عرض رسالة الخطأ
-            loginError.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
-            loginError.style.display = 'flex';
-            
-            // تأثير الاهتزاز
-            usernameInput.classList.add('shake');
-            passwordInput.classList.add('shake');
-            setTimeout(() => {
-                usernameInput.classList.remove('shake');
-                passwordInput.classList.remove('shake');
-            }, 500);
-            
-            console.error('فشل تسجيل الدخول:', error);
+            ui.showError(ui.elements.loginError, error.message);
+            ui.shakeElement(ui.elements.username);
+            ui.shakeElement(ui.elements.password);
         } finally {
-            // إعادة تعيين حالة الزر
-            loginText.style.display = 'inline-block';
-            loginSpinner.style.display = 'none';
-            loginButton.disabled = false;
+            ui.toggleLoginButton(false);
         }
     });
-
-    // حدث البحث
-    searchButton.addEventListener('click', async () => {
-        try {
-            // إخفاء الرسائل السابقة
-            errorMessage.style.display = 'none';
-            noResults.style.display = 'none';
-            employeeDetails.style.display = 'none';
-            
-            // إظهار حالة التحميل
-            loading.style.display = 'flex';
-            
-            // الحصول على قيمة البحث
-            const searchTerm = searchInput.value.trim();
-            const cleanId = searchTerm.replace(/\D/g, '');
-            
-            // التحقق من صحة الإدخال
-            if (cleanId.length < 8) {
-                throw new Error('الرجاء إدخال 8 أرقام على الأقل');
+    
+    // ========== أحداث البحث ==========
+    UI_ELEMENTS.searchButton.addEventListener('click', async () => {
+        const searchTerm = UI_ELEMENTS.searchInput.value.trim();
+        const cleanId = searchTerm.replace(/\D/g, '');
+        
+        // التحقق من صحة الإدخال
+        if (cleanId.length < 8) {
+            ui.showError(ui.elements.errorMessage, 'الرجاء إدخال 8 أرقام على الأقل');
+            ui.shakeElement(ui.elements.searchInput);
+            return;
+        }
+        
+        // التحقق من تحميل البيانات
+        if (employeesData.length === 0) {
+            const { success } = await data.loadEmployeeData();
+            employeesData = data.getEmployees();
+            if (!success) {
+                ui.showError(ui.elements.errorMessage, 'جاري استخدام بيانات تجريبية');
             }
-            
-            // محاكاة تأخير الشبكة
+        }
+        
+        // إعداد واجهة البحث
+        ui.hideError(ui.elements.errorMessage);
+        ui.hideError(ui.elements.noResults);
+        ui.elements.employeeDetails.style.display = 'none';
+        ui.showLoading(true);
+        
+        try {
+            // محاكاة تأخير البحث
             await new Promise(resolve => setTimeout(resolve, 800));
             
-            // البحث في البيانات
+            // تنفيذ البحث
             const employee = data.searchEmployee(searchTerm);
             
             if (employee) {
-                  // عرض جميع بيانات الموظف
-            ui.displayEmployeeDetails(employee);
-        } else {
-            throw new Error('لا توجد بيانات مطابقة للرقم الوطني المدخل');
-            }
-                // عرض النتائج
-                employeeName.textContent = employee['الاسم والنسبة'] || 'بيانات الموظف';
-                detailsContent.innerHTML = '';
-                
-                // إضافة الحقول المتاحة
-                ['الرقم الوطني', 'التخصص', 'الجهة' ,'الرقم الذاتي' ,'الولادة والتاريخ' ,'المواليد / اليوم' ,'المواليد / عام' ,'مسمى وظيفي'].forEach(field => {
-                    if (employee[field]) {
-                        const row = document.createElement('div');
-                        row.className = 'detail-row';
-                        row.innerHTML = `
-                            <div class="detail-label">${field}:</div>
-                            <div class="detail-value">${employee[field]}</div>
-                        `;
-                        detailsContent.appendChild(row);
-                    }
-                });
-                
-                employeeDetails.style.display = 'block';
+                ui.displayEmployeeDetails(employee);
             } else {
-                throw new Error('لا توجد بيانات مطابقة للرقم الوطني المدخل');
+                ui.showError(ui.elements.noResults, 'لا توجد بيانات مطابقة للرقم الوطني المدخل');
             }
         } catch (error) {
-            // عرض رسالة الخطأ المناسبة
-            if (error.message.includes('8 أرقام')) {
-                errorMessage.textContent = error.message;
-                errorMessage.style.display = 'block';
-            } else {
-                noResults.textContent = error.message;
-                noResults.style.display = 'block';
-            }
-            
-            console.error('خطأ في البحث:', error);
+            ui.showError(ui.elements.errorMessage, 'حدث خطأ أثناء البحث: ' + error.message);
         } finally {
-            // إخفاء حالة التحميل
-            loading.style.display = 'none';
+            ui.showLoading(false);
         }
     });
-
-    // حدث تسجيل الخروج
-    logoutButton.addEventListener('click', () => {
+    
+    // ========== أحداث أخرى ==========
+    // تسجيل الخروج
+    UI_ELEMENTS.logoutButton.addEventListener('click', () => {
         if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
             window.location.reload();
         }
     });
-
+    
+    // البحث عند الضغط على Enter
+    UI_ELEMENTS.searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            UI_ELEMENTS.searchButton.click();
+        }
+    });
+    
     // التحقق من صحة الإدخال أثناء الكتابة
-    searchInput.addEventListener('input', function() {
+    UI_ELEMENTS.searchInput.addEventListener('input', function() {
         this.value = this.value.replace(/\D/g, '');
         if (this.value.length >= 8) {
-            errorMessage.style.display = 'none';
+            ui.hideError(ui.elements.errorMessage);
         }
     });
-
-    // البحث عند الضغط على Enter
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            searchButton.click();
-        }
-    });
-
+    
     // التركيز على حقل اسم المستخدم عند التحميل
-    usernameInput.focus();
+    UI_ELEMENTS.username.focus();
 });
