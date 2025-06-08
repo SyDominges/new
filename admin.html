@@ -163,8 +163,8 @@
         const card = document.createElement('div');
         card.className = 'card';
 
-        const name = emp['الاسم'] || emp['الاسم والنسبة'] || 'غير معروف';
-        const number = emp['الرقم الذاتي'] || '—';
+        const name = emp['الاسم والنسبة'] || emp['الاسم والنسبة'] || 'غير معروف';
+        const number = emp['الرقم الذاتي'] || '---';
 
         card.innerHTML = `
           <div class="summary">
