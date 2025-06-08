@@ -115,6 +115,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const employee = data.searchEmployee(searchTerm);
             
             if (employee) {
+                  // عرض جميع بيانات الموظف
+            ui.displayEmployeeDetails(employee);
+        } else {
+            throw new Error('لا توجد بيانات مطابقة للرقم الوطني المدخل');
+            }
                 // عرض النتائج
                 employeeName.textContent = employee['الاسم والنسبة'] || 'بيانات الموظف';
                 detailsContent.innerHTML = '';
