@@ -3,190 +3,394 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الاستعلام بالرقم الوطني</title>
+    <title>نظام الاستعلام عن البيانات الشخصية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
+        /* الأنماط الأساسية */
+        :root {
+            --primary: #3498db;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+        }
+        
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
             color: #333;
+            line-height: 1.6;
         }
+        
         .container {
-            max-width: 600px;
-            margin: 50px auto;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* أنماط تسجيل الدخول */
+        .login-container {
             background: white;
-            padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 500px;
+            margin: 50px auto;
             text-align: center;
-            margin-bottom: 30px;
+            transition: all 0.3s ease;
         }
-        .input-group {
+        
+        .logo {
+            margin-bottom: 25px;
+        }
+        
+        .logo i {
+            font-size: 50px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .logo h1 {
+            color: var(--dark);
+            font-size: 24px;
+        }
+        
+        .form-group {
             margin-bottom: 20px;
+            text-align: right;
         }
-        label {
+        
+        .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: bold;
+            font-weight: 600;
+            color: var(--dark);
         }
-        input {
+        
+        .form-control {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
             font-size: 16px;
-            box-sizing: border-box;
+            transition: border 0.3s;
         }
-        button {
-            background-color: #3498db;
-            color: white;
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
             border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
-            cursor: pointer;
+            border-radius: 6px;
             font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
             width: 100%;
-            transition: background-color 0.3s;
         }
-        button:hover {
+        
+        .btn-primary:hover {
             background-color: #2980b9;
+            transform: translateY(-2px);
         }
-        #result {
-            margin-top: 30px;
-            padding: 20px;
-            border-radius: 5px;
+        
+        .spinner {
             display: none;
         }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
+        
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-error {
+            background-color: #fdecea;
+            color: var(--danger);
             border: 1px solid #f5c6cb;
         }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .loading {
-            text-align: center;
+        
+        /* أنماط الواجهة الرئيسية */
+        .main-container {
             display: none;
-            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: var(--dark);
+            color: white;
+        }
+        
+        .header .logo {
+            display: flex;
+            align-items: center;
+            margin: 0;
+        }
+        
+        .header .logo i {
+            font-size: 30px;
+            margin-left: 10px;
+            color: white;
+        }
+        
+        .header .logo h1 {
+            color: white;
+            font-size: 20px;
+            margin: 0;
+        }
+        
+        .btn-logout {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-logout:hover {
+            background-color: #c0392b;
+        }
+        
+        .search-container {
+            padding: 30px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .instructions {
+            margin-bottom: 20px;
+            color: #7f8c8d;
+            text-align: center;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-box .form-control {
+            flex: 1;
+        }
+        
+        .btn-search {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-search:hover {
+            background-color: #27ae60;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .loading .spinner {
+            font-size: 40px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .employee-details {
+            padding: 30px;
+            display: none;
+        }
+        
+        .employee-details h2 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #detailsContent {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+        }
+        
+        /* أنماط للجوال */
+        @media (max-width: 768px) {
+            .login-container, .main-container {
+                margin: 20px;
+                width: auto;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>نظام الاستعلام بالرقم الوطني</h1>
-        
-        <div class="input-group">
-            <label for="nationalId">الرقم الوطني</label>
-            <input 
-                type="text" 
-                id="nationalId" 
-                placeholder="أدخل الرقم الوطني (10 أرقام)"
-                pattern="[0-9]{10}"
-                required
-            >
+        <div class="login-container" id="loginContainer">
+            <div class="logo">
+                <i class="fas fa-user-shield"></i>
+                <h1>نظام الاستعلام الآمن</h1>
+            </div>
+            
+            <div class="alert alert-error" id="loginError"></div>
+            
+            <div class="form-group">
+                <label for="username">اسم المستخدم</label>
+                <input type="text" id="username" class="form-control" placeholder="أدخل اسم المستخدم" autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">كلمة المرور</label>
+                <input type="password" id="password" class="form-control" placeholder="أدخل كلمة المرور" autocomplete="current-password">
+            </div>
+            
+            <button class="btn btn-primary" id="loginButton">
+                <span id="loginText">دخول</span>
+                <span id="loginSpinner" class="spinner"><i class="fas fa-spinner fa-spin"></i></span>
+            </button>
         </div>
         
-        <button onclick="handleQuery()">استعلام</button>
-        
-        <div id="loading" class="loading">
-            <img src="https://i.gifer.com/ZZ5H.gif" width="50" alt="تحميل">
-            <p>جاري البحث...</p>
+        <div class="main-container" id="mainContainer">
+            <div class="header">
+                <div class="logo">
+                    <i class="fas fa-database"></i>
+                    <h1>الاستعلام عن البيانات الشخصية</h1>
+                </div>
+                <button class="btn btn-logout" id="logoutButton">
+                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                </button>
+            </div>
+            
+            <div class="search-container">
+                <p class="instructions">الرجاء إدخال الرقم الوطني للاستعلام عن البيانات</p>
+                
+                <div class="alert alert-error" id="errorMessage"></div>
+                
+                <div class="form-group search-box">
+                    <input type="text" id="searchInput" class="form-control" placeholder="أدخل الرقم الوطني (10 أرقام)" maxlength="10">
+                    <button class="btn btn-search" id="searchButton">
+                        <i class="fas fa-search"></i> استعلام
+                    </button>
+                </div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"><i class="fas fa-spinner fa-spin"></i></div>
+                <p>جاري البحث عن البيانات...</p>
+            </div>
+            
+            <div class="alert alert-error" id="noResults">
+                <i class="fas fa-exclamation-circle"></i> لا توجد بيانات مطابقة للرقم الوطني المدخل
+            </div>
+            
+            <div class="employee-details" id="employeeDetails">
+                <h2 id="employeeName"><i class="fas fa-user-tie"></i> بيانات الموظف</h2>
+                <div id="detailsContent"></div>
+            </div>
         </div>
-        
-        <div id="result"></div>
     </div>
 
+    <!-- نظام إدارة التبعيات -->
     <script>
-        async function handleQuery() {
-            const nationalId = document.getElementById('nationalId').value;
-            const resultDiv = document.getElementById('result');
-            const loadingDiv = document.getElementById('loading');
-            
-            // التحقق من صحة الإدخال
-            if (!/^[0-9]{10}$/.test(nationalId)) {
-                showResult('الرجاء إدخال رقم وطني صحيح (10 أرقام فقط)', 'error');
-                return;
-            }
-            
-            // إظهار حالة التحميل
-            loadingDiv.style.display = 'block';
-            resultDiv.style.display = 'none';
-            
+        // حالة التطبيق العامة
+        const App = {
+            config: {
+                apiBaseUrl: 'https://your-api-endpoint.com/v1',
+                encryptionKey: '@ali96json@'
+            },
+            modules: {},
+            user: null,
+            dependenciesLoaded: false
+        };
+
+        // تسلسل تحميل الملفات
+        const loadDependencies = async () => {
             try {
-                // محاكاة اتصال بالخادم (استبدل هذا بطلب API فعلي)
-                const response = await mockApiCall(nationalId);
+                // تحميل المكتبات الأساسية أولاً
+                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js');
                 
-                if (response.success) {
-                    if (response.data) {
-                        // عرض البيانات عند وجودها
-                        const dataHtml = `
-                            <h3>النتائج:</h3>
-                            <p><strong>الاسم:</strong> ${response.data.name}</p>
-                            <p><strong>تاريخ الميلاد:</strong> ${response.data.birthDate}</p>
-                            <p><strong>الجنسية:</strong> ${response.data.nationality}</p>
-                        `;
-                        showResult(dataHtml, 'success');
-                    } else {
-                        // حالة عدم وجود بيانات
-                        showResult('لا توجد بيانات مطابقة للرقم الوطني المدخل', 'error');
-                    }
-                } else {
-                    // حالة الخطأ من الخادم
-                    showResult(response.message || 'حدث خطأ في الخادم', 'error');
-                }
+                // تحميل وحدات النظام
+                App.modules.auth = await loadModule('auth');
+                App.modules.data = await loadModule('data');
+                App.modules.ui = await loadModule('ui');
+                App.modules.main = await loadModule('main');
+                
+                App.dependenciesLoaded = true;
+                initializeApp();
             } catch (error) {
-                showResult('فشل الاتصال بالخادم. يرجى المحاولة لاحقًا', 'error');
-            } finally {
-                loadingDiv.style.display = 'none';
+                console.error('فشل تحميل التبعيات:', error);
+                document.getElementById('loginError').textContent = 'حدث خطأ في تحميل النظام. يرجى إعادة المحاولة لاحقًا';
+                document.getElementById('loginError').style.display = 'block';
             }
-        }
-        
-        function showResult(message, type) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = message;
-            resultDiv.className = type;
-            resultDiv.style.display = 'block';
-        }
-        
-        // دالة محاكاة للاتصال بالخادم (استبدلها بطلب fetch/axios فعلي)
-        function mockApiCall(nationalId) {
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    // محاكاة قاعدة بيانات بسيطة
-                    const mockDatabase = {
-                        '1234567890': {
-                            name: 'أحمد محمد',
-                            birthDate: '01/01/1990',
-                            nationality: 'سعودي'
-                        },
-                        '0987654321': {
-                            name: 'فاطمة علي',
-                            birthDate: '15/05/1985',
-                            nationality: 'سعودية'
-                        }
-                    };
-                    
-                    if (mockDatabase[nationalId]) {
-                        resolve({
-                            success: true,
-                            data: mockDatabase[nationalId]
-                        });
-                    } else {
-                        resolve({
-                            success: true,
-                            data: null
-                        });
-                    }
-                }, 1500); // محاكاة تأخير الشبكة
+        };
+
+        // دالة مساعدة لتحميل السكربتات
+        const loadScript = (src) => {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = () => reject(new Error(`فشل تحميل السكربت: ${src}`));
+                document.head.appendChild(script);
             });
-        }
+        };
+
+        // دالة مساعدة لتحميل الوحدات
+        const loadModule = (name) => {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = `${name}.js`;
+                script.onload = () => {
+                    if (window[name + 'Module']) {
+                        resolve(window[name + 'Module']);
+                    } else {
+                        reject(new Error(`الوحدة ${name} لم تُصدر بشكل صحيح`));
+                    }
+                };
+                script.onerror = () => reject(new Error(`فشل تحميل الوحدة: ${name}`));
+                document.head.appendChild(script);
+            });
+        };
+
+        // تهيئة التطبيق بعد تحميل التبعيات
+        const initializeApp = () => {
+            // تهيئة وحدات النظام
+            App.modules.auth.init(App);
+            App.modules.ui.init(App);
+            App.modules.data.init(App);
+            App.modules.main.init(App);
+            
+            // إخفاء شاشة التحميل إذا كانت موجودة
+            document.getElementById('loginSpinner').style.display = 'none';
+        };
+
+        // بدء تحميل التبعيات عند تحميل الصفحة
+        window.addEventListener('DOMContentLoaded', loadDependencies);
     </script>
 </body>
 </html>
