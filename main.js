@@ -24,20 +24,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // حدث تسجيل الدخول
     loginButton.addEventListener('click', async () => {
         try {
-            // إظهار حالة التحميل
             loginText.style.display = 'none';
             loginSpinner.style.display = 'inline-block';
             loginButton.disabled = true;
-            
+
             const username = usernameInput.value.trim();
             const password = passwordInput.value.trim();
-            
-            // التحقق من إدخال البيانات
+
             if (!username || !password) {
                 throw new Error('يرجى إدخال اسم المستخدم وكلمة المرور');
             }
-            
-            // تنفيذ المصادقة
+
             const isAuthenticated = await new Promise((resolve, reject) => {
                 setTimeout(() => {
                     try {
@@ -48,40 +45,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }, 800);
             });
-            
+
             if (isAuthenticated) {
-                // إخفاء رسائل الخطأ
                 loginError.style.display = 'none';
-                
-                // تبديل الواجهات
                 loginContainer.style.display = 'none';
                 mainContainer.style.display = 'block';
-                
-                // تحميل بيانات الموظفين
+
                 const { success, error } = await data.loadEmployeeData();
                 employeesData = data.getEmployees();
-                
+
                 if (!success) {
                     errorMessage.textContent = error || 'تم تحميل بيانات تجريبية';
                     errorMessage.style.display = 'block';
                 }
             }
         } catch (error) {
-            // عرض رسالة الخطأ
             loginError.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
             loginError.style.display = 'flex';
-            
-            // تأثير الاهتزاز
+
             usernameInput.classList.add('shake');
             passwordInput.classList.add('shake');
             setTimeout(() => {
                 usernameInput.classList.remove('shake');
                 passwordInput.classList.remove('shake');
             }, 500);
-            
-            console.error('فشل تسجيل الدخول:', error);
         } finally {
-            // إعادة تعيين حالة الزر
             loginText.style.display = 'inline-block';
             loginSpinner.style.display = 'none';
             loginButton.disabled = false;
@@ -91,36 +79,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // حدث البحث
     searchButton.addEventListener('click', async () => {
         try {
-            // إخفاء الرسائل السابقة
             errorMessage.style.display = 'none';
             noResults.style.display = 'none';
             employeeDetails.style.display = 'none';
-            
-            // إظهار حالة التحميل
             loading.style.display = 'flex';
-            
-            // الحصول على قيمة البحث
+
             const searchTerm = searchInput.value.trim();
             const cleanId = searchTerm.replace(/\D/g, '');
-            
-            // التحقق من صحة الإدخال
+
             if (cleanId.length < 8) {
                 throw new Error('الرجاء إدخال 8 أرقام على الأقل');
             }
-            
-            // محاكاة تأخير الشبكة
+
             await new Promise(resolve => setTimeout(resolve, 800));
-            
-            // البحث في البيانات
+
             const employee = data.searchEmployee(searchTerm);
-            
+
             if (employee) {
-                // عرض النتائج
                 employeeName.textContent = employee['الاسم والنسبة'] || 'بيانات الموظف';
                 detailsContent.innerHTML = '';
-                
-                // إضافة الحقول المتاحة
-                ['الرقم الوطني', 'التخصص', 'الجهة'].forEach(field => {
+
+                const fieldsToDisplay = [
+                    "الاسم والنسبة", "الاسم", "النسبة", "اسم الأب", "اسم الأم",
+                    "الولادة والتاريخ", "المواليد / اليوم", "المواليد / شهر", "المواليد / عام",
+                    "الرقم الوطني", "الرقم الذاتي", "القيد والخانة", "الجهة", "الشهادة",
+                    "التخصص", "مسمى وظيفي", "الدرجة", "تاريخ التعيين", "الحالة الوظيفية"
+                ];
+
+                fieldsToDisplay.forEach(field => {
                     if (employee[field]) {
                         const row = document.createElement('div');
                         row.className = 'detail-row';
@@ -131,13 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         detailsContent.appendChild(row);
                     }
                 });
-                
+
                 employeeDetails.style.display = 'block';
             } else {
                 throw new Error('لا توجد بيانات مطابقة للرقم الوطني المدخل');
             }
         } catch (error) {
-            // عرض رسالة الخطأ المناسبة
             if (error.message.includes('8 أرقام')) {
                 errorMessage.textContent = error.message;
                 errorMessage.style.display = 'block';
@@ -145,10 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 noResults.textContent = error.message;
                 noResults.style.display = 'block';
             }
-            
-            console.error('خطأ في البحث:', error);
         } finally {
-            // إخفاء حالة التحميل
             loading.style.display = 'none';
         }
     });
@@ -161,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // التحقق من صحة الإدخال أثناء الكتابة
-    searchInput.addEventListener('input', function() {
+    searchInput.addEventListener('input', function () {
         this.value = this.value.replace(/\D/g, '');
         if (this.value.length >= 8) {
             errorMessage.style.display = 'none';
@@ -175,6 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // التركيز على حقل اسم المستخدم عند التحميل
+    // تركيز المؤشر عند التحميل
     usernameInput.focus();
 });
