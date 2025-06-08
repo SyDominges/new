@@ -1,51 +1,78 @@
-const AUTH_CONFIG = {
-    USERNAME_HASH: "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", // admin
-    PASSWORD_HASH: "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", // admin
-    MAX_ATTEMPTS: 3,
-    LOCK_TIME: 30000 // 30 ثانية
+const UI_ELEMENTS = {
+    loginContainer: document.getElementById('loginContainer'),
+    mainContainer: document.getElementById('mainContainer'),
+    loginError: document.getElementById('loginError'),
+    errorMessage: document.getElementById('errorMessage'),
+    noResults: document.getElementById('noResults'),
+    loading: document.getElementById('loading'),
+    employeeDetails: document.getElementById('employeeDetails'),
+    logoutButton: document.getElementById('logoutButton'),
+    loginButton: document.getElementById('loginButton'),
+    searchButton: document.getElementById('searchButton'),
+    searchInput: document.getElementById('searchInput'),
+    employeeName: document.getElementById('employeeName'),
+    detailsContent: document.getElementById('detailsContent'),
+    loginText: document.getElementById('loginText'),
+    loginSpinner: document.getElementById('loginSpinner')
 };
 
-let failedAttempts = 0;
-let lastAttemptTime = 0;
+function showLoading(show) {
+    UI_ELEMENTS.loading.style.display = show ? 'flex' : 'none';
+}
 
-function authenticate(username, password) {
-    try {
-        // التحقق من وجود مكتبة التشفير
-        if (typeof CryptoJS === 'undefined') {
-            console.error('مكتبة التشفير غير محملة');
-            throw new Error('حدث خطأ في النظام. يرجى إعادة المحاولة لاحقاً');
+function showError(element, message) {
+    element.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+    element.style.display = 'flex';
+    element.classList.add('fade-in');
+}
+
+function hideError(element) {
+    element.style.display = 'none';
+    element.classList.remove('fade-in');
+}
+
+function displayEmployeeDetails(employee) {
+    UI_ELEMENTS.employeeName.textContent = employee['الاسم والنسبة'] || 'بيانات الموظف';
+    UI_ELEMENTS.detailsContent.innerHTML = '';
+    
+    ['الرقم الوطني', 'التخصص', 'الجهة'].forEach(field => {
+        if (employee[field]) {
+            const row = document.createElement('div');
+            row.className = 'detail-row';
+            row.innerHTML = `
+                <div class="detail-label">${field}:</div>
+                <div class="detail-value">${employee[field]}</div>
+            `;
+            UI_ELEMENTS.detailsContent.appendChild(row);
         }
+    });
+    
+    UI_ELEMENTS.employeeDetails.style.display = 'block';
+}
 
-        const currentTime = Date.now();
-        
-        // التحقق من تأمين الحساب
-        if (failedAttempts >= AUTH_CONFIG.MAX_ATTEMPTS) {
-            const remainingTime = AUTH_CONFIG.LOCK_TIME - (currentTime - lastAttemptTime);
-            if (remainingTime > 0) {
-                throw new Error(`تم تجاوز عدد المحاولات. الرجاء الانتظار ${Math.ceil(remainingTime/1000)} ثانية`);
-            } else {
-                failedAttempts = 0;
-            }
-        }
+function shakeElement(element) {
+    element.classList.add('shake');
+    setTimeout(() => element.classList.remove('shake'), 500);
+}
 
-        const hashedUsername = CryptoJS.SHA256(username).toString();
-        const hashedPassword = CryptoJS.SHA256(password).toString();
-
-        if (hashedUsername === AUTH_CONFIG.USERNAME_HASH && 
-            hashedPassword === AUTH_CONFIG.PASSWORD_HASH) {
-            failedAttempts = 0;
-            return true;
-        }
-
-        failedAttempts++;
-        lastAttemptTime = currentTime;
-        throw new Error(`بيانات الدخول غير صحيحة. المحاولات المتبقية: ${AUTH_CONFIG.MAX_ATTEMPTS - failedAttempts}`);
-    } catch (error) {
-        console.error('خطأ في المصادقة:', error);
-        throw error;
+function toggleLoginButton(isLoading) {
+    if (isLoading) {
+        UI_ELEMENTS.loginText.style.display = 'none';
+        UI_ELEMENTS.loginSpinner.style.display = 'inline-block';
+        UI_ELEMENTS.loginButton.disabled = true;
+    } else {
+        UI_ELEMENTS.loginText.style.display = 'inline-block';
+        UI_ELEMENTS.loginSpinner.style.display = 'none';
+        UI_ELEMENTS.loginButton.disabled = false;
     }
 }
 
-window.auth = {
-    authenticate
+window.ui = {
+    showLoading,
+    showError,
+    hideError,
+    displayEmployeeDetails,
+    shakeElement,
+    toggleLoginButton,
+    elements: UI_ELEMENTS
 };
