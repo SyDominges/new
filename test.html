@@ -2,223 +2,196 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>نظام الاستعلام</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>البحث عن موظف</title>
   <style>
     body {
-      font-family: 'Cairo', sans-serif;
-      background-color: #f4f6f9;
-      padding: 40px 20px;
-      color: #2c3e50;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 30px;
     }
-    h2 {
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    h1 {
       text-align: center;
+      color: #2c3e50;
       margin-bottom: 30px;
-      color: #34495e;
     }
+
     .search-box {
-      max-width: 600px;
-      margin: 0 auto 40px;
       display: flex;
       gap: 10px;
+      margin-bottom: 30px;
     }
-    .search-box input {
+
+    input[type="text"] {
       flex: 1;
       padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
       font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
-    .search-box button {
-      padding: 12px 18px;
+
+    button {
       background-color: #3498db;
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
+      padding: 12px 20px;
+      border-radius: 6px;
       cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
     }
-    .search-box button:hover {
+
+    button:hover {
       background-color: #2980b9;
     }
-    .results {
-      max-width: 800px;
-      margin: auto;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 20px;
+
+    .result-card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
       margin-bottom: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      padding: 20px;
+      background-color: #fafafa;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
-    .summary {
+
+    .result-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-size: 18px;
       font-weight: bold;
+      color: #333;
     }
-    .summary button {
-      margin-left: 10px;
-      background-color: #2ecc71;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .summary button:last-child {
-      background-color: #f39c12;
-    }
+
     .details {
-      margin-top: 15px;
+      margin-top: 10px;
       display: none;
-      line-height: 1.8;
+      padding-top: 10px;
+      border-top: 1px solid #eee;
     }
+
     .details p {
-      margin: 5px 0;
+      margin: 6px 0;
+      line-height: 1.6;
     }
+
+    .btn-toggle {
+      background-color: #27ae60;
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 5px;
+    }
+
+    .btn-toggle:hover {
+      background-color: #219150;
+    }
+
     .no-results {
       text-align: center;
-      color: #999;
+      color: #888;
       font-style: italic;
-      margin-top: 50px;
-    }
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      .print-content, .print-content * {
-        visibility: visible;
-      }
-      .print-content {
-        position: absolute;
-        top: 0;
-        right: 0;
-        left: 0;
-        margin: auto;
-        padding: 30px;
-      }
+      margin-top: 30px;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>البحث عن موظف</h1>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="أدخل الاسم، الرقم الذاتي أو أي معلومة...">
+      <button onclick="search()">بحث</button>
+    </div>
+    <div id="results"></div>
+  </div>
 
-<script>
-  const password = "1234"; // يمكنك تغيير كلمة المرور هنا
-  if (!sessionStorage.getItem("authenticated")) {
-    const entered = prompt("أدخل كلمة المرور للدخول:");
-    if (entered === password) {
-      sessionStorage.setItem("authenticated", true);
-    } else {
-      alert("كلمة المرور خاطئة.");
-      location.href = "https://google.com";
+  <script>
+    let employees = [];
+
+    // تحميل ملف JSON
+    fetch('8jfh0-7m5vq.json')
+      .then(res => res.json())
+      .then(data => {
+        employees = data;
+      });
+
+    function search() {
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+
+      if (!query) return;
+
+      const filtered = employees.filter(emp =>
+        Object.values(emp).some(val =>
+          String(val).toLowerCase().includes(query)
+        )
+      );
+
+      if (filtered.length === 0) {
+        resultsDiv.innerHTML = `<p class="no-results">لا توجد نتائج مطابقة.</p>`;
+        return;
+      }
+
+      filtered.slice(0, 10).forEach((emp, i) => {
+        const fullName = [emp["الاسم"], emp["اسم الأب"], emp["النسبة"]].filter(Boolean).join(" ");
+
+        const card = document.createElement("div");
+        card.className = "result-card";
+
+        card.innerHTML = `
+          <div class="result-header">
+            <span>${fullName}</span>
+            <span>الرقم الذاتي: ${emp["الرقم الذاتي"] || "غير متوفر"}</span>
+            <button class="btn-toggle" onclick="toggleDetails(${i})">إظهار التفاصيل</button>
+          </div>
+          <div class="details" id="details-${i}">
+            ${Object.entries(emp).map(([key, value]) => {
+              if (typeof value === "string" && key.includes("تاريخ")) {
+                return `<p><strong>${key}:</strong> ${formatArabicDate(value)}</p>`;
+              } else {
+                return `<p><strong>${key}:</strong> ${sanitize(value)}</p>`;
+              }
+            }).join('')}
+          </div>
+        `;
+
+        resultsDiv.appendChild(card);
+      });
     }
-  }
-</script>
 
-<h2><i class="fas fa-search"></i> نظام الاستعلام عن الموظفين</h2>
+    function toggleDetails(index) {
+      const details = document.getElementById(`details-${index}`);
+      details.style.display = details.style.display === "block" ? "none" : "block";
+    }
 
-<div class="search-box">
-  <input type="text" id="searchInput" placeholder="ابحث بالاسم، الرقم الذاتي، أو أي معلومة...">
-  <button onclick="search()">بحث</button>
-</div>
+    function sanitize(text) {
+      return String(text || "").replace(/^'+|'+$/g, "").replace(/'/g, "");
+    }
 
-<div class="results" id="results"></div>
-<div class="no-results" id="noResults" style="display: none;">لا توجد نتائج مطابقة.</div>
+    function formatArabicDate(dateStr) {
+      const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+      const parts = dateStr.includes("/") ? dateStr.split("/") : dateStr.split("-");
+      if (parts.length !== 3) return dateStr;
 
-<script>
-let employees = [];
+      let day, month, year;
+      if (parts[0].length === 4) { // yyyy-mm-dd
+        [year, month, day] = parts;
+      } else {
+        [day, month, year] = parts;
+      }
 
-fetch('8jfh0-7m5vq.json')
-  .then(res => res.json())
-  .then(data => {
-    employees = data;
-  });
-
-function cleanText(text) {
-  return text ? text.toString().replace(/^['"]+|['"]+$/g, '') : '';
-}
-
-function search() {
-  const query = document.getElementById("searchInput").value.trim();
-  const resultsContainer = document.getElementById("results");
-  const noResults = document.getElementById("noResults");
-  resultsContainer.innerHTML = "";
-  noResults.style.display = "none";
-
-  if (!query) return;
-
-  const filtered = employees.filter(emp =>
-    Object.values(emp).some(val => val?.toString().toLowerCase().includes(query.toLowerCase()))
-  );
-
-  if (filtered.length === 0) {
-    noResults.style.display = "block";
-    return;
-  }
-
-  filtered.slice(0, 10).forEach(emp => {
-    const fullName = [cleanText(emp["الاسم"]), cleanText(emp["اسم الأب"]), cleanText(emp["النسبة"])].join(' ');
-    const number = cleanText(emp["الرقم الذاتي"]) || "—";
-
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div class="summary">
-        <div><i class="fas fa-user"></i> ${fullName} - <i class="fas fa-id-badge"></i> ${number}</div>
-        <div>
-          <button onclick="toggleDetails(this)">إظهار التفاصيل</button>
-          <button onclick="printCard(this)">طباعة</button>
-        </div>
-      </div>
-      <div class="details">
-        ${Object.entries(emp).map(([k, v]) => `<p><strong>${k}:</strong> ${v}</p>`).join('')}
-      </div>
-    `;
-    resultsContainer.appendChild(card);
-  });
-}
-
-function toggleDetails(button) {
-  const details = button.closest(".card").querySelector(".details");
-  if (details.style.display === "none" || details.style.display === "") {
-    details.style.display = "block";
-    button.textContent = "إخفاء التفاصيل";
-  } else {
-    details.style.display = "none";
-    button.textContent = "إظهار التفاصيل";
-  }
-}
-
-function printCard(button) {
-  const card = button.closest(".card").cloneNode(true);
-  card.querySelector(".details").style.display = "block";
-  const buttons = card.querySelectorAll("button");
-  buttons.forEach(btn => btn.remove());
-
-  const printWindow = window.open('', '', 'width=800,height=600');
-  const styles = `
-    <style>
-      body { font-family: 'Cairo', sans-serif; direction: rtl; padding: 30px; }
-      .card { border: 1px solid #ccc; padding: 30px; border-radius: 10px; }
-      p { line-height: 1.8; }
-    </style>
-  `;
-  printWindow.document.write(`
-    <html>
-    <head><title>طباعة</title>${styles}</head>
-    <body><div class="card">${card.innerHTML}</div></body>
-    </html>
-  `);
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
-  printWindow.close();
-}
-</script>
-
+      return `${+day} ${months[+month - 1]} ${year}`;
+    }
+  </script>
 </body>
 </html>
