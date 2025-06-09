@@ -1,288 +1,140 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>صفحة البحث</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>استعلام البيانات</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      background-color: #f4f4f4;
+      font-family: 'Cairo', sans-serif;
+      background-color: #f0f2f5;
+      padding: 20px;
       margin: 0;
-      padding: 20px;
-    }
+    }.container {
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
 
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-    }
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
 
-    .search-box {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
-    }
+.card {
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  padding: 15px;
+}
 
-    input[type="text"] {
-      flex: 1;
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  color: #34495e;
+}
 
-    button {
-      padding: 12px 20px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
+.details {
+  display: none;
+  margin-top: 10px;
+  line-height: 1.6;
+}
 
-    button:hover {
-      background-color: #2980b9;
-    }
+.details p {
+  margin: 4px 0;
+}
 
-    .result-card {
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      padding: 20px;
-      background-color: #fdfdfd;
-    }
+.btn-toggle {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
 
-    .result-header {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
+@media print {
+  .btn-toggle, input[type="text"] {
+    display: none;
+  }
 
-    .details {
-      display: none;
-      margin-top: 10px;
-      border-top: 1px solid #eee;
-      padding-top: 10px;
-    }
+  .details {
+    display: block !important;
+  }
+}
 
-    .details p {
-      margin: 6px 0;
-    }
-
-    .btn-toggle {
-      background-color: #27ae60;
-      margin-top: 10px;
-      padding: 6px 12px;
-      font-size: 14px;
-      border-radius: 5px;
-      color: white;
-      cursor: pointer;
-      border: none;
-    }
-
-    .btn-toggle:hover {
-      background-color: #219150;
-    }
-
-    .print-button {
-      background-color: #e67e22;
-      margin-right: 10px;
-    }
-
-    .print-button:hover {
-      background-color: #d35400;
-    }
-
-    @media (max-width: 600px) {
-      .search-box {
-        flex-direction: column;
-      }
-    }
-
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      .printable, .printable * {
-        visibility: visible;
-      }
-      .printable {
-        position: absolute;
-        top: 0;
-        right: 0;
-        left: 0;
-      }
-    }
-
-    #password-screen {
-      position: fixed;
-      top: 0; right: 0; bottom: 0; left: 0;
-      background: #ecf0f1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-
-    #password-box {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.2);
-      text-align: center;
-    }
-
-    #password-box input {
-      padding: 10px;
-      font-size: 16px;
-      width: 100%;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
   </style>
 </head>
 <body>
-  <!-- شاشة كلمة المرور -->
-  <div id="password-screen">
-    <div id="password-box">
-      <h2>أدخل كلمة المرور</h2>
-      <input type="password" id="passwordInput" placeholder="كلمة المرور">
-      <button onclick="checkPassword()">دخول</button>
-      <p id="error" style="color: red;"></p>
-    </div>
-  </div>
-
-  <div class="container" style="display:none;" id="main-content">
-    <h1>البحث عن موظف</h1>
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="أدخل الاسم، الرقم الذاتي أو أي معلومة...">
-      <button onclick="search()">بحث</button>
-      <button class="print-button" onclick="printResults()">طباعة</button>
-    </div>
-    <div id="results" class="printable"></div>
-  </div>
-
-  <script>
-    // تغيير كلمة المرور هنا
-    const PASSWORD = "123456";
-
-    function checkPassword() {
-      const input = document.getElementById("passwordInput").value;
-      if (input === PASSWORD) {
-        document.getElementById("password-screen").style.display = "none";
-        document.getElementById("main-content").style.display = "block";
-      } else {
-        document.getElementById("error").innerText = "كلمة المرور غير صحيحة";
-      }
-    }
-
-    let employees = [];
+  <div class="container">
+    <h1><i class="fas fa-search"></i> استعلام عن البيانات</h1>
+    <input type="text" id="searchInput" placeholder="ابحث عن أي جزء من البيانات..." oninput="search()">
+    <div id="results"></div>
+  </div>  <script>
+    let data = [];
 
     fetch('8jfh0-7m5vq.json')
       .then(res => res.json())
-      .then(data => {
-        employees = data;
-      })
-      .catch(error => {
-        console.error("فشل تحميل البيانات:", error);
-      });
-
-    function sanitize(text) {
-      return String(text || "").replace(/['"]/g, "").trim();
-    }
-
-    function formatBirthDate(emp) {
-      if (emp["اليوم"] && emp["الشهر"] && emp["السنة"]) {
-        return `${emp["اليوم"]} / ${emp["الشهر"]} / ${emp["السنة"]}`;
-      }
-      return '';
-    }
+      .then(json => data = json)
+      .catch(err => console.error("فشل تحميل البيانات", err));
 
     function search() {
-      const query = document.getElementById("searchInput").value.trim().toLowerCase();
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.innerHTML = "";
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const container = document.getElementById('results');
+      container.innerHTML = '';
 
-      if (!query) return;
+      if (!q) return;
 
-      const filtered = employees.filter(emp =>
-        Object.values(emp).some(val =>
-          String(val).toLowerCase().includes(query)
-        )
-      );
+      const results = data.filter(item => Object.values(item).join(' ').toLowerCase().includes(q)).slice(0, 10);
 
-      if (filtered.length === 0) {
-        resultsDiv.innerHTML = "<p style='text-align:center; color:gray;'>لا توجد نتائج مطابقة.</p>";
-        return;
-      }
-
-      filtered.slice(0, 10).forEach((emp, i) => {
-        const fullName = sanitize(`${emp["الاسم"]} ${emp["اسم الأب"]} ${emp["النسبة"]}`);
-        const selfId = sanitize(emp["الرقم الذاتي"]);
-        const card = document.createElement("div");
-        card.className = "result-card";
-
-        const detailsId = `details-${i}`;
-        const birthDate = formatBirthDate(emp);
-
-        let details = "";
-        for (const key in emp) {
-          if (["الاسم", "اسم الأب", "النسبة", "الرقم الذاتي", "اليوم", "الشهر", "السنة"].includes(key)) continue;
-          details += `<p><strong>${key}:</strong> ${sanitize(emp[key])}</p>`;
-        }
-
-        if (birthDate) {
-          details += `<p><strong>تاريخ الميلاد:</strong> ${birthDate}</p>`;
-        }
-
+      results.forEach(entry => {
+        const fullName = `${sanitize(entry['الاسم'])} ${sanitize(entry['اسم الاب'])} ${sanitize(entry['النسبة'])}`;
+        const birthDate = `${entry['يوم']}/${entry['شهر']}/${entry['سنة']}`;
+        const card = document.createElement('div');
+        card.className = 'card';
         card.innerHTML = `
-          <div class="result-header">${fullName} - الرقم الذاتي: ${selfId}</div>
-          <button class="btn-toggle" onclick="toggleDetails('${detailsId}')">إظهار التفاصيل</button>
-          <div class="details" id="${detailsId}">${details}</div>
+          <div class="card-header">
+            <span>${fullName} - ${entry['الرقم الذاتي']}</span>
+            <button class="btn-toggle" onclick="toggleDetails(this)">إظهار التفاصيل</button>
+          </div>
+          <div class="details">
+            <p><strong>الرقم الوطني:</strong> ${entry['الرقم الوطني']}</p>
+            <p><strong>الجنس:</strong> ${entry['الجنس']}</p>
+            <p><strong>اسم الأم:</strong> ${sanitize(entry['اسم الام'])}</p>
+            <p><strong>تاريخ الميلاد:</strong> ${birthDate}</p>
+            <p><strong>مكان الولادة:</strong> ${entry['مكان الولادة']}</p>
+            <p><strong>فصيلة الدم:</strong> ${entry['فصيلة الدم']}</p>
+          </div>
         `;
-
-        resultsDiv.appendChild(card);
+        container.appendChild(card);
       });
     }
 
-    function toggleDetails(id) {
-      const element = document.getElementById(id);
-      element.style.display = element.style.display === "block" ? "none" : "block";
+    function toggleDetails(button) {
+      const details = button.parentElement.nextElementSibling;
+      const visible = details.style.display === 'block';
+      details.style.display = visible ? 'none' : 'block';
+      button.textContent = visible ? 'إظهار التفاصيل' : 'إخفاء التفاصيل';
     }
 
-    function printResults() {
-      const printable = document.querySelector('.printable').innerHTML;
-      const printWindow = window.open('', '', 'width=800,height=600');
-      printWindow.document.write(`
-        <html>
-        <head>
-          <title>طباعة النتائج</title>
-          <style>
-            body { font-family: 'Segoe UI', sans-serif; direction: rtl; padding: 20px; }
-            .result-card { border: 1px solid #ddd; margin-bottom: 20px; padding: 15px; border-radius: 8px; }
-            .result-header { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-            .details p { margin: 5px 0; }
-          </style>
-        </head>
-        <body>${printable}</body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
+    function sanitize(text) {
+      return typeof text === 'string' ? text.replace(/'+/g, '') : text;
     }
-  </script>
-</body>
+  </script></body>
 </html>
