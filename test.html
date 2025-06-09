@@ -147,7 +147,7 @@
 <h2><i class="fas fa-search"></i> نظام الاستعلام عن الموظفين</h2>
 
 <div class="search-box">
-  <input type="text" id="searchInput" placeholder="ابحث بالاسم، الرقم الذاتي، أو أي معلومة..." onkeypress="if(event.keyCode==13) search()">
+  <input type="text" id="searchInput" placeholder="ابحث بالاسم، الرقم الذاتي، أو أي معلومة..." onkeypress="if(event.key === 'Enter') search()">
   <button onclick="search()">بحث</button>
 </div>
 
@@ -157,20 +157,33 @@
 <script>
 let employees = [];
 
-fetch('8jfh0-7m5vq.json')
-  .then(res => res.json())
-  .then(data => {
-    employees = data;
-  })
-  .catch(error => {
-    console.error('حدث خطأ في جلب البيانات:', error);
-    alert('حدث خطأ في تحميل البيانات. الرجاء المحاولة لاحقاً.');
-  });
+// دالة لتحميل البيانات
+function loadData() {
+  return fetch('8jfh0-7m5vq.json')
+    .then(res => {
+      if (!res.ok) {
+        throw new Error('فشل جلب البيانات');
+      }
+      return res.json();
+    })
+    .then(data => {
+      employees = data;
+      console.log('تم تحميل البيانات بنجاح');
+    })
+    .catch(error => {
+      console.error('حدث خطأ في جلب البيانات:', error);
+      alert('حدث خطأ في تحميل البيانات. الرجاء المحاولة لاحقاً.');
+    });
+}
+
+// تحميل البيانات عند بدء التشغيل
+loadData();
 
 function search() {
   const query = document.getElementById("searchInput").value.trim();
   const resultsContainer = document.getElementById("results");
   const noResults = document.getElementById("noResults");
+  
   resultsContainer.innerHTML = "";
   noResults.style.display = "none";
 
@@ -179,10 +192,17 @@ function search() {
     return;
   }
 
-  const filtered = employees.filter(emp =>
-    Object.values(emp).some(val => 
-      val?.toString().toLowerCase().includes(query.toLowerCase())
-  );
+  if (employees.length === 0) {
+    alert("جاري تحميل البيانات، الرجاء الانتظار...");
+    return;
+  }
+
+  const filtered = employees.filter(emp => {
+    return Object.values(emp).some(val => {
+      if (val === null || val === undefined) return false;
+      return val.toString().toLowerCase().includes(query.toLowerCase());
+    });
+  });
 
   if (filtered.length === 0) {
     noResults.style.display = "block";
@@ -224,12 +244,12 @@ function toggleDetails(button) {
 
 function printCard(button) {
   const card = button.closest(".card");
-  const printContent = card.innerHTML.replace(/<button.*?<\/button>/g, '');
-  
   const originalDisplay = card.querySelector(".details").style.display;
   card.querySelector(".details").style.display = "block";
   
-  const printWindow = window.open('', '', 'width=800,height=600');
+  const printContent = card.innerHTML.replace(/<button.*?<\/button>/g, '');
+  
+  const printWindow = window.open('', '_blank');
   printWindow.document.write(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
@@ -266,10 +286,10 @@ function printCard(button) {
       ${printContent}
       <script>
         window.onload = function() {
-          window.print();
           setTimeout(function() {
+            window.print();
             window.close();
-          }, 100);
+          }, 200);
         };
       </script>
     </body>
@@ -277,10 +297,10 @@ function printCard(button) {
   `);
   printWindow.document.close();
   
-  // استعادة الحالة الأصلية بعد الطباعة
+  // استعادة الحالة الأصلية
   card.querySelector(".details").style.display = originalDisplay;
 }
 </script>
 
 </body>
-  </html>
+</html>
