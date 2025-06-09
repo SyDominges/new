@@ -132,14 +132,15 @@
 <body>
 
 <script>
-  const password = "1234"; // غيّر كلمة المرور من هنا
+  // نظام الحماية بكلمة المرور
+  const password = "1234";
   if (!sessionStorage.getItem("authenticated")) {
     const entered = prompt("أدخل كلمة المرور للدخول:");
     if (entered === password) {
-      sessionStorage.setItem("authenticated", true);
+      sessionStorage.setItem("authenticated", "true");
     } else {
       alert("كلمة المرور خاطئة.");
-      location.href = "https://google.com";
+      window.location.href = "https://google.com";
     }
   }
 </script>
@@ -147,7 +148,8 @@
 <h2><i class="fas fa-search"></i> نظام الاستعلام عن الموظفين</h2>
 
 <div class="search-box">
-  <input type="text" id="searchInput" placeholder="ابحث بالاسم، الرقم الذاتي، أو أي معلوووومة..." onkeypress="if(event.key === 'Enter') search()">
+  <input type="text" id="searchInput" placeholder="ابحث بالاسم، الرقم الذاتي، أو أي معلومة..." 
+         onkeydown="if(event.key === 'Enter') search()">
   <button onclick="search()">بحث</button>
 </div>
 
@@ -155,60 +157,73 @@
 <div class="no-results" id="noResults" style="display: none;">لا توجد نتائج مطابقة.</div>
 
 <script>
+// بيانات الموظفين
 let employees = [];
 
-// دالة لتحميل البيانات
-function loadData() {
-  return fetch('8jfh0-7m5vq.json')
-    .then(res => {
-      if (!res.ok) {
-        throw new Error('فشل جلب البيانات');
-      }
-      return res.json();
-    })
-    .then(data => {
-      employees = data;
-      console.log('تم تحميل البيانات بنجاح');
-    })
-    .catch(error => {
-      console.error('حدث خطأ في جلب البيانات:', error);
-      alert('حدث خطأ في تحميل البيانات. الرجاء المحاولة لاحقاً.');
-    });
+// تحميل البيانات من ملف JSON
+async function loadEmployees() {
+  try {
+    const response = await fetch('8jfh0-7m5vq.json');
+    if (!response.ok) {
+      throw new Error('فشل تحميل البيانات');
+    }
+    employees = await response.json();
+    console.log('تم تحميل بيانات الموظفين بنجاح');
+  } catch (error) {
+    console.error('حدث خطأ في تحميل البيانات:', error);
+    document.getElementById("results").innerHTML = `
+      <div class="card" style="color: red;">
+        <p>حدث خطأ في تحميل البيانات. يرجى تحديث الصفحة أو المحاولة لاحقاً.</p>
+      </div>
+    `;
+  }
 }
 
 // تحميل البيانات عند بدء التشغيل
-loadData();
+loadEmployees();
 
+// وظيفة البحث
 function search() {
   const query = document.getElementById("searchInput").value.trim();
   const resultsContainer = document.getElementById("results");
   const noResults = document.getElementById("noResults");
   
+  // مسح النتائج السابقة
   resultsContainer.innerHTML = "";
   noResults.style.display = "none";
 
+  // التحقق من إدخال كلمة بحث
   if (!query) {
     alert("الرجاء إدخال كلمة للبحث");
     return;
   }
 
+  // التحقق من وجود بيانات
   if (employees.length === 0) {
-    alert("جاري تحميل البيانات، الرجاء الانتظار...");
+    resultsContainer.innerHTML = `
+      <div class="card" style="color: orange;">
+        <p>جاري تحميل البيانات، الرجاء الانتظار...</p>
+      </div>
+    `;
     return;
   }
 
+  // تصفية النتائج
   const filtered = employees.filter(emp => {
     return Object.values(emp).some(val => {
-      if (val === null || val === undefined) return false;
-      return val.toString().toLowerCase().includes(query.toLowerCase());
+      return val !== null && 
+             val !== undefined && 
+             val.toString().toLowerCase().includes(query.toLowerCase());
     });
   });
 
+  // عرض النتائج
   if (filtered.length === 0) {
     noResults.style.display = "block";
     return;
   }
 
+  // عرض أول 10 نتائج
   filtered.slice(0, 10).forEach(emp => {
     const fullName = [emp["الاسم"], emp["اسم الأب"], emp["النسبة"]].filter(Boolean).join(' ');
     const number = emp["الرقم الذاتي"] || "—";
@@ -231,9 +246,11 @@ function search() {
   });
 }
 
+// تبديل عرض التفاصيل
 function toggleDetails(button) {
-  const details = button.closest(".card").querySelector(".details");
-  if (details.style.display === "none" || details.style.display === "") {
+  const card = button.closest(".card");
+  const details = card.querySelector(".details");
+  if (window.getComputedStyle(details).display === "none") {
     details.style.display = "block";
     button.textContent = "إخفاء التفاصيل";
   } else {
@@ -242,44 +259,36 @@ function toggleDetails(button) {
   }
 }
 
+// طباعة البطاقة
 function printCard(button) {
   const card = button.closest(".card");
-  const originalDisplay = card.querySelector(".details").style.display;
-  card.querySelector(".details").style.display = "block";
+  const details = card.querySelector(".details");
+  const originalDisplay = details.style.display;
   
-  const printContent = card.innerHTML.replace(/<button.*?<\/button>/g, '');
+  // إظهار التفاصيل للطباعة
+  details.style.display = "block";
   
-  const printWindow = window.open('', '_blank');
+  // إنشاء محتوى الطباعة
+  const printContent = `
+    <div class="card" style="font-family: 'Cairo', sans-serif; direction: rtl;">
+      ${card.querySelector(".summary").innerHTML.replace(/<button.*?<\/button>/g, '')}
+      ${details.innerHTML}
+    </div>
+  `;
+  
+  // فتح نافذة الطباعة
+  const printWindow = window.open('', '_blank', 'width=800,height=600');
   printWindow.document.write(`
     <!DOCTYPE html>
-    <html lang="ar" dir="rtl">
+    <html>
     <head>
-      <meta charset="UTF-8">
       <title>طباعة بيانات الموظف</title>
       <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
       <style>
-        body {
-          font-family: 'Cairo', sans-serif;
-          padding: 20px;
-          direction: rtl;
-        }
-        .card {
-          background: white;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          padding: 20px;
-          margin: 10px;
-        }
-        .details {
-          display: block !important;
-        }
-        p {
-          margin: 8px 0;
-        }
-        strong {
-          color: #34495e;
-        }
+        body { padding: 20px; background: white; }
+        .card { border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+        p { margin: 8px 0; }
+        strong { color: #34495e; }
       </style>
     </head>
     <body>
@@ -289,7 +298,7 @@ function printCard(button) {
           setTimeout(function() {
             window.print();
             window.close();
-          }, 200);
+          }, 300);
         };
       </script>
     </body>
@@ -298,7 +307,7 @@ function printCard(button) {
   printWindow.document.close();
   
   // استعادة الحالة الأصلية
-  card.querySelector(".details").style.display = originalDisplay;
+  details.style.display = originalDisplay;
 }
 </script>
 
