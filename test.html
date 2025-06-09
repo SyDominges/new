@@ -7,15 +7,15 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, sans-serif;
-      background-color: #f0f2f5;
+      background-color: #f4f4f4;
       margin: 0;
-      padding: 30px;
+      padding: 20px;
     }
 
     .container {
       max-width: 900px;
       margin: auto;
-      background: #fff;
+      background: white;
       padding: 30px;
       border-radius: 10px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
@@ -24,18 +24,17 @@
     h1 {
       text-align: center;
       color: #2c3e50;
-      margin-bottom: 30px;
     }
 
     .search-box {
       display: flex;
-      flex-wrap: wrap;
       gap: 10px;
       margin-bottom: 30px;
+      flex-wrap: wrap;
     }
 
     input[type="text"] {
-      flex: 1 1 200px;
+      flex: 1;
       padding: 12px;
       font-size: 16px;
       border: 1px solid #ccc;
@@ -43,14 +42,13 @@
     }
 
     button {
+      padding: 12px 20px;
       background-color: #3498db;
       color: white;
       border: none;
-      padding: 12px 20px;
       border-radius: 6px;
-      cursor: pointer;
       font-size: 16px;
-      transition: background-color 0.3s ease;
+      cursor: pointer;
     }
 
     button:hover {
@@ -62,29 +60,29 @@
       border-radius: 10px;
       margin-bottom: 20px;
       padding: 20px;
-      background-color: #fafafa;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      background-color: #fdfdfd;
     }
 
     .result-header {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
       font-size: 18px;
       font-weight: bold;
-      color: #333;
+      margin-bottom: 10px;
     }
 
-    .result-actions {
+    .details {
+      display: none;
       margin-top: 10px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
     }
 
-    .btn-toggle,
-    .btn-print {
+    .details p {
+      margin: 6px 0;
+    }
+
+    .btn-toggle {
       background-color: #27ae60;
+      margin-top: 10px;
       padding: 6px 12px;
       font-size: 14px;
       border-radius: 5px;
@@ -93,37 +91,13 @@
       border: none;
     }
 
-    .btn-toggle:hover,
-    .btn-print:hover {
+    .btn-toggle:hover {
       background-color: #219150;
-    }
-
-    .details {
-      margin-top: 10px;
-      display: none;
-      padding-top: 10px;
-      border-top: 1px solid #eee;
-    }
-
-    .details p {
-      margin: 6px 0;
-      line-height: 1.6;
-    }
-
-    .no-results {
-      text-align: center;
-      color: #888;
-      font-style: italic;
-      margin-top: 30px;
     }
 
     @media (max-width: 600px) {
       .search-box {
         flex-direction: column;
-      }
-
-      .result-header {
-        font-size: 16px;
       }
     }
   </style>
@@ -141,11 +115,26 @@
   <script>
     let employees = [];
 
+    // تحميل البيانات من الملف
     fetch('8jfh0-7m5vq.json')
       .then(res => res.json())
       .then(data => {
         employees = data;
+      })
+      .catch(error => {
+        console.error("فشل تحميل البيانات:", error);
       });
+
+    function sanitize(text) {
+      return String(text || "").replace(/['"]/g, "").trim();
+    }
+
+    function formatBirthDate(emp) {
+      if (emp["اليوم"] && emp["الشهر"] && emp["السنة"]) {
+        return `${emp["اليوم"]} / ${emp["الشهر"]} / ${emp["السنة"]}`;
+      }
+      return '';
+    }
 
     function search() {
       const query = document.getElementById("searchInput").value.trim().toLowerCase();
@@ -161,7 +150,7 @@
       );
 
       if (filtered.length === 0) {
-        resultsDiv.innerHTML = `<p class="no-results">لا توجد نتائج مطابقة.</p>`;
+        resultsDiv.innerHTML = "<p style='text-align:center; color:gray;'>لا توجد نتائج مطابقة.</p>";
         return;
       }
 
@@ -173,32 +162,22 @@
         card.className = "result-card";
 
         const detailsId = `details-${i}`;
+        const birthDate = formatBirthDate(emp);
 
-        const detailsContent = `
-          ${Object.entries(emp).map(([key, value]) => {
-            if (["اليوم", "الشهر", "السنة"].includes(key)) return "";
-            if (key.includes("تاريخ") && typeof value === "string") {
-              return `<p><strong>${key}:</strong> ${formatArabicDate(value)}</p>`;
-            }
-            return `<p><strong>${key}:</strong> ${sanitize(value)}</p>`;
-          }).join('')}
-          ${emp["اليوم"] && emp["الشهر"] && emp["السنة"]
-            ? `<p><strong>تاريخ الميلاد:</strong> ${formatArabicDateParts(emp["اليوم"], emp["الشهر"], emp["السنة"])}</p>`
-            : ""}
-        `;
+        let details = "";
+        for (const key in emp) {
+          if (["الاسم", "اسم الأب", "النسبة", "الرقم الذاتي", "اليوم", "الشهر", "السنة"].includes(key)) continue;
+          details += `<p><strong>${key}:</strong> ${sanitize(emp[key])}</p>`;
+        }
+
+        if (birthDate) {
+          details += `<p><strong>تاريخ الميلاد:</strong> ${birthDate}</p>`;
+        }
 
         card.innerHTML = `
-          <div class="result-header">
-            <span>${fullName}</span>
-            <span>الرقم الذاتي: ${selfId}</span>
-          </div>
-          <div class="result-actions">
-            <button class="btn-toggle" onclick="toggleDetails('${detailsId}')">إظهار التفاصيل</button>
-            <button class="btn-print" onclick="printDetails(\`${detailsContent.replace(/`/g, "\\`")}\`)">طباعة</button>
-          </div>
-          <div class="details" id="${detailsId}">
-            ${detailsContent}
-          </div>
+          <div class="result-header">${fullName} - الرقم الذاتي: ${selfId}</div>
+          <button class="btn-toggle" onclick="toggleDetails('${detailsId}')">إظهار التفاصيل</button>
+          <div class="details" id="${detailsId}">${details}</div>
         `;
 
         resultsDiv.appendChild(card);
@@ -206,60 +185,8 @@
     }
 
     function toggleDetails(id) {
-      const el = document.getElementById(id);
-      el.style.display = el.style.display === "block" ? "none" : "block";
-    }
-
-    function sanitize(text) {
-      return String(text || "").replace(/['"]/g, "").trim();
-    }
-
-    function formatArabicDate(dateStr) {
-      const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-      const parts = dateStr.includes("/") ? dateStr.split("/") : dateStr.split("-");
-      if (parts.length !== 3) return sanitize(dateStr);
-
-      let day, month, year;
-      if (parts[0].length === 4) { [year, month, day] = parts; }
-      else { [day, month, year] = parts; }
-
-      return `${+day} ${months[+month - 1]} ${year}`;
-    }
-
-    function formatArabicDateParts(day, month, year) {
-      const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-      return `${+day} ${months[+month - 1]} ${year}`;
-    }
-
-    function printDetails(content) {
-      const printWindow = window.open('', '', 'width=800,height=600');
-      const html = `
-        <html lang="ar" dir="rtl">
-        <head>
-          <meta charset="UTF-8">
-          <title>طباعة التفاصيل</title>
-          <style>
-            body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 30px; }
-            h2 { color: #2c3e50; }
-            p { font-size: 16px; margin-bottom: 10px; }
-          </style>
-        </head>
-        <body>
-          <h2>تفاصيل الموظف</h2>
-          ${content}
-          <script>
-            window.onload = function() {
-              window.print();
-              window.onafterprint = () => window.close();
-            }
-          </script>
-        </body>
-        </html>
-      `;
-
-      printWindow.document.open();
-      printWindow.document.write(html);
-      printWindow.document.close();
+      const element = document.getElementById(id);
+      element.style.display = element.style.display === "block" ? "none" : "block";
     }
   </script>
 </body>
