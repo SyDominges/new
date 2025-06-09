@@ -1,194 +1,287 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>البحث عن البيانات</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <meta charset="UTF-8">
+  <title>صفحة البحث</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f9;
-      color: #333;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: #f4f4f4;
       margin: 0;
       padding: 20px;
-      direction: rtl;
     }
 
     .container {
       max-width: 900px;
       margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
 
     h1 {
       text-align: center;
       color: #2c3e50;
-      margin-bottom: 30px;
     }
 
     .search-box {
       display: flex;
-      flex-direction: column;
       gap: 10px;
       margin-bottom: 30px;
+      flex-wrap: wrap;
     }
 
-    .search-box input {
+    input[type="text"] {
+      flex: 1;
       padding: 12px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 6px;
     }
 
+    button {
+      padding: 12px 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
     .result-card {
-      background: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid #ddd;
+      border-radius: 10px;
       margin-bottom: 20px;
+      padding: 20px;
+      background-color: #fdfdfd;
     }
 
     .result-header {
       font-size: 18px;
       font-weight: bold;
-      color: #2c3e50;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .result-header button {
-      background-color: #3498db;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
+      margin-bottom: 10px;
     }
 
     .details {
       display: none;
-      margin-top: 15px;
-      line-height: 1.8;
+      margin-top: 10px;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
     }
 
     .details p {
-      margin: 4px 0;
+      margin: 6px 0;
     }
 
-    @media print {
-      body {
-        background: white;
-        padding: 0;
-        margin: 0;
-        font-size: 14px;
-      }
+    .btn-toggle {
+      background-color: #27ae60;
+      margin-top: 10px;
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
 
-      .search-box,
-      .result-header button {
-        display: none !important;
-      }
+    .btn-toggle:hover {
+      background-color: #219150;
+    }
 
-      .result-card {
-        page-break-inside: avoid;
-        box-shadow: none;
-        border: 1px solid #000;
-      }
+    .print-button {
+      background-color: #e67e22;
+      margin-right: 10px;
+    }
 
-      .details {
-        display: block !important;
-      }
+    .print-button:hover {
+      background-color: #d35400;
     }
 
     @media (max-width: 600px) {
-      .result-header {
+      .search-box {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
       }
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .printable, .printable * {
+        visibility: visible;
+      }
+      .printable {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+      }
+    }
+
+    #password-screen {
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background: #ecf0f1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    #password-box {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    #password-box input {
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
   </style>
 </head>
 <body>
-
-  <div class="container">
-    <h1><i class="fas fa-search"></i> استعلام عن بيانات</h1>
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="ابحث عن الاسم أو الرقم الذاتي أو أي جزء من البيانات" oninput="searchData()" />
+  <!-- شاشة كلمة المرور -->
+  <div id="password-screen">
+    <div id="password-box">
+      <h2>أدخل كلمة المرور</h2>
+      <input type="password" id="passwordInput" placeholder="كلمة المرور">
+      <button onclick="checkPassword()">دخول</button>
+      <p id="error" style="color: red;"></p>
     </div>
-    <div id="results"></div>
+  </div>
+
+  <div class="container" style="display:none;" id="main-content">
+    <h1>البحث عن موظف</h1>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="أدخل الاسم، الرقم الذاتي أو أي معلومة...">
+      <button onclick="search()">بحث</button>
+      <button class="print-button" onclick="printResults()">طباعة</button>
+    </div>
+    <div id="results" class="printable"></div>
   </div>
 
   <script>
-    let data = [];
+    // تغيير كلمة المرور هنا
+    const PASSWORD = "123456";
+
+    function checkPassword() {
+      const input = document.getElementById("passwordInput").value;
+      if (input === PASSWORD) {
+        document.getElementById("password-screen").style.display = "none";
+        document.getElementById("main-content").style.display = "block";
+      } else {
+        document.getElementById("error").innerText = "كلمة المرور غير صحيحة";
+      }
+    }
+
+    let employees = [];
 
     fetch('8jfh0-7m5vq.json')
       .then(res => res.json())
-      .then(json => {
-        data = json;
+      .then(data => {
+        employees = data;
       })
-      .catch(err => {
-        console.error("خطأ في تحميل البيانات:", err);
+      .catch(error => {
+        console.error("فشل تحميل البيانات:", error);
       });
 
-    function searchData() {
+    function sanitize(text) {
+      return String(text || "").replace(/['"]/g, "").trim();
+    }
+
+    function formatBirthDate(emp) {
+      if (emp["اليوم"] && emp["الشهر"] && emp["السنة"]) {
+        return `${emp["اليوم"]} / ${emp["الشهر"]} / ${emp["السنة"]}`;
+      }
+      return '';
+    }
+
+    function search() {
       const query = document.getElementById("searchInput").value.trim().toLowerCase();
-      const resultsContainer = document.getElementById("results");
-      resultsContainer.innerHTML = "";
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
 
-      if (query === "") return;
+      if (!query) return;
 
-      const results = data.filter(entry => {
-        const combined = Object.values(entry).join(" ").toLowerCase();
-        return combined.includes(query);
-      }).slice(0, 10);
+      const filtered = employees.filter(emp =>
+        Object.values(emp).some(val =>
+          String(val).toLowerCase().includes(query)
+        )
+      );
 
-      if (results.length === 0) {
-        resultsContainer.innerHTML = "<p>لا توجد نتائج.</p>";
+      if (filtered.length === 0) {
+        resultsDiv.innerHTML = "<p style='text-align:center; color:gray;'>لا توجد نتائج مطابقة.</p>";
         return;
       }
 
-      results.forEach(person => {
-        const fullName = `${removeQuotes(person['الاسم'])} ${removeQuotes(person['اسم الاب'])} ${removeQuotes(person['النسبة'])}`;
-        const birthDate = `${person['يوم']}/${person['شهر']}/${person['سنة']}`;
-
+      filtered.slice(0, 10).forEach((emp, i) => {
+        const fullName = sanitize(`${emp["الاسم"]} ${emp["اسم الأب"]} ${emp["النسبة"]}`);
+        const selfId = sanitize(emp["الرقم الذاتي"]);
         const card = document.createElement("div");
         card.className = "result-card";
 
-        const header = document.createElement("div");
-        header.className = "result-header";
-        header.innerHTML = `
-          <span>${fullName} - ${person['الرقم الذاتي']}</span>
-          <button onclick="toggleDetails(this)">إظهار التفاصيل</button>
+        const detailsId = `details-${i}`;
+        const birthDate = formatBirthDate(emp);
+
+        let details = "";
+        for (const key in emp) {
+          if (["الاسم", "اسم الأب", "النسبة", "الرقم الذاتي", "اليوم", "الشهر", "السنة"].includes(key)) continue;
+          details += `<p><strong>${key}:</strong> ${sanitize(emp[key])}</p>`;
+        }
+
+        if (birthDate) {
+          details += `<p><strong>تاريخ الميلاد:</strong> ${birthDate}</p>`;
+        }
+
+        card.innerHTML = `
+          <div class="result-header">${fullName} - الرقم الذاتي: ${selfId}</div>
+          <button class="btn-toggle" onclick="toggleDetails('${detailsId}')">إظهار التفاصيل</button>
+          <div class="details" id="${detailsId}">${details}</div>
         `;
 
-        const details = document.createElement("div");
-        details.className = "details";
-        details.innerHTML = `
-          <p><strong>الرقم الوطني:</strong> ${person['الرقم الوطني']}</p>
-          <p><strong>الجنس:</strong> ${person['الجنس']}</p>
-          <p><strong>اسم الأم:</strong> ${removeQuotes(person['اسم الام'])}</p>
-          <p><strong>المواليد:</strong> ${birthDate}</p>
-          <p><strong>مكان الولادة:</strong> ${person['مكان الولادة']}</p>
-          <p><strong>فصيلة الدم:</strong> ${person['فصيلة الدم']}</p>
-        `;
-
-        card.appendChild(header);
-        card.appendChild(details);
-        resultsContainer.appendChild(card);
+        resultsDiv.appendChild(card);
       });
     }
 
-    function toggleDetails(btn) {
-      const details = btn.closest(".result-card").querySelector(".details");
-      const visible = details.style.display === "block";
-      details.style.display = visible ? "none" : "block";
-      btn.textContent = visible ? "إظهار التفاصيل" : "إخفاء التفاصيل";
+    function toggleDetails(id) {
+      const element = document.getElementById(id);
+      element.style.display = element.style.display === "block" ? "none" : "block";
     }
 
-    function removeQuotes(str) {
-      return typeof str === 'string' ? str.replace(/^'+|'+$/g, '') : str;
+    function printResults() {
+      const printable = document.querySelector('.printable').innerHTML;
+      const printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.write(`
+        <html>
+        <head>
+          <title>طباعة النتائج</title>
+          <style>
+            body { font-family: 'Segoe UI', sans-serif; direction: rtl; padding: 20px; }
+            .result-card { border: 1px solid #ddd; margin-bottom: 20px; padding: 15px; border-radius: 8px; }
+            .result-header { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+            .details p { margin: 5px 0; }
+          </style>
+        </head>
+        <body>${printable}</body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
     }
   </script>
 </body>
