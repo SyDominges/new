@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>البحث عن موظف</title>
+  <title>صفحة البحث</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -95,27 +95,101 @@
       background-color: #219150;
     }
 
+    .print-button {
+      background-color: #e67e22;
+      margin-right: 10px;
+    }
+
+    .print-button:hover {
+      background-color: #d35400;
+    }
+
     @media (max-width: 600px) {
       .search-box {
         flex-direction: column;
       }
     }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .printable, .printable * {
+        visibility: visible;
+      }
+      .printable {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+      }
+    }
+
+    #password-screen {
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background: #ecf0f1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    #password-box {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    #password-box input {
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <!-- شاشة كلمة المرور -->
+  <div id="password-screen">
+    <div id="password-box">
+      <h2>أدخل كلمة المرور</h2>
+      <input type="password" id="passwordInput" placeholder="كلمة المرور">
+      <button onclick="checkPassword()">دخول</button>
+      <p id="error" style="color: red;"></p>
+    </div>
+  </div>
+
+  <div class="container" style="display:none;" id="main-content">
     <h1>البحث عن موظف</h1>
     <div class="search-box">
       <input type="text" id="searchInput" placeholder="أدخل الاسم، الرقم الذاتي أو أي معلومة...">
       <button onclick="search()">بحث</button>
+      <button class="print-button" onclick="printResults()">طباعة</button>
     </div>
-    <div id="results"></div>
+    <div id="results" class="printable"></div>
   </div>
 
   <script>
+    // تغيير كلمة المرور هنا
+    const PASSWORD = "123456";
+
+    function checkPassword() {
+      const input = document.getElementById("passwordInput").value;
+      if (input === PASSWORD) {
+        document.getElementById("password-screen").style.display = "none";
+        document.getElementById("main-content").style.display = "block";
+      } else {
+        document.getElementById("error").innerText = "كلمة المرور غير صحيحة";
+      }
+    }
+
     let employees = [];
 
-    // تحميل البيانات من الملف
     fetch('8jfh0-7m5vq.json')
       .then(res => res.json())
       .then(data => {
@@ -157,7 +231,6 @@
       filtered.slice(0, 10).forEach((emp, i) => {
         const fullName = sanitize(`${emp["الاسم"]} ${emp["اسم الأب"]} ${emp["النسبة"]}`);
         const selfId = sanitize(emp["الرقم الذاتي"]);
-
         const card = document.createElement("div");
         card.className = "result-card";
 
@@ -187,6 +260,28 @@
     function toggleDetails(id) {
       const element = document.getElementById(id);
       element.style.display = element.style.display === "block" ? "none" : "block";
+    }
+
+    function printResults() {
+      const printable = document.querySelector('.printable').innerHTML;
+      const printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.write(`
+        <html>
+        <head>
+          <title>طباعة النتائج</title>
+          <style>
+            body { font-family: 'Segoe UI', sans-serif; direction: rtl; padding: 20px; }
+            .result-card { border: 1px solid #ddd; margin-bottom: 20px; padding: 15px; border-radius: 8px; }
+            .result-header { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+            .details p { margin: 5px 0; }
+          </style>
+        </head>
+        <body>${printable}</body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
     }
   </script>
 </body>
