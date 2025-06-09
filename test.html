@@ -117,7 +117,6 @@
   <script>
     let employees = [];
 
-    // تحميل ملف JSON
     fetch('8jfh0-7m5vq.json')
       .then(res => res.json())
       .then(data => {
@@ -143,7 +142,7 @@
       }
 
       filtered.slice(0, 10).forEach((emp, i) => {
-        const fullName = [emp["الاسم"], emp["اسم الأب"], emp["النسبة"]].filter(Boolean).join(" ");
+        const fullName = sanitize([emp["الاسم"], emp["اسم الأب"], emp["النسبة"]].filter(Boolean).join(" "));
 
         const card = document.createElement("div");
         card.className = "result-card";
@@ -151,17 +150,23 @@
         card.innerHTML = `
           <div class="result-header">
             <span>${fullName}</span>
-            <span>الرقم الذاتي: ${emp["الرقم الذاتي"] || "غير متوفر"}</span>
+            <span>الرقم الذاتي: ${sanitize(emp["الرقم الذاتي"] || "غير متوفر")}</span>
             <button class="btn-toggle" onclick="toggleDetails(${i})">إظهار التفاصيل</button>
           </div>
           <div class="details" id="details-${i}">
             ${Object.entries(emp).map(([key, value]) => {
-              if (typeof value === "string" && key.includes("تاريخ")) {
+              if (["تاريخ الميلاد", "تاريخ التعيين", "تاريخ"].some(k => key.includes(k))) {
                 return `<p><strong>${key}:</strong> ${formatArabicDate(value)}</p>`;
+              } else if (["اليوم", "الشهر", "السنة"].includes(key)) {
+                return ""; // سنجمعهم يدوياً لاحقاً
               } else {
                 return `<p><strong>${key}:</strong> ${sanitize(value)}</p>`;
               }
             }).join('')}
+
+            ${emp["اليوم"] && emp["الشهر"] && emp["السنة"]
+              ? `<p><strong>تاريخ الميلاد:</strong> ${formatArabicDateParts(emp["اليوم"], emp["الشهر"], emp["السنة"])}</p>`
+              : ""}
           </div>
         `;
 
@@ -175,21 +180,23 @@
     }
 
     function sanitize(text) {
-      return String(text || "").replace(/^'+|'+$/g, "").replace(/'/g, "");
+      return String(text || "").replace(/['"]/g, "").trim();
     }
 
     function formatArabicDate(dateStr) {
       const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
       const parts = dateStr.includes("/") ? dateStr.split("/") : dateStr.split("-");
-      if (parts.length !== 3) return dateStr;
+      if (parts.length !== 3) return sanitize(dateStr);
 
       let day, month, year;
-      if (parts[0].length === 4) { // yyyy-mm-dd
-        [year, month, day] = parts;
-      } else {
-        [day, month, year] = parts;
-      }
+      if (parts[0].length === 4) { [year, month, day] = parts; }
+      else { [day, month, year] = parts; }
 
+      return `${+day} ${months[+month - 1]} ${year}`;
+    }
+
+    function formatArabicDateParts(day, month, year) {
+      const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
       return `${+day} ${months[+month - 1]} ${year}`;
     }
   </script>
