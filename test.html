@@ -191,7 +191,7 @@
 
       const results = data.filter(item =>
         Object.values(item).join(' ').toLowerCase().includes(q)
-      ).slice(0, 10);
+      ).slice(0, 20);
 
       results.forEach(entry => {
         const fullName = `${sanitize(entry['الاسم'])} ${sanitize(entry['اسم الأب']) || sanitize(entry['اسم الاب'])} ${sanitize(entry['النسبة'])}`;
