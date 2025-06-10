@@ -114,7 +114,6 @@
       }
     }
 
-    /* شاشة كلمة المرور */
     #password-screen {
       position: fixed;
       top: 0; right: 0; bottom: 0; left: 0;
@@ -154,7 +153,6 @@
       cursor: pointer;
     }
 
-    /* تصفية والتصفح */
     .pagination {
       display: flex;
       justify-content: center;
@@ -176,7 +174,6 @@
       cursor: not-allowed;
     }
 
-    /* أزرار التصدير */
     .export-buttons {
       display: flex;
       gap: 10px;
@@ -198,14 +195,11 @@
       background: #2ecc71;
     }
   </style>
-  <!-- مكتبة html2pdf لتصدير PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <!-- مكتبة SheetJS لتصدير Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
-  <!-- شاشة كلمة المرور -->
   <div id="password-screen">
     <div id="password-box">
       <h2>أدخل كلمة المرور</h2>
@@ -215,7 +209,6 @@
     </div>
   </div>
 
-  <!-- المحتوى الرئيسي -->
   <div class="container" id="main-content" style="display:none;">
     <h1>استعلام عن البيانات</h1>
     <div class="search-box">
@@ -236,11 +229,12 @@
   </div>
 
   <script>
-    const PASSWORD = "123456"; // يمكنك تغييره
+    const PASSWORD = "123456";
     const RESULTS_PER_PAGE = 10;
     let currentPage = 1;
     let filteredData = [];
     let allResults = [];
+    let data = [];
 
     function checkPassword() {
       const input = document.getElementById("passwordInput").value;
@@ -248,20 +242,24 @@
       if (input === PASSWORD) {
         document.getElementById("password-screen").style.display = "none";
         document.getElementById("main-content").style.display = "block";
+        loadData();
       } else {
         error.textContent = "كلمة المرور غير صحيحة";
       }
     }
 
-    let data = [];
-
-    fetch('8jfh0-7m5vq.json')
-      .then(res => res.json())
-      .then(json => {
-        data = json;
-        searchData();
-      })
-      .catch(err => console.error("فشل تحميل البيانات", err));
+    function loadData() {
+      fetch('8jfh0-7m5vq.json')
+        .then(res => res.json())
+        .then(json => {
+          data = json;
+          console.log("تم تحميل البيانات بنجاح");
+        })
+        .catch(err => {
+          console.error("فشل تحميل البيانات", err);
+          alert("حدث خطأ في تحميل البيانات");
+        });
+    }
 
     function sanitize(text) {
       return typeof text === 'string' ? text.replace(/'+/g, '').trim() : text;
@@ -278,11 +276,13 @@
         return;
       }
 
-      filteredData = data.filter(item =>
-        Object.values(item).join(' ').toLowerCase().includes(q)
-      );
+      filteredData = data.filter(item => {
+        return Object.values(item).some(value => 
+          String(value).toLowerCase().includes(q)
+        );
+      });
       
-      allResults = filteredData; // حفظ جميع النتائج للتصدير
+      allResults = [...filteredData];
       currentPage = 1;
       renderResults();
       updatePagination();
@@ -295,6 +295,11 @@
       const startIdx = (currentPage - 1) * RESULTS_PER_PAGE;
       const endIdx = startIdx + RESULTS_PER_PAGE;
       const pageData = filteredData.slice(startIdx, endIdx);
+
+      if (pageData.length === 0) {
+        container.innerHTML = '<p style="text-align:center;">لا توجد نتائج</p>';
+        return;
+      }
 
       pageData.forEach((entry, index) => {
         const resultNumber = startIdx + index + 1;
@@ -365,18 +370,15 @@
         return;
       }
 
-      // إنشاء عنصر مؤقت لعرض جميع النتائج
       const tempDiv = document.createElement('div');
       tempDiv.style.padding = '20px';
       
-      // إضافة عنوان للتقرير
       const title = document.createElement('h2');
       title.textContent = 'نتائج البحث - ' + new Date().toLocaleDateString();
       title.style.textAlign = 'center';
       title.style.marginBottom = '30px';
       tempDiv.appendChild(title);
 
-      // إضافة جميع النتائج
       allResults.forEach((entry, index) => {
         const fullName = `${sanitize(entry['الاسم'])} ${sanitize(entry['اسم الأب']) || sanitize(entry['اسم الاب'])} ${sanitize(entry['النسبة'])}`;
         const birthDate = `${entry['اليوم'] || entry['المواليد / اليوم']}/${entry['الشهر'] || entry['المواليد / شهر']}/${entry['السنة'] || entry['المواليد / عام']}`;
@@ -406,16 +408,14 @@
         tempDiv.appendChild(card);
       });
 
-      // إعداد خيارات PDF
       const opt = {
         margin: 10,
-        filename: 'نتائج_البحص.pdf',
+        filename: 'نتائج_البحث.pdf',
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
 
-      // تصدير إلى PDF
       html2pdf().set(opt).from(tempDiv).save();
     }
 
@@ -425,7 +425,6 @@
         return;
       }
 
-      // تحضير البيانات لملف Excel
       const excelData = allResults.map((entry, index) => {
         const row = {
           'م': index + 1,
@@ -436,7 +435,6 @@
           'تاريخ الميلاد': `${entry['اليوم'] || entry['المواليد / اليوم']}/${entry['الشهر'] || entry['المواليد / شهر']}/${entry['السنة'] || entry['المواليد / عام']}`
         };
 
-        // إضافة باقي الحقول
         Object.entries(entry).forEach(([k, v]) => {
           if (!['الاسم', 'اسم الأب', 'اسم الاب', 'النسبة', 'الرقم الذاتي', 'اليوم', 'الشهر', 'السنة', 'المواليد / يوم', 'المواليد / شهر', 'المواليد / عام'].includes(k)) {
             row[k] = sanitize(v);
@@ -446,14 +444,12 @@
         return row;
       });
 
-      // إنشاء ورقة عمل
       const ws = XLSX.utils.json_to_sheet(excelData);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "نتائج البحث");
 
-      // تصدير الملف
       XLSX.writeFile(wb, 'نتائج_البحث.xlsx');
     }
   </script>
 </body>
-      </html>
+</html>
