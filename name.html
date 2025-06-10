@@ -50,6 +50,8 @@
       padding: 20px;
       margin-bottom: 20px;
       position: relative;
+      page-break-inside: avoid;
+      break-inside: avoid-page;
     }
 
     .result-number {
@@ -109,8 +111,9 @@
       }
 
       .result-card {
-        page-break-inside: avoid;
-        border: 1px solid #000;
+        page-break-inside: avoid !important;
+        break-inside: avoid-page !important;
+        border: 1px solid #000 !important;
       }
     }
 
@@ -372,11 +375,14 @@
 
       const tempDiv = document.createElement('div');
       tempDiv.style.padding = '20px';
+      tempDiv.style.fontFamily = "'Segoe UI', Tahoma, sans-serif";
+      tempDiv.style.direction = 'rtl';
       
       const title = document.createElement('h2');
       title.textContent = 'نتائج البحث - ' + new Date().toLocaleDateString();
       title.style.textAlign = 'center';
       title.style.marginBottom = '30px';
+      title.style.color = '#2c3e50';
       tempDiv.appendChild(title);
 
       allResults.forEach((entry, index) => {
@@ -384,24 +390,29 @@
         const birthDate = `${entry['اليوم'] || entry['المواليد / اليوم']}/${entry['الشهر'] || entry['المواليد / شهر']}/${entry['السنة'] || entry['المواليد / عام']}`;
 
         const card = document.createElement('div');
-        card.className = 'result-card';
-        card.style.marginBottom = '15px';
+        card.style.marginBottom = '20px';
+        card.style.padding = '20px';
+        card.style.backgroundColor = '#fafafa';
+        card.style.border = '1px solid #ddd';
+        card.style.borderRadius = '8px';
+        card.style.position = 'relative';
+        card.style.pageBreakInside = 'avoid';
+        card.style.breakInside = 'avoid-page';
+        
         card.innerHTML = `
-          <div style="position:relative;">
-            <div style="position:absolute;left:10px;top:10px;background:#3498db;color:white;width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;">
-              ${index + 1}
+          <div style="position:absolute;left:10px;top:10px;background:#3498db;color:white;width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;">
+            ${index + 1}
+          </div>
+          <div style="margin-right:30px;">
+            <div style="font-size:18px;font-weight:bold;color:#2c3e50;margin-bottom:10px;">
+              ${fullName} - ${sanitize(entry['الرقم الذاتي'])}
             </div>
-            <div style="margin-right:30px;">
-              <div style="font-size:18px;font-weight:bold;color:#2c3e50;">
-                ${fullName} - ${sanitize(entry['الرقم الذاتي'])}
-              </div>
-              <div style="margin-top:10px;line-height:1.6;">
-                ${Object.entries(entry).map(([k, v]) => {
-                  if (['الاسم', 'اسم الأب', 'اسم الاب', 'النسبة', 'الرقم الذاتي', 'اليوم', 'الشهر', 'السنة', 'المواليد / يوم', 'المواليد / شهر', 'المواليد / عام'].includes(k)) return '';
-                  return `<p style="margin:4px 0;"><strong>${k}:</strong> ${sanitize(v)}</p>`;
-                }).join('')}
-                <p style="margin:4px 0;"><strong>تاريخ الميلاد:</strong> ${birthDate}</p>
-              </div>
+            <div style="line-height:1.6;">
+              ${Object.entries(entry).map(([k, v]) => {
+                if (['الاسم', 'اسم الأب', 'اسم الاب', 'النسبة', 'الرقم الذاتي', 'اليوم', 'الشهر', 'السنة', 'المواليد / يوم', 'المواليد / شهر', 'المواليد / عام'].includes(k)) return '';
+                return `<p style="margin:4px 0;"><strong>${k}:</strong> ${sanitize(v)}</p>`;
+              }).join('')}
+              <p style="margin:4px 0;"><strong>تاريخ الميلاد:</strong> ${birthDate}</p>
             </div>
           </div>
         `;
@@ -409,14 +420,31 @@
       });
 
       const opt = {
-        margin: 10,
+        margin: [15, 10, 15, 10], // [top, right, bottom, left]
         filename: 'نتائج_البحث.pdf',
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        html2canvas: { 
+          scale: 2,
+          logging: true,
+          useCORS: true
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait',
+          hotfixes: ["px_scaling"] 
+        },
+        pagebreak: { mode: ['avoid-all', 'css'] }
       };
 
-      html2pdf().set(opt).from(tempDiv).save();
+      html2pdf()
+        .set(opt)
+        .from(tempDiv)
+        .save()
+        .catch(err => {
+          console.error('خطأ في التصدير إلى PDF:', err);
+          alert('حدث خطأ أثناء التصدير إلى PDF');
+        });
     }
 
     function exportToExcel() {
