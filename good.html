@@ -13,7 +13,6 @@
       padding: 20px;
       direction: rtl;
     }
-
     .container {
       max-width: 900px;
       margin: auto;
@@ -22,27 +21,23 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
     h1 {
       text-align: center;
       color: #2c3e50;
       margin-bottom: 30px;
     }
-
     .search-box {
       display: flex;
       flex-direction: column;
       gap: 10px;
       margin-bottom: 30px;
     }
-
     .search-box input {
       padding: 12px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 6px;
     }
-
     .result-card {
       background: #fafafa;
       border: 1px solid #ddd;
@@ -50,10 +45,7 @@
       padding: 20px;
       margin-bottom: 20px;
       position: relative;
-      page-break-inside: avoid;
-      break-inside: avoid-page;
     }
-
     .result-number {
       position: absolute;
       left: 10px;
@@ -68,7 +60,6 @@
       justify-content: center;
       font-size: 14px;
     }
-
     .result-header {
       font-size: 18px;
       font-weight: bold;
@@ -78,17 +69,14 @@
       align-items: center;
       margin-right: 30px;
     }
-
     .details {
       display: none;
       margin-top: 10px;
       line-height: 1.6;
     }
-
     .details p {
       margin: 4px 0;
     }
-
     .btn-toggle {
       background-color: #3498db;
       color: white;
@@ -97,26 +85,6 @@
       border-radius: 4px;
       cursor: pointer;
     }
-
-    @media print {
-      .btn-toggle,
-      .search-box,
-      .export-buttons,
-      .pagination {
-        display: none !important;
-      }
-
-      .details {
-        display: block !important;
-      }
-
-      .result-card {
-        page-break-inside: avoid !important;
-        break-inside: avoid-page !important;
-        border: 1px solid #000 !important;
-      }
-    }
-
     #password-screen {
       position: fixed;
       top: 0; right: 0; bottom: 0; left: 0;
@@ -126,7 +94,6 @@
       align-items: center;
       justify-content: center;
     }
-
     #password-box {
       background: white;
       padding: 30px;
@@ -136,7 +103,6 @@
       max-width: 300px;
       width: 100%;
     }
-
     #password-box input {
       padding: 10px;
       font-size: 16px;
@@ -145,7 +111,6 @@
       border: 1px solid #ccc;
       border-radius: 6px;
     }
-
     #password-box button {
       padding: 10px 20px;
       font-size: 16px;
@@ -155,47 +120,10 @@
       color: white;
       cursor: pointer;
     }
-
-    .pagination {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-      gap: 10px;
-    }
-
-    .pagination button {
-      padding: 8px 16px;
-      background: #3498db;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .pagination button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-
-    .export-buttons {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    
-    .export-btn {
-      background: #27ae60;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
-      flex: 1;
-    }
-    
-    .export-excel {
-      background: #2ecc71;
+    .loading {
+      text-align: center;
+      padding: 20px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -213,122 +141,94 @@
   <div class="container" id="main-content" style="display:none;">
     <h1>استعلام عن البيانات</h1>
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="ابحث عن الاسم أو الرقم الذاتي أو أي جزء من البيانات..." oninput="searchData()">
+      <input type="text" id="searchInput" placeholder="ابحث عن الاسم أو الرقم الذاتي أو أي جزء من البيانات..." oninput="searchData()" disabled>
     </div>
-    
-    <div class="export-buttons">
-      <button class="export-btn" onclick="exportToPDF()">تصدير إلى PDF</button>
-      <button class="export-btn export-excel" onclick="exportToExcel()">تصدير إلى Excel</button>
-    </div>
-    
-    <div id="results"></div>
-    <div class="pagination" id="pagination" style="display:none;">
-      <button id="prevBtn" onclick="prevPage()">السابق</button>
-      <span id="pageInfo">الصفحة 1</span>
-      <button id="nextBtn" onclick="nextPage()">التالي</button>
+    <div id="results">
+      <div class="loading">جاري تحميل البيانات...</div>
     </div>
   </div>
 
   <script>
-    // ====== الإعدادات الأساسية ======
+    // إعدادات التطبيق
     const PASSWORD = "123456";
-    const RESULTS_PER_PAGE = 10;
-    let currentPage = 1;
-    let filteredData = [];
-    let allResults = [];
     let data = [];
 
-    // ====== بيانات نموذجية (يمكن استبدالها بملف JSON) ======
-    function loadSampleData() {
-      data = [
-        {
-          "الاسم": "محمد",
-          "اسم الأب": "أحمد",
-          "النسبة": "الغامدي",
-          "الرقم الذاتي": "123456789",
-          "اليوم": "15",
-          "الشهر": "03",
-          "السنة": "1990",
-          "الجنسية": "سعودي",
-          "الحالة الاجتماعية": "متزوج"
-        },
-        {
-          "الاسم": "فاطمة",
-          "اسم الأب": "علي",
-          "النسبة": "الزيدي",
-          "الرقم الذاتي": "987654321",
-          "اليوم": "22",
-          "الشهر": "07",
-          "السنة": "1985",
-          "الجنسية": "سعودية",
-          "الحالة الاجتماعية": "أعزب"
-        }
-      ];
-    }
-
-    // ====== وظائف المصادقة ======
+    // وظائف المصادقة
     function checkPassword() {
       const input = document.getElementById("passwordInput").value;
       const error = document.getElementById("errorMsg");
       if (input === PASSWORD) {
         document.getElementById("password-screen").style.display = "none";
         document.getElementById("main-content").style.display = "block";
-        loadSampleData(); // تحميل البيانات النموذجية
+        loadData();
       } else {
         error.textContent = "كلمة المرور غير صحيحة";
       }
     }
 
-    // ====== وظائف البحث والعرض ======
+    // تحميل البيانات من ملف JSON
+    function loadData() {
+      fetch('8jfh0-7m5vq.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('حدث خطأ في تحميل الملف');
+          }
+          return response.json();
+        })
+        .then(jsonData => {
+          data = jsonData;
+          document.getElementById('searchInput').disabled = false;
+          document.getElementById('results').innerHTML = '';
+          console.log('تم تحميل البيانات بنجاح:', data.length, 'سجل');
+        })
+        .catch(error => {
+          console.error('فشل تحميل البيانات:', error);
+          document.getElementById('results').innerHTML = `
+            <div style="color: red; text-align: center; padding: 20px;">
+              خطأ في تحميل البيانات. تأكد من:
+              <ul style="text-align: right; direction: rtl;">
+                <li>وجود ملف 8jfh0-7m5vq.json في نفس المجلد</li>
+                <li>صيغة الملف صحيحة (JSON)</li>
+                <li>عدم وجود أخطاء في البيانات</li>
+              </ul>
+              <div>${error.message}</div>
+            </div>
+          `;
+        });
+    }
+
+    // تنظيف النص
     function sanitize(text) {
       return typeof text === 'string' ? text.replace(/'+/g, '').trim() : text;
     }
 
+    // وظيفة البحث
     function searchData() {
       const q = document.getElementById('searchInput').value.trim().toLowerCase();
       const container = document.getElementById('results');
       container.innerHTML = '';
 
-      if (!q) {
-        document.getElementById('pagination').style.display = 'none';
-        allResults = [];
-        return;
-      }
+      if (!q) return;
 
-      filteredData = data.filter(item => {
-        return Object.values(item).some(value => 
+      const results = data.filter(item =>
+        Object.values(item).some(value => 
           String(value).toLowerCase().includes(q)
-        );
-      });
-      
-      allResults = [...filteredData];
-      currentPage = 1;
-      renderResults();
-      updatePagination();
-    }
+        )
+      );
 
-    function renderResults() {
-      const container = document.getElementById('results');
-      container.innerHTML = '';
-
-      const startIdx = (currentPage - 1) * RESULTS_PER_PAGE;
-      const endIdx = startIdx + RESULTS_PER_PAGE;
-      const pageData = filteredData.slice(startIdx, endIdx);
-
-      if (pageData.length === 0) {
+      if (results.length === 0) {
         container.innerHTML = '<p style="text-align:center;">لا توجد نتائج</p>';
         return;
       }
 
-      pageData.forEach((entry, index) => {
-        const resultNumber = startIdx + index + 1;
+      results.forEach((entry, index) => {
         const fullName = `${sanitize(entry['الاسم'])} ${sanitize(entry['اسم الأب']) || sanitize(entry['اسم الاب'])} ${sanitize(entry['النسبة'])}`;
         const birthDate = `${entry['اليوم'] || entry['المواليد / اليوم']}/${entry['الشهر'] || entry['المواليد / شهر']}/${entry['السنة'] || entry['المواليد / عام']}`;
 
         const card = document.createElement('div');
         card.className = 'result-card';
         card.innerHTML = `
-          <div class="result-number">${resultNumber}</div>
+          <div class="result-number">${index + 1}</div>
           <div class="result-header">
             <span>${fullName} - ${sanitize(entry['الرقم الذاتي'])}</span>
             <button class="btn-toggle" onclick="toggleDetails(this)">إظهار التفاصيل</button>
@@ -345,187 +245,13 @@
       });
     }
 
+    // إظهار/إخفاء التفاصيل
     function toggleDetails(btn) {
       const details = btn.closest(".result-card").querySelector(".details");
       const visible = details.style.display === "block";
       details.style.display = visible ? "none" : "block";
       btn.textContent = visible ? "إظهار التفاصيل" : "إخفاء التفاصيل";
     }
-
-    function updatePagination() {
-      const totalPages = Math.ceil(filteredData.length / RESULTS_PER_PAGE);
-      const paginationDiv = document.getElementById('pagination');
-      
-      if (filteredData.length > RESULTS_PER_PAGE) {
-        paginationDiv.style.display = 'flex';
-        document.getElementById('pageInfo').textContent = `الصفحة ${currentPage} من ${totalPages}`;
-        document.getElementById('prevBtn').disabled = currentPage === 1;
-        document.getElementById('nextBtn').disabled = currentPage === totalPages;
-      } else {
-        paginationDiv.style.display = 'none';
-      }
-    }
-
-    function nextPage() {
-      const totalPages = Math.ceil(filteredData.length / RESULTS_PER_PAGE);
-      if (currentPage < totalPages) {
-        currentPage++;
-        renderResults();
-        updatePagination();
-      }
-    }
-
-    function prevPage() {
-      if (currentPage > 1) {
-        currentPage--;
-        renderResults();
-        updatePagination();
-      }
-    }
-
-    // ====== وظائف التصدير ======
-    function exportToPDF() {
-      if (allResults.length === 0) {
-        alert("لا توجد نتائج لتصديرها");
-        return;
-      }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-
-      // إعداد العنوان
-      doc.setFont('Times', 'bold');
-      doc.setFontSize(18);
-      doc.text('نتائج البحث - ' + new Date().toLocaleDateString(), 105, 20, { align: 'center' });
-
-      let y = 40;
-      const margin = 15;
-      const pageWidth = doc.internal.pageSize.getWidth() - margin * 2;
-
-      allResults.forEach((entry, index) => {
-        // التحقق من المساحة المتبقية في الصفحة
-        if (y > 250) {
-          doc.addPage();
-          y = margin;
-        }
-
-        const fullName = `${sanitize(entry['الاسم'])} ${sanitize(entry['اسم الأب']) || sanitize(entry['اسم الاب'])} ${sanitize(entry['النسبة'])}`;
-        const birthDate = `${entry['اليوم'] || entry['المواليد / اليوم']}/${entry['الشهر'] || entry['المواليد / شهر']}/${entry['السنة'] || entry['المواليد / عام']}`;
-
-        // رسم البطاقة
-        doc.setFillColor(250, 250, 250);
-        doc.rect(margin, y - 5, pageWidth, 60, 'F');
-        doc.setDrawColor(221, 221, 221);
-        doc.rect(margin, y - 5, pageWidth, 60);
-
-        // رقم البطاقة
-        doc.setFillColor(52, 152, 219);
-        doc.circle(margin + 10, y + 5, 5, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(10);
-        doc.text((index + 1).toString(), margin + 10, y + 7, { align: 'center' });
-
-        // العنوان الرئيسي
-        doc.setTextColor(44, 62, 80);
-        doc.setFont('Times', 'bold');
-        doc.setFontSize(12);
-        doc.text(`${fullName} - ${sanitize(entry['الرقم الذاتي'])}`, margin + 20, y + 10);
-
-        // التفاصيل
-        doc.setFont('Times', 'normal');
-        doc.setFontSize(10);
-        let detailY = y + 20;
-        
-        Object.entries(entry).forEach(([k, v]) => {
-          if (!['الاسم', 'اسم الأب', 'اسم الاب', 'النسبة', 'الرقم الذاتي', 'اليوم', 'الشهر', 'السنة', 'المواليد / يوم', 'المواليد / شهر', 'المواليد / عام'].includes(k)) {
-            doc.text(`${k}: ${sanitize(v)}`, margin + 15, detailY);
-            detailY += 7;
-          }
-        });
-
-        doc.text(`تاريخ الميلاد: ${birthDate}`, margin + 15, detailY);
-        
-        y += 70;
-      });
-
-      doc.save('نتائج_البحث.pdf');
-    }
-
-    function exportToExcel() {
-      if (allResults.length === 0) {
-        alert("لا توجد نتائج لتصديرها");
-        return;
-      }
-
-      const excelData = allResults.map((entry, index) => {
-        const row = {
-          'م': index + 1,
-          'الاسم': sanitize(entry['الاسم']),
-          'اسم الأب': sanitize(entry['اسم الأب']) || sanitize(entry['اسم الاب']),
-          'النسبة': sanitize(entry['النسبة']),
-          'الرقم الذاتي': sanitize(entry['الرقم الذاتي']),
-          'تاريخ الميلاد': `${entry['اليوم'] || entry['المواليد / اليوم']}/${entry['الشهر'] || entry['المواليد / شهر']}/${entry['السنة'] || entry['المواليد / عام']}`
-        };
-
-        Object.entries(entry).forEach(([k, v]) => {
-          if (!['الاسم', 'اسم الأب', 'اسم الاب', 'النسبة', 'الرقم الذاتي', 'اليوم', 'الشهر', 'السنة', 'المواليد / يوم', 'المواليد / شهر', 'المواليد / عام'].includes(k)) {
-            row[k] = sanitize(v);
-          }
-        });
-
-        return row;
-      });
-
-      // إنشاء ملف Excel يدوياً بدون مكتبات
-      let csvContent = "data:text/csv;charset=utf-8,";
-      
-      // العنوان
-      const headers = Object.keys(excelData[0]);
-      csvContent += headers.join(",") + "\r\n";
-      
-      // البيانات
-      excelData.forEach(row => {
-        csvContent += headers.map(header => row[header]).join(",") + "\r\n";
-      });
-      
-      // التحميل
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "نتائج_البحث.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    // ====== تحميل مكتبة jsPDF عند الحاجة ======
-    function loadJS() {
-      return new Promise((resolve, reject) => {
-        if (window.jspdf) return resolve();
-        
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
-    }
-
-    // تعديل دالة تصدير PDF للتحقق من وجود المكتبة
-    async function exportToPDF() {
-      try {
-        await loadJS();
-        exportPDF();
-      } catch (err) {
-        alert("لا يمكن تحميل مكتبة PDF، الرجاء الاتصال بالإنترنت لاستخدام هذه الميزة");
-      }
-    }
-
-    // ... (بقية الدوال تبقى كما هي) ...
   </script>
 </body>
-  </html>
+</html>
