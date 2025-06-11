@@ -28,7 +28,6 @@
     }
     .search-box {
       display: flex;
-      flex-direction: column;
       gap: 10px;
       margin-bottom: 30px;
     }
@@ -37,6 +36,20 @@
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 6px;
+      flex: 1;
+    }
+    .search-btn {
+      padding: 12px 24px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .search-btn:hover {
+      background-color: #2980b9;
     }
     .result-card {
       background: #fafafa;
@@ -130,6 +143,11 @@
       color: #666;
       margin-bottom: 10px;
     }
+    .no-results {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
   </style>
 </head>
 <body>
@@ -147,8 +165,9 @@
     <h1>استعلام عن البيانات</h1>
     <div class="search-box">
       <input type="text" id="searchInput" placeholder="ابحث عن الاسم أو الرقم الذاتي أو أي جزء من البيانات..." disabled>
-      <div class="search-info" id="searchInfo">اكتب للبحث (سيبدأ البحث بعد توقفك عن الكتابة بثانية واحدة)</div>
+      <button class="search-btn" id="searchBtn" disabled onclick="searchData()">بحث</button>
     </div>
+    <div class="search-info" id="searchInfo">اكتب كلمة البحث ثم اضغط زر البحث</div>
     <div id="results">
       <div class="loading">جاري تحميل البيانات...</div>
     </div>
@@ -158,8 +177,6 @@
     // إعدادات التطبيق
     const PASSWORD = "123456";
     let data = [];
-    let searchTimeout = null;
-    const SEARCH_DELAY = 300; // تأخير البحث بـ 300 مللي ثانية (0.3 ثانية)
 
     // وظائف المصادقة
     function checkPassword() {
@@ -186,8 +203,9 @@
         .then(jsonData => {
           data = jsonData;
           document.getElementById('searchInput').disabled = false;
+          document.getElementById('searchBtn').disabled = false;
           document.getElementById('results').innerHTML = '';
-          document.getElementById('searchInput').addEventListener('input', handleSearchInput);
+          document.getElementById('searchInfo').textContent = "اكتب كلمة البحث ثم اضغط زر البحث";
           console.log('تم تحميل البيانات بنجاح:', data.length, 'سجل');
         })
         .catch(error => {
@@ -206,70 +224,42 @@
         });
     }
 
-    // معالجة إدخال البحث مع تأخير
-    function handleSearchInput(event) {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
-        searchData(event.target.value);
-      }, SEARCH_DELAY);
-    }
-
     // تنظيف النص
     function sanitize(text) {
       return typeof text === 'string' ? text.replace(/'+/g, '').trim() : text;
     }
 
-    // وظيفة البحث المحسنة
-    function searchData(query) {
-      const q = query.trim().toLowerCase();
+    // وظيفة البحث عند الضغط على الزر
+    function searchData() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
       const container = document.getElementById('results');
       container.innerHTML = '';
 
       if (!q) {
-        document.getElementById('searchInfo').textContent = "اكتب للبحث (سيبدأ البحث بعد توقفك عن الكتابة بثانية واحدة)";
+        document.getElementById('searchInfo').textContent = "الرجاء إدخال كلمة للبحث";
+        container.innerHTML = '<div class="no-results">لم يتم إدخال كلمة بحث</div>';
         return;
       }
 
       document.getElementById('searchInfo').textContent = "جاري البحث...";
 
-      // استخدام Web Worker للبحث إذا كان متاحاً
-      if (window.Worker) {
-        const worker = new Worker('data:application/javascript,' + encodeURIComponent(`
-          onmessage = function(e) {
-            const { data, query } = e.data;
-            const results = data.filter(item =>
-              Object.values(item).some(value => 
-                String(value).toLowerCase().includes(query)
-              )
-            );
-            postMessage(results);
-          }
-        `));
+      // البحث مع إظهار النتائج فوراً
+      const results = data.filter(item =>
+        Object.values(item).some(value => 
+          String(value).toLowerCase().includes(q)
+        )
+      );
 
-        worker.postMessage({ data: data, query: q });
-        
-        worker.onmessage = function(e) {
-          displayResults(e.data);
-          worker.terminate();
-        };
-      } else {
-        // البحث بدون Web Worker إذا لم يكن متاحاً
-        const results = data.filter(item =>
-          Object.values(item).some(value => 
-            String(value).toLowerCase().includes(q)
-          )
-        );
-        displayResults(results);
-      }
+      displayResults(results);
     }
 
     // عرض النتائج
     function displayResults(results) {
       const container = document.getElementById('results');
-      document.getElementById('searchInfo').textContent = `عثرنا على ${results.length} نتيجة`;
+      document.getElementById('searchInfo').textContent = `تم العثور على ${results.length} نتيجة`;
 
       if (results.length === 0) {
-        container.innerHTML = '<p style="text-align:center;">لا توجد نتائج</p>';
+        container.innerHTML = '<div class="no-results">لا توجد نتائج مطابقة</div>';
         return;
       }
 
@@ -304,6 +294,13 @@
       details.style.display = visible ? "none" : "block";
       btn.textContent = visible ? "إظهار التفاصيل" : "إخفاء التفاصيل";
     }
+
+    // تفعيل البحث عند الضغط على Enter
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        searchData();
+      }
+    });
   </script>
 </body>
 </html>
