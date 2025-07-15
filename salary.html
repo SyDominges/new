@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة الزيادات الذكية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0077b6;
+            --secondary: #48cae4;
+            --dark: #023e8a;
+            --light: #ffffff;
+            --error: #ff3333;
+            --success: #4CAF50;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f8ff;
+            color: var(--dark);
+        }
+
+        .calculator-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+            position: relative;
+            margin-top: 30px;
+        }
+
+        .logo-container {
+            position: absolute;
+            top: -50px;
+            right: 50%;
+            transform: translateX(50%);
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border: 3px solid var(--primary);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+            text-align: right;
+        }
+
+        label {
+            font-weight: bold;
+            color: var(--dark);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 8px rgba(72, 202, 228, 0.5);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        button:hover {
+            background: var(--dark);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .total-item {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.1rem;
+            border-bottom: none;
+        }
+
+        .copy-btn {
+            margin-top: 1rem;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--error);
+            color: white;
+            padding: 0.8rem;
+            border-radius: 5px;
+            font-weight: bold;
+            animation: fadeInOut 3s ease-in-out;
+            z-index: 1000;
+        }
+
+        .copy-success {
+            color: var(--success);
+            font-weight: bold;
+            margin-top: 0.5rem;
+            display: none;
+            text-align: center;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translateY(-10px); }
+            10%, 90% { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer {
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="calculator-container">
+        <div class="logo-container">
+            2025
+        </div>
+        
+        <div class="calculator-header">
+            <h1 class="calculator-title">حاسبة الزيادات</h1>
+            <p class="calculator-subtitle">أداة لحساب الزيادات على الرواتب من 2015-2025</p>
+        </div>
+        
+        <div class="input-group">
+            <label for="basicSalary">الراتب الأساسي</label>
+            <input type="number" id="basicSalary" placeholder="أدخل الراتب الأساسي">
+        </div>
+        
+        <div class="input-group">
+            <label for="raises">نوع الزيادة</label>
+            <select id="raises">
+                <option value="">اختر نوع الزيادة</option>
+                <option value="2500">زيادة 2,500 ل.س (المرسوم 42/2015)</option>
+                <option value="31500">زيادة 31,500 ل.س (المرسوم 23/2019)</option>
+                <option value="50">زيادة 50% (المرسوم 19/2021)</option>
+                <option value="30">زيادة 30% (المرسوم 29/2021)</option>
+                <option value="100">زيادة 100% (المرسوم 11/2023)</option>
+                <option value="50">زيادة 50% (المرسوم 7)</option>
+                <option value="9">ترفيع 9%</option>
+                <option value="200">زيادة 200% (المرسوم 102/2025)</option>
+            </select>
+        </div>
+        
+        <button id="calculate-btn">حساب الراتب الجديد</button>
+        
+        <div id="result" style="display: none; margin-top: 2rem;">
+            <div class="result-item">
+                <span class="result-label">الراتب الأساسي:</span>
+                <span class="result-value" id="originalSalaryDisplay">0 ل.س</span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">نوع الزيادة:</span>
+                <span class="result-value" id="raiseTypeDisplay">-</span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">مبلغ الزيادة:</span>
+                <span class="result-value" id="raiseAmountDisplay">0 ل.س</span>
+            </div>
+            
+            <div class="result-item total-item">
+                <span class="result-label">الراتب بعد الزيادة:</span>
+                <span class="result-value" id="newSalaryDisplay">0 ل.س</span>
+            </div>
+            
+            <button id="copy-btn" class="copy-btn">نسخ الرقم فقط</button>
+            <div id="copy-success" class="copy-success"></div>
+        </div>
+        
+        <div class="footer">
+            <p>Ali</p>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        document.getElementById('calculate-btn').addEventListener('click', function() {
+            const basicSalaryInput = document.getElementById('basicSalary');
+            const raiseSelect = document.getElementById('raises');
+            
+            if (!basicSalaryInput.value || isNaN(parseFloat(basicSalaryInput.value))) {
+                showNotification('يرجى إدخال راتب أساسي صحيح!');
+                basicSalaryInput.focus();
+                return;
+            }
+            
+            const basicSalary = parseFloat(basicSalaryInput.value);
+            
+            if (basicSalary <= 0) {
+                showNotification('الراتب الأساسي يجب أن يكون أكبر من الصفر!');
+                basicSalaryInput.focus();
+                return;
+            }
+            
+            if (!raiseSelect.value) {
+                showNotification('يرجى اختيار نوع الزيادة!');
+                raiseSelect.focus();
+                return;
+            }
+            
+            const raiseValue = raiseSelect.value;
+            const raiseText = raiseSelect.options[raiseSelect.selectedIndex].text;
+            
+            let raiseAmount;
+            if (raiseText.includes('%')) {
+                raiseAmount = basicSalary * (parseFloat(raiseValue) / 100);
+            } else {
+                raiseAmount = parseFloat(raiseValue);
+            }
+            
+            const newSalary = basicSalary + raiseAmount;
+            
+            document.getElementById('originalSalaryDisplay').textContent = formatNumberWithCommas(basicSalary) + ' ل.س';
+            document.getElementById('raiseTypeDisplay').textContent = raiseText;
+            document.getElementById('raiseAmountDisplay').textContent = formatNumberWithCommas(raiseAmount) + ' ل.س';
+            document.getElementById('newSalaryDisplay').textContent = formatNumberWithCommas(newSalary) + ' ل.س';
+            
+            document.getElementById('result').style.display = 'block';
+        });
+
+        document.getElementById('copy-btn').addEventListener('click', async function() {
+            try {
+                const newSalaryText = document.getElementById('newSalaryDisplay').textContent;
+                const salaryNumber = extractPureNumber(newSalaryText);
+                
+                if (navigator.clipboard) {
+                    await navigator.clipboard.writeText(salaryNumber);
+                    showCopySuccess('✓ تم نسخ الرقم: ' + salaryNumber);
+                } else {
+                    const tempInput = document.createElement('input');
+                    tempInput.value = salaryNumber;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    showCopySuccess('✓ تم نسخ الرقم: ' + salaryNumber);
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showNotification('حدث خطأ أثناء النسخ!');
+                
+                const newSalaryText = document.getElementById('newSalaryDisplay').textContent;
+                const salaryNumber = extractPureNumber(newSalaryText);
+                prompt('اضغط Ctrl+C ثم Enter لنسخ الرقم:', salaryNumber);
+            }
+        });
+
+        function extractPureNumber(text) {
+            // إزالة كل ما ليس رقماً أو نقطة عشرية
+            return text.replace(/[^\d]/g, '');
+        }
+
+        function formatNumberWithCommas(num) {
+            // تنسيق الرقم مع فواصل
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => { 
+                notification.style.display = 'none'; 
+            }, 3000);
+        }
+
+        function showCopySuccess(message) {
+            const successElement = document.getElementById('copy-success');
+            successElement.textContent = message;
+            successElement.style.display = 'block';
+            setTimeout(() => { 
+                successElement.style.display = 'none'; 
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
