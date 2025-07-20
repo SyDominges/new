@@ -46,9 +46,21 @@
             cursor: pointer;
             font-size: 16px;
             width: 100%;
+            margin-top: 10px;
         }
         button:hover {
             background-color: #2980b9;
+        }
+        .job-type {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .job-type button {
+            flex: 1;
+        }
+        .job-type button.active {
+            background-color: #27ae60;
         }
         .result {
             margin-top: 20px;
@@ -69,6 +81,8 @@
             color: #2c3e50;
             font-size: 18px;
             margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #3498db;
         }
     </style>
 </head>
@@ -81,6 +95,11 @@
             <input type="number" id="basicSalary" placeholder="أدخل الراتب الأساسي">
         </div>
         
+        <div class="job-type">
+            <button id="adminBtn" onclick="selectJobType('admin')">إداري</button>
+            <button id="teacherBtn" onclick="selectJobType('teacher')">معلم</button>
+        </div>
+        
         <button onclick="calculateSalary()">حساب الراتب النهائي</button>
         
         <div id="result" class="result" style="display: none;">
@@ -91,7 +110,26 @@
     </div>
 
     <script>
+        let selectedJobType = null;
+        
+        function selectJobType(type) {
+            selectedJobType = type;
+            document.getElementById('adminBtn').classList.remove('active');
+            document.getElementById('teacherBtn').classList.remove('active');
+            
+            if (type === 'admin') {
+                document.getElementById('adminBtn').classList.add('active');
+            } else {
+                document.getElementById('teacherBtn').classList.add('active');
+            }
+        }
+        
         function calculateSalary() {
+            if (!selectedJobType) {
+                alert("الرجاء تحديد نوع الوظيفة (إداري أو معلم)");
+                return;
+            }
+            
             // الحصول على الراتب الأساسي
             const basicSalary = parseFloat(document.getElementById('basicSalary').value);
             
@@ -104,41 +142,31 @@
             const increase = basicSalary * 2;
             const salaryAfterIncrease = basicSalary + increase;
             
-            // حساب الاقتطاعات
+            // حساب الضريبة على الراتب المقطوع الأول (5%)
+            const tax = salaryAfterIncrease * 0.05;
+            
+            // حساب الاقتطاعات على الراتب بعد الزيادة
             const teachersUnion = salaryAfterIncrease * 0.02; // نقابة المعلمين 2%
             const teachersPension = salaryAfterIncrease * 0.03; // خزانة تقاعد المعلمين 3%
             const healthInsurance = salaryAfterIncrease * 0.03; // تأمين صحي 3%
             const socialInsurance = salaryAfterIncrease * 0.07; // تأمينات اجتماعية 7%
             
             // مجموع الاقتطاعات
-            const totalDeductions = teachersUnion + teachersPension + healthInsurance + socialInsurance;
+            const totalDeductions = teachersUnion + teachersPension + healthInsurance + socialInsurance + tax;
             
-            // الراتب بعد الاقتطاعات
+            // الراتب بعد الاقتطاعات والضريبة
             const salaryAfterDeductions = salaryAfterIncrease - totalDeductions;
             
-            // حساب الضريبة (نفترض أن الحد المعفى 837,000 ل.س)
-            const taxExemption = 837000;
-            let taxableAmount = Math.max(0, salaryAfterDeductions - taxExemption);
-            let tax = 0;
-            
-            if (taxableAmount > 0) {
-                if (taxableAmount <= 250000) {
-                    tax = taxableAmount * 0.05;
-                } else if (taxableAmount <= 450000) {
-                    tax = 250000 * 0.05 + (taxableAmount - 250000) * 0.07;
-                } else if (taxableAmount <= 650000) {
-                    tax = 250000 * 0.05 + 200000 * 0.07 + (taxableAmount - 450000) * 0.09;
-                } else if (taxableAmount <= 850000) {
-                    tax = 250000 * 0.05 + 200000 * 0.07 + 200000 * 0.09 + (taxableAmount - 650000) * 0.11;
-                } else if (taxableAmount <= 1100000) {
-                    tax = 250000 * 0.05 + 200000 * 0.07 + 200000 * 0.09 + 200000 * 0.11 + (taxableAmount - 850000) * 0.13;
-                } else {
-                    tax = 250000 * 0.05 + 200000 * 0.07 + 200000 * 0.09 + 200000 * 0.11 + 250000 * 0.13 + (taxableAmount - 1100000) * 0.15;
-                }
+            // حساب علاوة طبيعة العمل
+            let natureAllowance = 0;
+            if (selectedJobType === 'admin') {
+                natureAllowance = salaryAfterDeductions * 0.10; // 10% للإداريين
+            } else {
+                natureAllowance = salaryAfterDeductions * 0.40; // 40% للمعلمين
             }
             
-            // الراتب النهائي بعد الضريبة
-            const netSalary = salaryAfterDeductions - tax;
+            // الراتب النهائي بعد إضافة علاوة طبيعة العمل
+            const netSalary = salaryAfterDeductions + natureAllowance;
             
             // عرض النتائج
             const resultDetails = document.getElementById('resultDetails');
@@ -152,8 +180,12 @@
                     <span>${increase.toLocaleString()} ل.س</span>
                 </div>
                 <div class="result-item">
-                    <span>الراتب بعد الزيادة:</span>
+                    <span>الراتب بعد الزيادة (مقطوع):</span>
                     <span>${salaryAfterIncrease.toLocaleString()} ل.س</span>
+                </div>
+                <div class="result-item">
+                    <span>الضريبة (5% على المقطوع):</span>
+                    <span>- ${tax.toLocaleString()} ل.س</span>
                 </div>
                 <div class="result-item">
                     <span>نقابة المعلمين (2%):</span>
@@ -172,7 +204,7 @@
                     <span>- ${socialInsurance.toLocaleString()} ل.س</span>
                 </div>
                 <div class="result-item">
-                    <span>إجمالي الاقتطاعات:</span>
+                    <span>إجمالي الاقتطاعات والضريبة:</span>
                     <span>- ${totalDeductions.toLocaleString()} ل.س</span>
                 </div>
                 <div class="result-item">
@@ -180,16 +212,8 @@
                     <span>${salaryAfterDeductions.toLocaleString()} ل.س</span>
                 </div>
                 <div class="result-item">
-                    <span>الحد المعفى من الضريبة:</span>
-                    <span>837,000 ل.س</span>
-                </div>
-                <div class="result-item">
-                    <span>المبلغ الخاضع للضريبة:</span>
-                    <span>${taxableAmount.toLocaleString()} ل.س</span>
-                </div>
-                <div class="result-item">
-                    <span>الضريبة المستحقة:</span>
-                    <span>- ${tax.toLocaleString()} ل.س</span>
+                    <span>علاوة طبيعة العمل (${selectedJobType === 'admin' ? '10%' : '40%'}):</span>
+                    <span>+ ${natureAllowance.toLocaleString()} ل.س</span>
                 </div>
             `;
             
