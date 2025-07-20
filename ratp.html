@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة الرواتب</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border-right: 4px solid #3498db;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #ddd;
+        }
+        .total {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>حاسبة الرواتب والاقتطاعات</h1>
+        
+        <div class="form-group">
+            <label for="basicSalary">الراتب الأساسي (ل.س):</label>
+            <input type="number" id="basicSalary" placeholder="أدخل الراتب الأساسي">
+        </div>
+        
+        <button onclick="calculateSalary()">حساب الراتب النهائي</button>
+        
+        <div id="result" class="result" style="display: none;">
+            <h3>تفصيل الرواتب والاقتطاعات:</h3>
+            <div id="resultDetails"></div>
+            <div class="total" id="netSalary"></div>
+        </div>
+    </div>
+
+    <script>
+        function calculateSalary() {
+            // الحصول على الراتب الأساسي
+            const basicSalary = parseFloat(document.getElementById('basicSalary').value);
+            
+            if (isNaN(basicSalary) || basicSalary <= 0) {
+                alert("الرجاء إدخال قيمة صحيحة للراتب الأساسي");
+                return;
+            }
+            
+            // حساب الزيادة 200%
+            const increase = basicSalary * 2;
+            const salaryAfterIncrease = basicSalary + increase;
+            
+            // حساب الاقتطاعات
+            const teachersUnion = salaryAfterIncrease * 0.02; // نقابة المعلمين 2%
+            const teachersPension = salaryAfterIncrease * 0.03; // خزانة تقاعد المعلمين 3%
+            const healthInsurance = salaryAfterIncrease * 0.03; // تأمين صحي 3%
+            const socialInsurance = salaryAfterIncrease * 0.07; // تأمينات اجتماعية 7%
+            
+            // مجموع الاقتطاعات
+            const totalDeductions = teachersUnion + teachersPension + healthInsurance + socialInsurance;
+            
+            // الراتب بعد الاقتطاعات
+            const salaryAfterDeductions = salaryAfterIncrease - totalDeductions;
+            
+            // حساب الضريبة (نفترض أن الحد المعفى 837,000 ل.س)
+            const taxExemption = 837000;
+            let taxableAmount = Math.max(0, salaryAfterDeductions - taxExemption);
+            let tax = 0;
+            
+            if (taxableAmount > 0) {
+                if (taxableAmount <= 250000) {
+                    tax = taxableAmount * 0.05;
+                } else if (taxableAmount <= 450000) {
+                    tax = 250000 * 0.05 + (taxableAmount - 250000) * 0.07;
+                } else if (taxableAmount <= 650000) {
+                    tax = 250000 * 0.05 + 200000 * 0.07 + (taxableAmount - 450000) * 0.09;
+                } else if (taxableAmount <= 850000) {
+                    tax = 250000 * 0.05 + 200000 * 0.07 + 200000 * 0.09 + (taxableAmount - 650000) * 0.11;
+                } else if (taxableAmount <= 1100000) {
+                    tax = 250000 * 0.05 + 200000 * 0.07 + 200000 * 0.09 + 200000 * 0.11 + (taxableAmount - 850000) * 0.13;
+                } else {
+                    tax = 250000 * 0.05 + 200000 * 0.07 + 200000 * 0.09 + 200000 * 0.11 + 250000 * 0.13 + (taxableAmount - 1100000) * 0.15;
+                }
+            }
+            
+            // الراتب النهائي بعد الضريبة
+            const netSalary = salaryAfterDeductions - tax;
+            
+            // عرض النتائج
+            const resultDetails = document.getElementById('resultDetails');
+            resultDetails.innerHTML = `
+                <div class="result-item">
+                    <span>الراتب الأساسي:</span>
+                    <span>${basicSalary.toLocaleString()} ل.س</span>
+                </div>
+                <div class="result-item">
+                    <span>الزيادة (200%):</span>
+                    <span>${increase.toLocaleString()} ل.س</span>
+                </div>
+                <div class="result-item">
+                    <span>الراتب بعد الزيادة:</span>
+                    <span>${salaryAfterIncrease.toLocaleString()} ل.س</span>
+                </div>
+                <div class="result-item">
+                    <span>نقابة المعلمين (2%):</span>
+                    <span>- ${teachersUnion.toLocaleString()} ل.س</span>
+                </div>
+                <div class="result-item">
+                    <span>خزانة تقاعد المعلمين (3%):</span>
+                    <span>- ${teachersPension.toLocaleString()} ل.س</span>
+                </div>
+                <div class="result-item">
+                    <span>تأمين صحي (3%):</span>
+                    <span>- ${healthInsurance.toLocaleString()} ل.س</span>
+                </div>
+                <div class="result-item">
+                    <span>تأمينات اجتماعية (7%):</span>
+                    <span>- ${socialInsurance.toLocaleString()} ل.س</span>
+                </div>
+                <div class="result-item">
+                    <span>إجمالي الاقتطاعات:</span>
+                    <span>- ${totalDeductions.toLocaleString()} ل.س</span>
+                </div>
+                <div class="result-item">
+                    <span>الراتب بعد الاقتطاعات:</span>
+                    <span>${salaryAfterDeductions.toLocaleString()} ل.س</span>
+                </div>
+                <div class="result-item">
+                    <span>الحد المعفى من الضريبة:</span>
+                    <span>837,000 ل.س</span>
+                </div>
+                <div class="result-item">
+                    <span>المبلغ الخاضع للضريبة:</span>
+                    <span>${taxableAmount.toLocaleString()} ل.س</span>
+                </div>
+                <div class="result-item">
+                    <span>الضريبة المستحقة:</span>
+                    <span>- ${tax.toLocaleString()} ل.س</span>
+                </div>
+            `;
+            
+            document.getElementById('netSalary').innerHTML = `
+                الراتب الصافي النهائي: ${netSalary.toLocaleString()} ليرة سورية
+            `;
+            
+            document.getElementById('result').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
