@@ -3,115 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حاسبة الرواتب</title>
+    <title>حاسبة الرواتب - نظام الشرائح</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            font-family: 'Arial', sans-serif;
             background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
         }
         .container {
             background-color: white;
-            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
         h1 {
             color: #2c3e50;
             text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
         }
-        .form-group {
-            margin-bottom: 15px;
+        .input-group {
+            margin-bottom: 20px;
         }
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: bold;
+            color: #2c3e50;
         }
-        input, select {
+        input[type="number"] {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
+            border-radius: 5px;
             font-size: 16px;
-            width: 100%;
-            margin-top: 10px;
-        }
-        button:hover {
-            background-color: #2980b9;
+            box-sizing: border-box;
         }
         .job-type {
             display: flex;
             gap: 10px;
-            margin-bottom: 15px;
+            margin: 20px 0;
         }
-        .job-type button {
+        .job-btn {
             flex: 1;
-        }
-        .job-type button.active {
-            background-color: #27ae60;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f9f9f9;
+            padding: 12px;
+            background-color: #ecf0f1;
+            border: none;
             border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .job-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .calculate-btn {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        .calculate-btn:hover {
+            background-color: #219653;
+        }
+        .result-section {
+            margin-top: 30px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
             border-right: 4px solid #3498db;
+            display: none;
         }
         .result-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
             border-bottom: 1px dashed #ddd;
         }
         .total {
             font-weight: bold;
+            font-size: 20px;
             color: #2c3e50;
-            font-size: 18px;
-            margin-top: 10px;
-            padding-top: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
             border-top: 2px solid #3498db;
+        }
+        .highlight {
+            color: #e74c3c;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>حاسبة الرواتب والاقتطاعات</h1>
+        <h1>حاسبة الرواتب الحكومية</h1>
         
-        <div class="form-group">
-            <label for="basicSalary">الراتب الأساسي (ل.س):</label>
+        <div class="input-group">
+            <label for="basicSalary">الراتب الأساسي (ليرة سورية):</label>
             <input type="number" id="basicSalary" placeholder="أدخل الراتب الأساسي">
         </div>
         
         <div class="job-type">
-            <button id="adminBtn" onclick="selectJobType('admin')">إداري</button>
-            <button id="teacherBtn" onclick="selectJobType('teacher')">معلم</button>
+            <button id="adminBtn" class="job-btn" onclick="selectJobType('admin')">إداري (علاوة 10%)</button>
+            <button id="teacherBtn" class="job-btn" onclick="selectJobType('teacher')">معلم (علاوة 40%)</button>
         </div>
         
-        <button onclick="calculateSalary()">حساب الراتب النهائي</button>
+        <button class="calculate-btn" onclick="calculateSalary()">حساب الراتب النهائي</button>
         
-        <div id="result" class="result" style="display: none;">
-            <h3>تفصيل الرواتب والاقتطاعات:</h3>
+        <div id="result" class="result-section">
+            <h2>تفصيل الرواتب والاقتطاعات:</h2>
             <div id="resultDetails"></div>
             <div class="total" id="netSalary"></div>
         </div>
     </div>
 
     <script>
-        let selectedJobType = null;
+        // القيم الثابتة
+        const TAX_EXEMPTION = 837000; // الحد المعفى من الضريبة
+        const TAX_BRACKETS = [
+            { min: 0, max: 250000, rate: 0.05 },
+            { min: 250001, max: 450000, rate: 0.07 },
+            { min: 450001, max: 650000, rate: 0.09 },
+            { min: 650001, max: 850000, rate: 0.11 },
+            { min: 850001, max: 1100000, rate: 0.13 },
+            { min: 1100001, max: Infinity, rate: 0.15 }
+        ];
         
+        // متغيرات النظام
+        let selectedJobType = null;
+        let allowanceRate = 0;
+        
+        // تحديد نوع الوظيفة
         function selectJobType(type) {
             selectedJobType = type;
             document.getElementById('adminBtn').classList.remove('active');
@@ -119,106 +154,144 @@
             
             if (type === 'admin') {
                 document.getElementById('adminBtn').classList.add('active');
+                allowanceRate = 0.10; // 10% للإداريين
             } else {
                 document.getElementById('teacherBtn').classList.add('active');
+                allowanceRate = 0.40; // 40% للمعلمين
             }
         }
         
+        // حساب الضريبة حسب الشرائح
+        function calculateTax(amount) {
+            let taxableAmount = amount - TAX_EXEMPTION;
+            if (taxableAmount <= 0) return 0;
+            
+            let tax = 0;
+            for (const bracket of TAX_BRACKETS) {
+                if (taxableAmount <= 0) break;
+                
+                const bracketAmount = Math.min(
+                    taxableAmount,
+                    bracket.max - bracket.min + 1
+                );
+                
+                if (bracketAmount > 0) {
+                    tax += bracketAmount * bracket.rate;
+                    taxableAmount -= bracketAmount;
+                }
+            }
+            return tax;
+        }
+        
+        // حساب الراتب النهائي
         function calculateSalary() {
+            // التحقق من البيانات المدخلة
             if (!selectedJobType) {
                 alert("الرجاء تحديد نوع الوظيفة (إداري أو معلم)");
                 return;
             }
             
-            // الحصول على الراتب الأساسي
             const basicSalary = parseFloat(document.getElementById('basicSalary').value);
-            
             if (isNaN(basicSalary) || basicSalary <= 0) {
                 alert("الرجاء إدخال قيمة صحيحة للراتب الأساسي");
                 return;
             }
             
-            // حساب الزيادة 200%
+            // 1. حساب الزيادة 200%
             const increase = basicSalary * 2;
             const salaryAfterIncrease = basicSalary + increase;
             
-            // حساب الضريبة على الراتب المقطوع الأول (5%)
-            const tax = salaryAfterIncrease * 0.05;
+            // 2. حساب الضريبة (شرائح تصاعدية)
+            const tax = calculateTax(salaryAfterIncrease);
             
-            // حساب الاقتطاعات على الراتب بعد الزيادة
-            const teachersUnion = salaryAfterIncrease * 0.02; // نقابة المعلمين 2%
-            const teachersPension = salaryAfterIncrease * 0.03; // خزانة تقاعد المعلمين 3%
-            const healthInsurance = salaryAfterIncrease * 0.03; // تأمين صحي 3%
-            const socialInsurance = salaryAfterIncrease * 0.07; // تأمينات اجتماعية 7%
+            // 3. حساب الاقتطاعات
+            const deductions = {
+                teachersUnion: salaryAfterIncrease * 0.02,    // نقابة المعلمين 2%
+                teachersPension: salaryAfterIncrease * 0.03,  // تقاعد المعلمين 3%
+                healthInsurance: salaryAfterIncrease * 0.03,  // تأمين صحي 3%
+                socialInsurance: salaryAfterIncrease * 0.07    // تأمينات اجتماعية 7%
+            };
             
-            // مجموع الاقتطاعات
-            const totalDeductions = teachersUnion + teachersPension + healthInsurance + socialInsurance + tax;
+            // 4. إجمالي الاقتطاعات
+            const totalDeductions = Object.values(deductions).reduce((sum, val) => sum + val, 0) + tax;
             
-            // الراتب بعد الاقتطاعات والضريبة
+            // 5. الراتب بعد الاقتطاعات والضريبة
             const salaryAfterDeductions = salaryAfterIncrease - totalDeductions;
             
-            // حساب علاوة طبيعة العمل
-            let natureAllowance = 0;
-            if (selectedJobType === 'admin') {
-                natureAllowance = salaryAfterDeductions * 0.10; // 10% للإداريين
-            } else {
-                natureAllowance = salaryAfterDeductions * 0.40; // 40% للمعلمين
-            }
+            // 6. حساب علاوة طبيعة العمل
+            const natureAllowance = salaryAfterDeductions * allowanceRate;
             
-            // الراتب النهائي بعد إضافة علاوة طبيعة العمل
+            // 7. الراتب النهائي
             const netSalary = salaryAfterDeductions + natureAllowance;
             
             // عرض النتائج
+            showResults({
+                basicSalary,
+                increase,
+                salaryAfterIncrease,
+                tax,
+                deductions,
+                totalDeductions,
+                salaryAfterDeductions,
+                natureAllowance,
+                netSalary
+            });
+        }
+        
+        // عرض النتائج
+        function showResults(data) {
             const resultDetails = document.getElementById('resultDetails');
             resultDetails.innerHTML = `
                 <div class="result-item">
                     <span>الراتب الأساسي:</span>
-                    <span>${basicSalary.toLocaleString()} ل.س</span>
+                    <span>${data.basicSalary.toLocaleString()} ل.س</span>
                 </div>
                 <div class="result-item">
                     <span>الزيادة (200%):</span>
-                    <span>${increase.toLocaleString()} ل.س</span>
+                    <span>+ ${data.increase.toLocaleString()} ل.س</span>
                 </div>
-                <div class="result-item">
-                    <span>الراتب بعد الزيادة (مقطوع):</span>
-                    <span>${salaryAfterIncrease.toLocaleString()} ل.س</span>
+                <div class="result-item highlight">
+                    <span>الراتب بعد الزيادة:</span>
+                    <span>${data.salaryAfterIncrease.toLocaleString()} ل.س</span>
                 </div>
-                <div class="result-item">
-                    <span>الضريبة (5% على المقطوع):</span>
-                    <span>- ${tax.toLocaleString()} ل.س</span>
-                </div>
+                
+                <h3>الاقتطاعات:</h3>
                 <div class="result-item">
                     <span>نقابة المعلمين (2%):</span>
-                    <span>- ${teachersUnion.toLocaleString()} ل.س</span>
+                    <span>- ${data.deductions.teachersUnion.toLocaleString()} ل.س</span>
                 </div>
                 <div class="result-item">
-                    <span>خزانة تقاعد المعلمين (3%):</span>
-                    <span>- ${teachersPension.toLocaleString()} ل.س</span>
+                    <span>تقاعد المعلمين (3%):</span>
+                    <span>- ${data.deductions.teachersPension.toLocaleString()} ل.س</span>
                 </div>
                 <div class="result-item">
                     <span>تأمين صحي (3%):</span>
-                    <span>- ${healthInsurance.toLocaleString()} ل.س</span>
+                    <span>- ${data.deductions.healthInsurance.toLocaleString()} ل.س</span>
                 </div>
                 <div class="result-item">
                     <span>تأمينات اجتماعية (7%):</span>
-                    <span>- ${socialInsurance.toLocaleString()} ل.س</span>
+                    <span>- ${data.deductions.socialInsurance.toLocaleString()} ل.س</span>
+                </div>
+                <div class="result-item highlight">
+                    <span>الضريبة (شرائح تصاعدية):</span>
+                    <span>- ${data.tax.toLocaleString()} ل.س</span>
                 </div>
                 <div class="result-item">
-                    <span>إجمالي الاقتطاعات والضريبة:</span>
-                    <span>- ${totalDeductions.toLocaleString()} ل.س</span>
+                    <span>إجمالي الاقتطاعات:</span>
+                    <span>- ${data.totalDeductions.toLocaleString()} ل.س</span>
                 </div>
-                <div class="result-item">
+                <div class="result-item highlight">
                     <span>الراتب بعد الاقتطاعات:</span>
-                    <span>${salaryAfterDeductions.toLocaleString()} ل.س</span>
+                    <span>${data.salaryAfterDeductions.toLocaleString()} ل.س</span>
                 </div>
                 <div class="result-item">
-                    <span>علاوة طبيعة العمل (${selectedJobType === 'admin' ? '10%' : '40%'}):</span>
-                    <span>+ ${natureAllowance.toLocaleString()} ل.س</span>
+                    <span>علاوة طبيعة العمل (${(allowanceRate*100)}%):</span>
+                    <span>+ ${data.natureAllowance.toLocaleString()} ل.س</span>
                 </div>
             `;
             
             document.getElementById('netSalary').innerHTML = `
-                الراتب الصافي النهائي: ${netSalary.toLocaleString()} ليرة سورية
+                الراتب الصافي النهائي: <span class="highlight">${data.netSalary.toLocaleString()} ليرة سورية</span>
             `;
             
             document.getElementById('result').style.display = 'block';
