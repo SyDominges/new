@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام البحث في البيانات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .search-section {
+            padding: 30px 40px;
+            background-color: #f9fafc;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            border-color: #4a6491;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 100, 145, 0.2);
+        }
+        
+        .search-btn {
+            background-color: #4a6491;
+            color: white;
+            border: none;
+            padding: 0 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .search-btn:hover {
+            background-color: #3a5379;
+        }
+        
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-item label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .filter-item select {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: white;
+        }
+        
+        .results-section {
+            padding: 30px 40px;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .results-count {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4a6491;
+        }
+        
+        .results-count span {
+            background-color: #eef2f9;
+            padding: 5px 12px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        
+        .export-btn {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .export-btn:hover {
+            background-color: #219653;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .results-table th {
+            background-color: #4a6491;
+            color: white;
+            text-align: right;
+            padding: 18px 15px;
+            font-weight: 600;
+        }
+        
+        .results-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .results-table tr:nth-child(even) {
+            background-color: #f9fafc;
+        }
+        
+        .results-table tr:hover {
+            background-color: #eef2f9;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: #777;
+            font-size: 1.2rem;
+        }
+        
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #777;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            background-color: #f9fafc;
+        }
+        
+        .highlight {
+            background-color: #fff9c4;
+            padding: 0 3px;
+            border-radius: 3px;
+        }
+        
+        @media (max-width: 768px) {
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-btn {
+                padding: 15px;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filter-item {
+                min-width: 100%;
+            }
+            
+            .results-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .container {
+                border-radius: 0;
+            }
+            
+            header, .search-section, .results-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-search"></i> نظام البحث في البيانات</h1>
+            <p class="subtitle">ابحث في قاعدة البيانات باستخدام الاسم، الكنية، مكان الولادة أو الرقم الوطني</p>
+        </header>
+        
+        <section class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" class="search-input" placeholder="اكتب كلمة للبحث في جميع الحقول...">
+                <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i> بحث</button>
+            </div>
+            
+            <div class="filters">
+                <div class="filter-item">
+                    <label for="nameFilter">بحث حسب الاسم:</label>
+                    <select id="nameFilter">
+                        <option value="">جميع الأسماء</option>
+                    </select>
+                </div>
+                
+                <div class="filter-item">
+                    <label for="locationFilter">بحث حسب مكان الولادة:</label>
+                    <select id="locationFilter">
+                        <option value="">جميع الأماكن</option>
+                    </select>
+                </div>
+                
+                <div class="filter-item">
+                    <label for="sortFilter">ترتيب النتائج:</label>
+                    <select id="sortFilter">
+                        <option value="name_asc">الاسم من أ إلى ي</option>
+                        <option value="name_desc">الاسم من ي إلى أ</option>
+                        <option value="birth_asc">تاريخ الولادة الأقدم</option>
+                        <option value="birth_desc">تاريخ الولادة الأحدث</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+        
+        <section class="results-section">
+            <div class="results-header">
+                <div class="results-count">عدد النتائج: <span id="resultsCount">0</span></div>
+                <button id="exportBtn" class="export-btn"><i class="fas fa-download"></i> تصدير النتائج</button>
+            </div>
+            
+            <div id="resultsContainer">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th width="15%">الاسم</th>
+                            <th width="15%">اسم الأب</th>
+                            <th width="15%">الكنية</th>
+                            <th width="15%">مكان الولادة</th>
+                            <th width="15%">تاريخ الولادة</th>
+                            <th width="15%">الرقم الوطني</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        <!-- سيتم تعبئة النتائج هنا -->
+                    </tbody>
+                </table>
+                <div id="noResults" class="no-results" style="display: none;">
+                    <i class="fas fa-search"></i>
+                    <p>لا توجد نتائج للبحث المطلوب. حاول استخدام كلمات بحث أخرى.</p>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <p>تم تصميم هذا النظام للبحث في البيانات المخزنة بتنسيق JSON | جميع الحقوق محفوظة © 2023</p>
+        </footer>
+    </div>
+
+    <script>
+        // البيانات - سيتم تحميلها من ملف JSON
+        let data = [];
+        let filteredData = [];
+        
+        // عناصر DOM
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const nameFilter = document.getElementById('nameFilter');
+        const locationFilter = document.getElementById('locationFilter');
+        const sortFilter = document.getElementById('sortFilter');
+        const resultsBody = document.getElementById('resultsBody');
+        const resultsCount = document.getElementById('resultsCount');
+        const noResults = document.getElementById('noResults');
+        const exportBtn = document.getElementById('exportBtn');
+        
+        // تحميل البيانات من ملف JSON
+        async function loadData() {
+            try {
+                // هنا سيتم تحميل البيانات من ملف JSON في GitHub
+                // يمكنك استبدال الرابط برابط ملف JSON الخاص بك في GitHub
+                const response = await fetch('search.json');
+                
+                if (!response.ok) {
+                    throw new Error('فشل في تحميل البيانات');
+                }
+                
+                data = await response.json();
+                filteredData = [...data];
+                
+                // تعبئة القوائم المنسدلة
+                populateFilters();
+                
+                // عرض جميع البيانات في البداية
+                displayResults();
+                
+                console.log('تم تحميل البيانات بنجاح:', data.length, 'سجلاً');
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات:', error);
+                resultsBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #e74c3c; padding: 30px;">حدث خطأ في تحميل البيانات. تأكد من صحة رابط ملف JSON.</td></tr>`;
+            }
+        }
+        
+        // تعبئة القوائم المنسدلة بالخيارات
+        function populateFilters() {
+            // جمع جميع الأسماء الفريدة
+            const names = [...new Set(data.map(item => item['الاسم'].trim()))].sort();
+            names.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                nameFilter.appendChild(option);
+            });
+            
+            // جمع جميع أماكن الولادة الفريدة
+            const locations = [...new Set(data.map(item => item['مكان الولادة'].trim()))].sort();
+            locations.forEach(location => {
+                const option = document.createElement('option');
+                option.value = location;
+                option.textContent = location;
+                locationFilter.appendChild(option);
+            });
+        }
+        
+        // تطبيق البحث والتصفية
+        function applyFilters() {
+            let searchTerm = searchInput.value.trim().toLowerCase();
+            let selectedName = nameFilter.value;
+            let selectedLocation = locationFilter.value;
+            
+            // تصفية البيانات
+            filteredData = data.filter(item => {
+                // تطبيق البحث العام
+                let matchesSearch = true;
+                if (searchTerm) {
+                    matchesSearch = Object.values(item).some(value => 
+                        String(value).toLowerCase().includes(searchTerm)
+                    );
+                }
+                
+                // تطبيق تصفية الاسم
+                let matchesName = true;
+                if (selectedName) {
+                    matchesName = item['الاسم'].trim() === selectedName;
+                }
+                
+                // تطبيق تصفية المكان
+                let matchesLocation = true;
+                if (selectedLocation) {
+                    matchesLocation = item['مكان الولادة'].trim() === selectedLocation;
+                }
+                
+                return matchesSearch && matchesName && matchesLocation;
+            });
+            
+            // تطبيق الترتيب
+            applySorting();
+            
+            // عرض النتائج
+            displayResults();
+        }
+        
+        // تطبيق الترتيب على البيانات
+        function applySorting() {
+            const sortValue = sortFilter.value;
+            
+            filteredData.sort((a, b) => {
+                switch(sortValue) {
+                    case 'name_asc':
+                        return a['الاسم'].localeCompare(b['الاسم']);
+                    case 'name_desc':
+                        return b['الاسم'].localeCompare(a['الاسم']);
+                    case 'birth_asc':
+                        return parseArabicDate(a['تاريخ الولادة']) - parseArabicDate(b['تاريخ الولادة']);
+                    case 'birth_desc':
+                        return parseArabicDate(b['تاريخ الولادة']) - parseArabicDate(a['تاريخ الولادة']);
+                    default:
+                        return 0;
+                }
+            });
+        }
+        
+        // تحويل التاريخ العربي إلى تاريخ يمكن مقارنته
+        function parseArabicDate(dateStr) {
+            if (!dateStr) return 0;
+            
+            // تحويل التاريخ من تنسيق dd/mm/yyyy أو d/m/yyyy
+            const parts = dateStr.split('/').map(part => parseInt(part));
+            if (parts.length !== 3) return 0;
+            
+            // افتراض أن التاريخ هو يوم/شهر/سنة
+            return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+        }
+        
+        // عرض النتائج في الجدول
+        function displayResults() {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            
+            if (filteredData.length === 0) {
+                resultsBody.innerHTML = '';
+                noResults.style.display = 'block';
+                resultsCount.textContent = '0';
+                return;
+            }
+            
+            noResults.style.display = 'none';
+            resultsCount.textContent = filteredData.length;
+            
+            let html = '';
+            
+            filteredData.forEach(item => {
+                html += `
+                <tr>
+                    <td>${highlightText(item['الاسم'], searchTerm)}</td>
+                    <td>${highlightText(item['الأب'], searchTerm)}</td>
+                    <td>${highlightText(item['الكنية'], searchTerm)}</td>
+                    <td>${highlightText(item['مكان الولادة'], searchTerm)}</td>
+                    <td>${item['تاريخ الولادة']}</td>
+                    <td>${highlightText(item['الرقم الوطني'].toString(), searchTerm)}</td>
+                </tr>
+                `;
+            });
+            
+            resultsBody.innerHTML = html;
+        }
+        
+        // تمييز نص البحث في النتائج
+        function highlightText(text, searchTerm) {
+            if (!searchTerm || !text) return text;
+            
+            const str = String(text);
+            const lowerStr = str.toLowerCase();
+            const lowerSearchTerm = searchTerm.toLowerCase();
+            
+            if (!lowerStr.includes(lowerSearchTerm)) return str;
+            
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            return str.replace(regex, '<span class="highlight">$1</span>');
+        }
+        
+        // تصدير النتائج إلى ملف CSV
+        function exportToCSV() {
+            if (filteredData.length === 0) {
+                alert('لا توجد بيانات للتصدير');
+                return;
+            }
+            
+            // عناوين الأعمدة
+            const headers = ['الاسم', 'الأب', 'الكنية', 'مكان الولادة', 'تاريخ الولادة', 'الرقم الوطني'];
+            
+            // بيانات CSV
+            let csvContent = headers.join(',') + '\n';
+            
+            filteredData.forEach(item => {
+                const row = [
+                    `"${item['الاسم']}"`,
+                    `"${item['الأب']}"`,
+                    `"${item['الكنية']}"`,
+                    `"${item['مكان الولادة']}"`,
+                    `"${item['تاريخ الولادة']}"`,
+                    `"${item['الرقم الوطني']}"`
+                ];
+                csvContent += row.join(',') + '\n';
+            });
+            
+            // إنشاء ملف وتنزيله
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'نتائج_البحث.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // إضافة مستمعي الأحداث
+        searchBtn.addEventListener('click', applyFilters);
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') applyFilters();
+        });
+        
+        nameFilter.addEventListener('change', applyFilters);
+        locationFilter.addEventListener('change', applyFilters);
+        sortFilter.addEventListener('change', applyFilters);
+        exportBtn.addEventListener('click', exportToCSV);
+        
+        // تحميل البيانات عند فتح الصفحة
+        window.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
