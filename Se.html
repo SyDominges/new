@@ -253,6 +253,34 @@
             100% { transform: rotate(360deg); }
         }
         
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+            gap: 10px;
+        }
+        
+        .pagination-btn {
+            background-color: #4a6491;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .pagination-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .pagination-info {
+            margin: 0 15px;
+            font-size: 15px;
+        }
+        
         @media (max-width: 768px) {
             .search-box {
                 flex-direction: column;
@@ -282,6 +310,19 @@
             header, .search-section, .results-section {
                 padding: 20px;
             }
+            
+            .pagination {
+                flex-wrap: wrap;
+            }
+        }
+        
+        .initial-info {
+            background-color: #fff8e1;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-right: 4px solid #ffc107;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -296,6 +337,11 @@
             <div class="file-info">
                 <i class="fas fa-file-code"></i>
                 <p id="fileStatus">جاري تحميل البيانات من ali.json...</p>
+            </div>
+            
+            <div class="initial-info">
+                <i class="fas fa-info-circle"></i>
+                <span id="initialMessage">يتم الآن تحميل عينة من البيانات للعرض. استخدم البحث للوصول إلى جميع السجلات.</span>
             </div>
             
             <div class="search-box">
@@ -359,6 +405,12 @@
                     <p>لا توجد نتائج للبحث المطلوب. حاول استخدام كلمات بحث أخرى.</p>
                 </div>
             </div>
+            
+            <div id="pagination" class="pagination" style="display: none;">
+                <button id="prevPage" class="pagination-btn">السابق</button>
+                <span id="pageInfo" class="pagination-info">الصفحة 1 من 1</span>
+                <button id="nextPage" class="pagination-btn">التالي</button>
+            </div>
         </section>
         
         <footer>
@@ -370,6 +422,13 @@
         // البيانات - سيتم تحميلها من ملف JSON خارجي
         let allData = [];
         let filteredData = [];
+        let currentDisplayData = [];
+        
+        // إعدادات التقسيم إلى صفحات
+        const itemsPerPage = 20;
+        const initialDisplayCount = 10; // ✅ عرض 10 سجلات فقط عند البداية
+        let currentPage = 1;
+        let totalPages = 1;
         
         // عناصر DOM
         const searchInput = document.getElementById('searchInput');
@@ -384,6 +443,11 @@
         const loadingIndicator = document.getElementById('loadingIndicator');
         const resultsTable = document.querySelector('.results-table');
         const fileStatus = document.getElementById('fileStatus');
+        const pagination = document.getElementById('pagination');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const pageInfo = document.getElementById('pageInfo');
+        const initialMessage = document.getElementById('initialMessage');
         
         // تحميل البيانات من ملف JSON خارجي
         async function loadData() {
@@ -399,11 +463,16 @@
                 
                 // تحويل البيانات إلى التنسيق المطلوب
                 allData = normalizeData(jsonData);
-                filteredData = [...allData]; // ✅ إصلاح: عرض جميع البيانات عند البداية
+                
+                // ✅ التغيير: عرض أول 10 سجلات فقط عند البداية
+                currentDisplayData = allData.slice(0, initialDisplayCount);
                 
                 // تحديث حالة التحميل
                 fileStatus.textContent = `تم تحميل ${allData.length} سجلاً بنجاح من ali.json`;
                 fileStatus.style.color = "#27ae60";
+                
+                // تحديث الرسالة الإرشادية
+                initialMessage.textContent = `يتم عرض أول ${initialDisplayCount} سجلاً فقط للسرعة. استخدم البحث للوصول إلى جميع ${allData.length} سجلاً.`;
                 
                 // إخفاء مؤشر التحميل
                 loadingIndicator.style.display = 'none';
@@ -412,10 +481,11 @@
                 // تعبئة القوائم المنسدلة
                 populateFilters();
                 
-                // ✅ إصلاح: عرض جميع البيانات عند البداية
-                displayResults();
+                // ✅ التغيير: عرض أول 10 سجلات فقط
+                displayCurrentData();
                 
                 console.log('تم تحميل البيانات بنجاح:', allData.length, 'سجلاً');
+                console.log('يتم عرض:', currentDisplayData.length, 'سجلاً فقط عند البداية');
                 
             } catch (error) {
                 console.error('خطأ في تحميل البيانات:', error);
@@ -456,7 +526,7 @@
             return [];
         }
         
-        // ✅ إصلاح: دالة للحصول على الاسم الكامل
+        // دالة للحصول على الاسم الكامل
         function getFullName(item) {
             const name = item['الاسم'] || '';
             const fatherName = item['اسم الأب'] || item['الأب'] || '';
@@ -464,7 +534,7 @@
             return `${name} ${fatherName} ${surname}`.trim();
         }
         
-        // ✅ إصلاح: دالة للحصول على تاريخ الميلاد
+        // دالة للحصول على تاريخ الميلاد
         function getBirthDate(item) {
             const birthDate = item['تاريخ الولادة'] || '';
             
@@ -484,34 +554,34 @@
             return item['الولادة والتاريخ'] || '';
         }
         
-        // ✅ إصلاح: دالة للحصول على مكان الولادة
+        // دالة للحصول على مكان الولادة
         function getBirthPlace(item) {
             return item['مكان الولادة'] || item['الولادة والتاريخ'] || '';
         }
         
-        // ✅ إصلاح: دالة للحصول على الرقم الوطني
+        // دالة للحصول على الرقم الوطني
         function getNationalId(item) {
             return item['الرقم الوطني'] || '';
         }
         
-        // ✅ إصلاح: دالة للحصول على التخصص
+        // دالة للحصول على التخصص
         function getSpecialty(item) {
             return item['التخصص'] || '';
         }
         
-        // ✅ إصلاح: دالة للحصول على المسمى الوظيفي
+        // دالة للحصول على المسمى الوظيفي
         function getJobTitle(item) {
             return item['مسمى وظيفي'] || item['الوظيفة'] || '';
         }
         
-        // ✅ إصلاح: دالة للحصول على الرقم الذاتي
+        // دالة للحصول على الرقم الذاتي
         function getPersonalId(item) {
             return item['الرقم الذاتي'] || '';
         }
         
         // تعبئة القوائم المنسدلة بالخيارات
         function populateFilters() {
-            // جمع جميع الأسماء الفريدة
+            // جمع جميع الأسماء الفريدة من جميع البيانات
             const names = [...new Set(allData.map(item => {
                 const firstName = getFullName(item).split(' ')[0];
                 return firstName || '';
@@ -524,7 +594,7 @@
                 nameFilter.appendChild(option);
             });
             
-            // جمع جميع التخصصات الفريدة
+            // جمع جميع التخصصات الفريدة من جميع البيانات
             const specialties = [...new Set(allData.map(item => getSpecialty(item)))].filter(s => s).sort();
             specialties.forEach(specialty => {
                 const option = document.createElement('option');
@@ -533,7 +603,7 @@
                 specialtyFilter.appendChild(option);
             });
             
-            // جمع جميع أماكن الولادة الفريدة
+            // جمع جميع أماكن الولادة الفريدة من جميع البيانات
             const locations = [...new Set(allData.map(item => getBirthPlace(item)))].filter(l => l).sort();
             locations.forEach(location => {
                 const option = document.createElement('option');
@@ -543,79 +613,108 @@
             });
         }
         
-        // ✅ إصلاح: تطبيق البحث والتصفية بشكل صحيح
+        // ✅ التغيير: تطبيق البحث والتصفية مع تحسين الأداء
         function applyFilters() {
-            let searchTerm = searchInput.value.trim().toLowerCase();
-            let selectedName = nameFilter.value;
-            let selectedSpecialty = specialtyFilter.value;
-            let selectedLocation = locationFilter.value;
+            // إظهار مؤشر التحميل لفترة قصيرة
+            showLoadingIndicator();
             
-            // ✅ إصلاح: تصفية البيانات بشكل صحيح
-            filteredData = allData.filter(item => {
-                // تطبيق البحث العام
-                let matchesSearch = true;
-                if (searchTerm) {
-                    matchesSearch = false;
-                    // البحث في جميع الحقول
-                    for (const key in item) {
-                        if (String(item[key]).toLowerCase().includes(searchTerm)) {
+            // السماح للمتصفح بالتنفس
+            setTimeout(() => {
+                let searchTerm = searchInput.value.trim().toLowerCase();
+                let selectedName = nameFilter.value;
+                let selectedSpecialty = specialtyFilter.value;
+                let selectedLocation = locationFilter.value;
+                
+                // ✅ التغيير: عند البحث، نستخدم جميع البيانات
+                filteredData = allData.filter(item => {
+                    // تطبيق البحث العام
+                    let matchesSearch = true;
+                    if (searchTerm) {
+                        matchesSearch = false;
+                        // البحث في جميع الحقول
+                        for (const key in item) {
+                            if (String(item[key]).toLowerCase().includes(searchTerm)) {
+                                matchesSearch = true;
+                                break;
+                            }
+                        }
+                        // البحث في الاسم الكامل أيضاً
+                        if (!matchesSearch && getFullName(item).toLowerCase().includes(searchTerm)) {
                             matchesSearch = true;
-                            break;
                         }
                     }
-                    // البحث في الاسم الكامل أيضاً
-                    if (!matchesSearch && getFullName(item).toLowerCase().includes(searchTerm)) {
-                        matchesSearch = true;
+                    
+                    // تطبيق تصفية الاسم
+                    let matchesName = true;
+                    if (selectedName) {
+                        const firstName = getFullName(item).split(' ')[0];
+                        matchesName = firstName === selectedName;
                     }
-                }
+                    
+                    // تطبيق تصفية التخصص
+                    let matchesSpecialty = true;
+                    if (selectedSpecialty) {
+                        matchesSpecialty = getSpecialty(item) === selectedSpecialty;
+                    }
+                    
+                    // تطبيق تصفية المكان
+                    let matchesLocation = true;
+                    if (selectedLocation) {
+                        matchesLocation = getBirthPlace(item) === selectedLocation;
+                    }
+                    
+                    return matchesSearch && matchesName && matchesSpecialty && matchesLocation;
+                });
                 
-                // تطبيق تصفية الاسم
-                let matchesName = true;
-                if (selectedName) {
-                    const firstName = getFullName(item).split(' ')[0];
-                    matchesName = firstName === selectedName;
-                }
+                // إعادة تعيين الصفحة الحالية
+                currentPage = 1;
                 
-                // تطبيق تصفية التخصص
-                let matchesSpecialty = true;
-                if (selectedSpecialty) {
-                    matchesSpecialty = getSpecialty(item) === selectedSpecialty;
-                }
+                // ✅ التغيير: تحديث البيانات المعروضة
+                currentDisplayData = filteredData;
                 
-                // تطبيق تصفية المكان
-                let matchesLocation = true;
-                if (selectedLocation) {
-                    matchesLocation = getBirthPlace(item) === selectedLocation;
-                }
+                // تحديث التقسيم إلى صفحات
+                updatePagination();
                 
-                return matchesSearch && matchesName && matchesSpecialty && matchesLocation;
-            });
-            
-            // ✅ إصلاح: عرض النتائج
-            displayResults();
+                // عرض النتائج
+                displayCurrentData();
+                
+                // إخفاء مؤشر التحميل
+                hideLoadingIndicator();
+                
+            }, 50); // تأخير بسيط لتحسين تجربة المستخدم
         }
         
-        // ✅ إصلاح: عرض النتائج في الجدول
-        function displayResults() {
+        // ✅ التغيير: عرض البيانات الحالية
+        function displayCurrentData() {
             const searchTerm = searchInput.value.trim().toLowerCase();
             
-            if (filteredData.length === 0) {
+            if (currentDisplayData.length === 0) {
                 resultsBody.innerHTML = '';
                 noResults.style.display = 'block';
                 resultsTable.style.display = 'none';
                 resultsCount.textContent = '0';
                 exportBtn.disabled = true;
+                pagination.style.display = 'none';
                 return;
             }
             
             noResults.style.display = 'none';
             resultsTable.style.display = 'table';
-            resultsCount.textContent = filteredData.length;
-            exportBtn.disabled = false;
+            resultsCount.textContent = currentDisplayData.length;
+            exportBtn.disabled = currentDisplayData.length === 0;
             
             let html = '';
             
-            filteredData.forEach(item => {
+            // ✅ التغيير: عرض البيانات الحالية مع التقسيم إلى صفحات إذا لزم الأمر
+            let displayItems = currentDisplayData;
+            
+            if (currentDisplayData.length > itemsPerPage) {
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                displayItems = currentDisplayData.slice(startIndex, endIndex);
+            }
+            
+            displayItems.forEach(item => {
                 const personalId = getPersonalId(item);
                 const fullName = getFullName(item);
                 const birthPlace = getBirthPlace(item);
@@ -638,6 +737,20 @@
             });
             
             resultsBody.innerHTML = html;
+        }
+        
+        // تحديث التقسيم إلى صفحات
+        function updatePagination() {
+            totalPages = Math.ceil(currentDisplayData.length / itemsPerPage);
+            
+            if (totalPages > 1) {
+                pagination.style.display = 'flex';
+                prevPageBtn.disabled = currentPage === 1;
+                nextPageBtn.disabled = currentPage === totalPages;
+                pageInfo.textContent = `الصفحة ${currentPage} من ${totalPages}`;
+            } else {
+                pagination.style.display = 'none';
+            }
         }
         
         // تمييز نص البحث في النتائج
@@ -696,7 +809,26 @@
             document.body.removeChild(link);
         }
         
-        // ✅ إصلاح: إضافة مستمعي الأحداث بشكل صحيح
+        // الانتقال إلى صفحة محددة
+        function goToPage(page) {
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            updatePagination();
+            displayCurrentData();
+        }
+        
+        // إظهار مؤشر التحميل
+        function showLoadingIndicator() {
+            loadingIndicator.style.display = 'block';
+        }
+        
+        // إخفاء مؤشر التحميل
+        function hideLoadingIndicator() {
+            loadingIndicator.style.display = 'none';
+        }
+        
+        // إضافة مستمعي الأحداث
         searchBtn.addEventListener('click', applyFilters);
         searchInput.addEventListener('keyup', (e) => {
             if (e.key === 'Enter') applyFilters();
@@ -707,7 +839,10 @@
         locationFilter.addEventListener('change', applyFilters);
         exportBtn.addEventListener('click', exportToCSV);
         
-        // ✅ إصلاح: تحميل البيانات عند فتح الصفحة
+        prevPageBtn.addEventListener('click', () => goToPage(currentPage - 1));
+        nextPageBtn.addEventListener('click', () => goToPage(currentPage + 1));
+        
+        // تحميل البيانات عند فتح الصفحة
         window.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
