@@ -110,7 +110,7 @@
             color: #555;
         }
         
-        .filter-item select {
+        .filter-item select, .filter-item input {
             padding: 12px 15px;
             border: 2px solid #ddd;
             border-radius: 8px;
@@ -253,6 +253,43 @@
             100% { transform: rotate(360deg); }
         }
         
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 30px;
+            gap: 10px;
+        }
+        
+        .pagination-btn {
+            background-color: #4a6491;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .pagination-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .pagination-info {
+            margin: 0 15px;
+            font-size: 15px;
+        }
+        
+        .record-info {
+            background-color: #fff8e1;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-right: 4px solid #ffc107;
+            font-size: 0.9rem;
+        }
+        
         @media (max-width: 768px) {
             .search-box {
                 flex-direction: column;
@@ -282,9 +319,13 @@
             header, .search-section, .results-section {
                 padding: 20px;
             }
+            
+            .pagination {
+                flex-wrap: wrap;
+            }
         }
     </style>
-    </head>
+</head>
 <body>
     <div class="container">
         <header>
@@ -295,36 +336,37 @@
         <section class="search-section">
             <div class="file-info">
                 <i class="fas fa-file-code"></i>
-                <p>جاري تحميل البيانات من ملف <strong>ali.json</strong> الخارجي...</p>
-                <p id="fileStatus">يرجى الانتظار حتى اكتمال تحميل البيانات</p>
+                <p id="fileStatus">اكتب كلمة للبحث ثم اضغط زر البحث لتحميل البيانات من ملف ali.json</p>
             </div>
             
             <div class="search-box">
-                <input type="text" id="searchInput" class="search-input" placeholder="اكتب كلمة للبحث في جميع الحقول..." disabled>
-                <button id="searchBtn" class="search-btn" disabled><i class="fas fa-search"></i> بحث</button>
+                <input type="text" id="searchInput" class="search-input" placeholder="اكتب كلمة للبحث في جميع الحقول..." value="">
+                <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i> بحث</button>
             </div>
             
             <div class="filters">
                 <div class="filter-item">
+                    <label for="idFilter">بحث بالرقم الذاتي:</label>
+                    <input type="text" id="idFilter" placeholder="أدخل الرقم الذاتي">
+                </div>
+                
+                <div class="filter-item">
                     <label for="nameFilter">بحث حسب الاسم:</label>
-                    <select id="nameFilter" disabled>
+                    <select id="nameFilter">
                         <option value="">جميع الأسماء</option>
                     </select>
                 </div>
                 
                 <div class="filter-item">
                     <label for="specialtyFilter">بحث حسب التخصص:</label>
-                    <select id="specialtyFilter" disabled>
+                    <select id="specialtyFilter">
                         <option value="">جميع التخصصات</option>
                     </select>
                 </div>
-                
-                <div class="filter-item">
-                    <label for="locationFilter">بحث حسب مكان الولادة:</label>
-                    <select id="locationFilter" disabled>
-                        <option value="">جميع الأماكن</option>
-                    </select>
-                </div>
+            </div>
+            
+            <div class="record-info">
+                <i class="fas fa-info-circle"></i> للبحث، اكتب كلمة واضغط زر البحث. سيتم تحميل البيانات وتطبيق الفلاتر تلقائياً.
             </div>
         </section>
         
@@ -335,19 +377,20 @@
             </div>
             
             <div id="resultsContainer">
-                <div id="loadingIndicator" class="loading">
+                <div id="loadingIndicator" class="loading" style="display: none;">
                     <div class="loading-spinner"></div>
-                    <p>جاري تحميل البيانات من ملف ali.json...</p>
+                    <p>جاري البحث وتحليل النتائج...</p>
                 </div>
                 <table class="results-table" style="display: none;">
                     <thead>
                         <tr>
+                            <th width="12%">الرقم الذاتي</th>
                             <th width="20%">الاسم الكامل</th>
-                            <th width="15%">مكان الولادة</th>
-                            <th width="15%">تاريخ الميلاد</th>
-                            <th width="15%">الرقم الوطني</th>
-                            <th width="15%">التخصص</th>
-                            <th width="15%">المسمى الوظيفي</th>
+                            <th width="12%">مكان الولادة</th>
+                            <th width="12%">تاريخ الميلاد</th>
+                            <th width="12%">الرقم الوطني</th>
+                            <th width="12%">التخصص</th>
+                            <th width="12%">المسمى الوظيفي</th>
                         </tr>
                     </thead>
                     <tbody id="resultsBody">
@@ -359,6 +402,12 @@
                     <p>لا توجد نتائج للبحث المطلوب. حاول استخدام كلمات بحث أخرى.</p>
                 </div>
             </div>
+            
+            <div id="pagination" class="pagination" style="display: none;">
+                <button id="prevPage" class="pagination-btn">السابق</button>
+                <span id="pageInfo" class="pagination-info">الصفحة 1 من 1</span>
+                <button id="nextPage" class="pagination-btn">التالي</button>
+            </div>
         </section>
         
         <footer>
@@ -367,16 +416,22 @@
     </div>
 
     <script>
-        // البيانات - سيتم تحميلها من ملف JSON خارجي
-        let data = [];
+        // البيانات - سيتم تحميلها من ملف JSON خارجي عند البحث
+        let allData = [];
         let filteredData = [];
+        let currentData = [];
+        
+        // إعدادات التقسيم إلى صفحات
+        const itemsPerPage = 20;
+        let currentPage = 1;
+        let totalPages = 1;
         
         // عناصر DOM
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
+        const idFilter = document.getElementById('idFilter');
         const nameFilter = document.getElementById('nameFilter');
         const specialtyFilter = document.getElementById('specialtyFilter');
-        const locationFilter = document.getElementById('locationFilter');
         const resultsBody = document.getElementById('resultsBody');
         const resultsCount = document.getElementById('resultsCount');
         const noResults = document.getElementById('noResults');
@@ -384,11 +439,16 @@
         const loadingIndicator = document.getElementById('loadingIndicator');
         const resultsTable = document.querySelector('.results-table');
         const fileStatus = document.getElementById('fileStatus');
+        const pagination = document.getElementById('pagination');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const pageInfo = document.getElementById('pageInfo');
         
         // تحميل البيانات من ملف JSON خارجي
         async function loadData() {
             try {
-                // تحديث حالة التحميل
+                // إظهار مؤشر التحميل
+                loadingIndicator.style.display = 'block';
                 fileStatus.textContent = "جارٍ تحميل البيانات من ali.json...";
                 
                 // تحميل البيانات من ملف ali.json
@@ -401,47 +461,27 @@
                 const jsonData = await response.json();
                 
                 // تحويل البيانات إلى التنسيق المطلوب إذا لزم الأمر
-                data = normalizeData(jsonData);
-                filteredData = [...data];
+                allData = normalizeData(jsonData);
                 
                 // تحديث حالة التحميل
-                fileStatus.textContent = `تم تحميل ${data.length} سجلاً بنجاح من ali.json`;
+                fileStatus.textContent = `تم تحميل ${allData.length} سجلاً بنجاح من ali.json`;
                 fileStatus.style.color = "#27ae60";
                 
-                // إخفاء مؤشر التحميل
-                loadingIndicator.style.display = 'none';
-                resultsTable.style.display = 'table';
+                console.log('تم تحميل البيانات بنجاح:', allData.length, 'سجلاً');
                 
-                // تمكين عناصر البحث
-                enableSearchElements();
-                
-                // تعبئة القوائم المنسدلة
-                populateFilters();
-                
-                // عرض جميع البيانات في البداية
-                displayResults();
-                
-                console.log('تم تحميل البيانات بنجاح:', data.length, 'سجلاً');
+                return true;
                 
             } catch (error) {
                 console.error('خطأ في تحميل البيانات:', error);
                 fileStatus.textContent = `خطأ في تحميل الملف: ${error.message}`;
                 fileStatus.style.color = "#e74c3c";
-                loadingIndicator.innerHTML = `
-                    <div style="color: #e74c3c; font-size: 3rem; margin-bottom: 20px;">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <p style="color: #e74c3c;">فشل في تحميل ملف ali.json</p>
-                    <p>تأكد من:</p>
-                    <ul style="text-align: right; margin-top: 10px;">
-                        <li>وجود ملف ali.json في نفس المجلد</li>
-                        <li>صحة تنسيق ملف JSON</li>
-                        <li>تسمية الملف الصحيحة (ali.json)</li>
-                    </ul>
-                `;
+                return false;
+            } finally {
+                loadingIndicator.style.display = 'none';
             }
         }
-      // تحويل البيانات إلى تنسيق موحد
+        
+        // تحويل البيانات إلى تنسيق موحد
         function normalizeData(jsonData) {
             // إذا كانت البيانات عبارة عن مصفوفة من السجلات
             if (Array.isArray(jsonData)) {
@@ -482,16 +522,6 @@
             return value;
         }
         
-        // تمكين عناصر البحث بعد تحميل البيانات
-        function enableSearchElements() {
-            searchInput.disabled = false;
-            searchBtn.disabled = false;
-            nameFilter.disabled = false;
-            specialtyFilter.disabled = false;
-            locationFilter.disabled = false;
-            exportBtn.disabled = false;
-        }
-        
         // إنشاء الاسم الكامل: الاسم + اسم الأب + النسبة
         function getFullName(item) {
             // محاولة العثور على حقول الاسم المختلفة
@@ -500,6 +530,11 @@
             const surname = item['النسبة'] || item['lastName'] || item['الكنية'] || '';
             
             return `${name} ${fatherName} ${surname}`.trim();
+        }
+        
+        // الحصول على الرقم الذاتي
+        function getPersonalId(item) {
+            return item['الرقم الذاتي'] || item['personalId'] || item['id'] || '';
         }
         
         // إنشاء تاريخ الميلاد كامل
@@ -551,15 +586,87 @@
                    item['الوظيفة'] || '';
         }
         
+        // تطبيق البحث والتصفية
+        async function applyFilters() {
+            // إذا لم تكن البيانات محملة بعد، قم بتحميلها أولاً
+            if (allData.length === 0) {
+                const loaded = await loadData();
+                if (!loaded) {
+                    return;
+                }
+                
+                // تعبئة القوائم المنسدلة بعد تحميل البيانات
+                populateFilters();
+            }
+            
+            // إظهار مؤشر التحميل
+            loadingIndicator.style.display = 'block';
+            
+            // السماح للمتصفح بعرض التحديث
+            await new Promise(resolve => setTimeout(resolve, 10));
+            
+            try {
+                let searchTerm = searchInput.value.trim().toLowerCase();
+                let selectedId = idFilter.value.trim();
+                let selectedName = nameFilter.value;
+                let selectedSpecialty = specialtyFilter.value;
+                
+                // تصفية البيانات
+                filteredData = allData.filter(item => {
+                    // تطبيق البحث العام
+                    let matchesSearch = true;
+                    if (searchTerm) {
+                        matchesSearch = Object.values(item).some(value => 
+                            String(value).toLowerCase().includes(searchTerm)
+                        ) || getFullName(item).toLowerCase().includes(searchTerm);
+                    }
+                    
+                    // تطبيق تصفية الرقم الذاتي
+                    let matchesId = true;
+                    if (selectedId) {
+                        const personalId = getPersonalId(item);
+                        matchesId = personalId.includes(selectedId);
+                    }
+                    
+                    // تطبيق تصفية الاسم
+                    let matchesName = true;
+                    if (selectedName) {
+                        const firstName = getFullName(item).split(' ')[0];
+                        matchesName = firstName === selectedName;
+                    }
+                    
+                    // تطبيق تصفية التخصص
+                    let matchesSpecialty = true;
+                    if (selectedSpecialty) {
+                        matchesSpecialty = getSpecialty(item) === selectedSpecialty;
+                    }
+                    
+                    return matchesSearch && matchesId && matchesName && matchesSpecialty;
+                });
+                
+                // إعادة تعيين الصفحة الحالية
+                currentPage = 1;
+                
+                // تحديث التقسيم إلى صفحات
+                updatePagination();
+                
+                // عرض النتائج
+                displayCurrentPage();
+                
+            } finally {
+                // إخفاء مؤشر التحميل
+                loadingIndicator.style.display = 'none';
+            }
+        }
+        
         // تعبئة القوائم المنسدلة بالخيارات
         function populateFilters() {
             // تنظيف القوائم المنسدلة أولاً
             nameFilter.innerHTML = '<option value="">جميع الأسماء</option>';
             specialtyFilter.innerHTML = '<option value="">جميع التخصصات</option>';
-            locationFilter.innerHTML = '<option value="">جميع الأماكن</option>';
             
             // جمع جميع الأسماء الفريدة
-            const names = [...new Set(data.map(item => {
+            const names = [...new Set(allData.map(item => {
                 const name = getFullName(item).split(' ')[0];
                 return name || '';
             }))].filter(name => name).sort();
@@ -570,133 +677,61 @@
                 option.textContent = name;
                 nameFilter.appendChild(option);
             });
-                     // جمع جميع التخصصات الفريدة
-            const specialties = [...new Set(data.map(item => getSpecialty(item)))].filter(s => s).sort();
+            
+            // جمع جميع التخصصات الفريدة
+            const specialties = [...new Set(allData.map(item => getSpecialty(item)))].filter(s => s).sort();
             specialties.forEach(specialty => {
                 const option = document.createElement('option');
                 option.value = specialty;
                 option.textContent = specialty;
                 specialtyFilter.appendChild(option);
             });
-            
-            // جمع جميع أماكن الولادة الفريدة
-            const locations = [...new Set(data.map(item => getBirthPlace(item)))].filter(l => l).sort();
-            locations.forEach(location => {
-                const option = document.createElement('option');
-                option.value = location;
-                option.textContent = location;
-                locationFilter.appendChild(option);
-            });
         }
         
-        // تطبيق البحث والتصفية
-        function applyFilters() {
-            let searchTerm = searchInput.value.trim().toLowerCase();
-            let selectedName = nameFilter.value;
-            let selectedSpecialty = specialtyFilter.value;
-            let selectedLocation = locationFilter.value;
+        // تحديث التقسيم إلى صفحات
+        function updatePagination() {
+            totalPages = Math.ceil(filteredData.length / itemsPerPage);
             
-            // تصفية البيانات
-            filteredData = data.filter(item => {
-                // تطبيق البحث العام
-                let matchesSearch = true;
-                if (searchTerm) {
-                    matchesSearch = Object.values(item).some(value => 
-                        String(value).toLowerCase().includes(searchTerm)
-                    ) || getFullName(item).toLowerCase().includes(searchTerm);
-                }
-                
-                // تطبيق تصفية الاسم
-                let matchesName = true;
-                if (selectedName) {
-                    const firstName = getFullName(item).split(' ')[0];
-                    matchesName = firstName === selectedName;
-                }
-                
-                // تطبيق تصفية التخصص
-                let matchesSpecialty = true;
-                if (selectedSpecialty) {
-                    matchesSpecialty = getSpecialty(item) === selectedSpecialty;
-                }
-                
-                // تطبيق تصفية المكان
-                let matchesLocation = true;
-                if (selectedLocation) {
-                    matchesLocation = getBirthPlace(item) === selectedLocation;
-                }
-                
-                return matchesSearch && matchesName && matchesSpecialty && matchesLocation;
-            });
-            
-            // تطبيق الترتيب
-            applySorting();
-            
-            // عرض النتائج
-            displayResults();
-        }
-        
-        // تطبيق الترتيب على البيانات
-        function applySorting() {
-            const sortValue = document.getElementById('sortFilter')?.value || 'name_asc';
-            
-            filteredData.sort((a, b) => {
-                switch(sortValue) {
-                    case 'name_asc':
-                        return getFullName(a).localeCompare(getFullName(b));
-                    case 'name_desc':
-                        return getFullName(b).localeCompare(getFullName(a));
-                    case 'birth_asc':
-                        return parseArabicDate(getBirthDate(a)) - parseArabicDate(getBirthDate(b));
-                    case 'birth_desc':
-                        return parseArabicDate(getBirthDate(b)) - parseArabicDate(getBirthDate(a));
-                    default:
-                        return 0;
-                }
-            });
-        }
-        
-        // تحويل التاريخ العربي إلى تاريخ يمكن مقارنته
-        function parseArabicDate(dateStr) {
-            if (!dateStr) return 0;
-            
-            // تحويل التاريخ من تنسيق dd/mm/yyyy أو d/m/yyyy
-            const parts = dateStr.split('/').map(part => parseInt(part));
-            if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
-                return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+            if (totalPages > 1) {
+                pagination.style.display = 'flex';
+                prevPageBtn.disabled = currentPage === 1;
+                nextPageBtn.disabled = currentPage === totalPages;
+                pageInfo.textContent = `الصفحة ${currentPage} من ${totalPages}`;
+            } else {
+                pagination.style.display = 'none';
             }
             
-            // إذا لم يكن التنسيق صحيحاً، حاول تحويله من نص
-            try {
-                const date = new Date(dateStr);
-                if (!isNaN(date.getTime())) {
-                    return date.getTime();
-                }
-            } catch {
-                // تجاهل الخطأ
-            }
+            // تمكين/تعطيل زر التصدير
+            exportBtn.disabled = filteredData.length === 0;
             
-            return 0;
+            // تحديث العدد الإجمالي للنتائج
+            resultsCount.textContent = filteredData.length;
         }
         
-        // عرض النتائج في الجدول
-        function displayResults() {
+        // عرض الصفحة الحالية من النتائج
+        function displayCurrentPage() {
             const searchTerm = searchInput.value.trim().toLowerCase();
+            const selectedId = idFilter.value.trim();
             
-            if (filteredData.length === 0) {
+            // حساب بيانات الصفحة الحالية
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            currentData = filteredData.slice(startIndex, endIndex);
+            
+            if (currentData.length === 0) {
                 resultsBody.innerHTML = '';
                 noResults.style.display = 'block';
                 resultsTable.style.display = 'none';
-                resultsCount.textContent = '0';
                 return;
             }
             
             noResults.style.display = 'none';
             resultsTable.style.display = 'table';
-            resultsCount.textContent = filteredData.length;
             
             let html = '';
             
-            filteredData.forEach(item => {
+            currentData.forEach(item => {
+                const personalId = getPersonalId(item);
                 const fullName = getFullName(item);
                 const birthPlace = getBirthPlace(item);
                 const birthDate = getBirthDate(item);
@@ -704,20 +739,24 @@
                 const specialty = getSpecialty(item);
                 const jobTitle = getJobTitle(item);
                 
+                // تحديد ما سيتم تمييزه
+                const highlightTerm = searchTerm || selectedId;
+                
                 html += `
                 <tr>
-                    <td>${highlightText(fullName, searchTerm)}</td>
-                    <td>${highlightText(birthPlace, searchTerm)}</td>
+                    <td>${highlightText(personalId, highlightTerm)}</td>
+                    <td>${highlightText(fullName, highlightTerm)}</td>
+                    <td>${highlightText(birthPlace, highlightTerm)}</td>
                     <td>${birthDate}</td>
-                    <td>${highlightText(nationalityNumber, searchTerm)}</td>
-                    <td>${highlightText(specialty, searchTerm)}</td>
-                    <td>${highlightText(jobTitle, searchTerm)}</td>
+                    <td>${highlightText(nationalityNumber, highlightTerm)}</td>
+                    <td>${highlightText(specialty, highlightTerm)}</td>
+                    <td>${highlightText(jobTitle, highlightTerm)}</td>
                 </tr>
                 `;
             });
             
             resultsBody.innerHTML = html;
-                      }
+        }
         
         // تمييز نص البحث في النتائج
         function highlightText(text, searchTerm) {
@@ -743,12 +782,13 @@
             }
             
             // عناوين الأعمدة
-            const headers = ['الاسم الكامل', 'مكان الولادة', 'تاريخ الميلاد', 'الرقم الوطني', 'التخصص', 'المسمى الوظيفي'];
+            const headers = ['الرقم الذاتي', 'الاسم الكامل', 'مكان الولادة', 'تاريخ الميلاد', 'الرقم الوطني', 'التخصص', 'المسمى الوظيفي'];
             
             // بيانات CSV
             let csvContent = headers.join(',') + '\n';
             
             filteredData.forEach(item => {
+                const personalId = getPersonalId(item);
                 const fullName = getFullName(item);
                 const birthPlace = getBirthPlace(item);
                 const birthDate = getBirthDate(item);
@@ -757,6 +797,7 @@
                 const jobTitle = getJobTitle(item);
                 
                 const row = [
+                    `"${personalId}"`,
                     `"${fullName}"`,
                     `"${birthPlace}"`,
                     `"${birthDate}"`,
@@ -778,19 +819,55 @@
             document.body.removeChild(link);
         }
         
+        // الانتقال إلى صفحة محددة
+        function goToPage(page) {
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            updatePagination();
+            displayCurrentPage();
+        }
+        
         // إضافة مستمعي الأحداث
         searchBtn.addEventListener('click', applyFilters);
         searchInput.addEventListener('keyup', (e) => {
             if (e.key === 'Enter') applyFilters();
         });
         
+        idFilter.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') applyFilters();
+        });
+        
         nameFilter.addEventListener('change', applyFilters);
         specialtyFilter.addEventListener('change', applyFilters);
-        locationFilter.addEventListener('change', applyFilters);
         exportBtn.addEventListener('click', exportToCSV);
         
-        // تحميل البيانات عند فتح الصفحة
-        window.addEventListener('DOMContentLoaded', loadData);
+        prevPageBtn.addEventListener('click', () => goToPage(currentPage - 1));
+        nextPageBtn.addEventListener('click', () => goToPage(currentPage + 1));
+        
+        // تحميل عينة صغيرة من البيانات عند فتح الصفحة لملء الفلاتر فقط
+        async function loadSampleForFilters() {
+            try {
+                const response = await fetch('ali.json');
+                if (!response.ok) return;
+                
+                const jsonData = await response.json();
+                const sampleData = normalizeData(jsonData).slice(0, 50); // أول 50 سجل فقط
+                
+                // ملء الفلاتر بالعينة
+                allData = sampleData;
+                populateFilters();
+                
+                fileStatus.textContent = `جاهز للبحث. يوجد ${sampleData.length} سجلاً للعرض في الفلاتر.`;
+                fileStatus.style.color = "#27ae60";
+                
+            } catch (error) {
+                console.log('سيتم تحميل البيانات الكاملة عند البحث');
+            }
+        }
+        
+        // تحميل عينة البيانات عند فتح الصفحة
+        window.addEventListener('DOMContentLoaded', loadSampleForFilters);
     </script>
 </body>
 </html>
