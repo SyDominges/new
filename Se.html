@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام البحث في البيانات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .search-section {
+            padding: 30px 40px;
+            background-color: #f9fafc;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            border-color: #4a6491;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 100, 145, 0.2);
+        }
+        
+        .search-btn {
+            background-color: #4a6491;
+            color: white;
+            border: none;
+            padding: 0 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .search-btn:hover {
+            background-color: #3a5379;
+        }
+        
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-item label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .filter-item select {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: white;
+        }
+        
+        .results-section {
+            padding: 30px 40px;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .results-count {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4a6491;
+        }
+        
+        .results-count span {
+            background-color: #eef2f9;
+            padding: 5px 12px;
+            border-radius: 20px;
+            margin-right: 5px;
+        }
+        
+        .export-btn {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .export-btn:hover {
+            background-color: #219653;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .results-table th {
+            background-color: #4a6491;
+            color: white;
+            text-align: right;
+            padding: 18px 15px;
+            font-weight: 600;
+        }
+        
+        .results-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .results-table tr:nth-child(even) {
+            background-color: #f9fafc;
+        }
+        
+        .results-table tr:hover {
+            background-color: #eef2f9;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: #777;
+            font-size: 1.2rem;
+        }
+        
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #777;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            background-color: #f9fafc;
+        }
+        
+        .highlight {
+            background-color: #fff9c4;
+            padding: 0 3px;
+            border-radius: 3px;
+        }
+        
+        .file-info {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            border: 2px dashed #3498db;
+        }
+        
+        .file-info i {
+            color: #3498db;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #4a6491;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-btn {
+                padding: 15px;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filter-item {
+                min-width: 100%;
+            }
+            
+            .results-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .container {
+                border-radius: 0;
+            }
+            
+            header, .search-section, .results-section {
+                padding: 20px;
+            }
+        }
+    </style>
+    </head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-search"></i> نظام البحث في البيانات</h1>
+            <p class="subtitle">ابحث في قاعدة البيانات من ملف ali.json الخارجي</p>
+        </header>
+        
+        <section class="search-section">
+            <div class="file-info">
+                <i class="fas fa-file-code"></i>
+                <p>جاري تحميل البيانات من ملف <strong>ali.json</strong> الخارجي...</p>
+                <p id="fileStatus">يرجى الانتظار حتى اكتمال تحميل البيانات</p>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" class="search-input" placeholder="اكتب كلمة للبحث في جميع الحقول..." disabled>
+                <button id="searchBtn" class="search-btn" disabled><i class="fas fa-search"></i> بحث</button>
+            </div>
+            
+            <div class="filters">
+                <div class="filter-item">
+                    <label for="nameFilter">بحث حسب الاسم:</label>
+                    <select id="nameFilter" disabled>
+                        <option value="">جميع الأسماء</option>
+                    </select>
+                </div>
+                
+                <div class="filter-item">
+                    <label for="specialtyFilter">بحث حسب التخصص:</label>
+                    <select id="specialtyFilter" disabled>
+                        <option value="">جميع التخصصات</option>
+                    </select>
+                </div>
+                
+                <div class="filter-item">
+                    <label for="locationFilter">بحث حسب مكان الولادة:</label>
+                    <select id="locationFilter" disabled>
+                        <option value="">جميع الأماكن</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+        
+        <section class="results-section">
+            <div class="results-header">
+                <div class="results-count">عدد النتائج: <span id="resultsCount">0</span></div>
+                <button id="exportBtn" class="export-btn" disabled><i class="fas fa-download"></i> تصدير النتائج</button>
+            </div>
+            
+            <div id="resultsContainer">
+                <div id="loadingIndicator" class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>جاري تحميل البيانات من ملف ali.json...</p>
+                </div>
+                <table class="results-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th width="20%">الاسم الكامل</th>
+                            <th width="15%">مكان الولادة</th>
+                            <th width="15%">تاريخ الميلاد</th>
+                            <th width="15%">الرقم الوطني</th>
+                            <th width="15%">التخصص</th>
+                            <th width="15%">المسمى الوظيفي</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        <!-- سيتم تعبئة النتائج هنا -->
+                    </tbody>
+                </table>
+                <div id="noResults" class="no-results" style="display: none;">
+                    <i class="fas fa-search"></i>
+                    <p>لا توجد نتائج للبحث المطلوب. حاول استخدام كلمات بحث أخرى.</p>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <p>تم تصميم هذا النظام للبحث في البيانات من ملف JSON خارجي | ملف البيانات: ali.json | جميع الحقوق محفوظة © 2023</p>
+        </footer>
+    </div>
+
+    <script>
+        // البيانات - سيتم تحميلها من ملف JSON خارجي
+        let data = [];
+        let filteredData = [];
+        
+        // عناصر DOM
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const nameFilter = document.getElementById('nameFilter');
+        const specialtyFilter = document.getElementById('specialtyFilter');
+        const locationFilter = document.getElementById('locationFilter');
+        const resultsBody = document.getElementById('resultsBody');
+        const resultsCount = document.getElementById('resultsCount');
+        const noResults = document.getElementById('noResults');
+        const exportBtn = document.getElementById('exportBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultsTable = document.querySelector('.results-table');
+        const fileStatus = document.getElementById('fileStatus');
+        
+        // تحميل البيانات من ملف JSON خارجي
+        async function loadData() {
+            try {
+                // تحديث حالة التحميل
+                fileStatus.textContent = "جارٍ تحميل البيانات من ali.json...";
+                
+                // تحميل البيانات من ملف ali.json
+                const response = await fetch('ali.json');
+                
+                if (!response.ok) {
+                    throw new Error(`فشل في تحميل الملف: ${response.status} ${response.statusText}`);
+                }
+                
+                const jsonData = await response.json();
+                
+                // تحويل البيانات إلى التنسيق المطلوب إذا لزم الأمر
+                data = normalizeData(jsonData);
+                filteredData = [...data];
+                
+                // تحديث حالة التحميل
+                fileStatus.textContent = `تم تحميل ${data.length} سجلاً بنجاح من ali.json`;
+                fileStatus.style.color = "#27ae60";
+                
+                // إخفاء مؤشر التحميل
+                loadingIndicator.style.display = 'none';
+                resultsTable.style.display = 'table';
+                
+                // تمكين عناصر البحث
+                enableSearchElements();
+                
+                // تعبئة القوائم المنسدلة
+                populateFilters();
+                
+                // عرض جميع البيانات في البداية
+                displayResults();
+                
+                console.log('تم تحميل البيانات بنجاح:', data.length, 'سجلاً');
+                
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات:', error);
+                fileStatus.textContent = `خطأ في تحميل الملف: ${error.message}`;
+                fileStatus.style.color = "#e74c3c";
+                loadingIndicator.innerHTML = `
+                    <div style="color: #e74c3c; font-size: 3rem; margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <p style="color: #e74c3c;">فشل في تحميل ملف ali.json</p>
+                    <p>تأكد من:</p>
+                    <ul style="text-align: right; margin-top: 10px;">
+                        <li>وجود ملف ali.json في نفس المجلد</li>
+                        <li>صحة تنسيق ملف JSON</li>
+                        <li>تسمية الملف الصحيحة (ali.json)</li>
+                    </ul>
+                `;
+            }
+        }
+      // تحويل البيانات إلى تنسيق موحد
+        function normalizeData(jsonData) {
+            // إذا كانت البيانات عبارة عن مصفوفة من السجلات
+            if (Array.isArray(jsonData)) {
+                return jsonData.map(item => {
+                    // تنظيف القيم من الاقتباسات الزائدة
+                    const cleanItem = {};
+                    for (const key in item) {
+                        cleanItem[key] = cleanValue(item[key]);
+                    }
+                    return cleanItem;
+                });
+            }
+            
+            // إذا كان JSON يحتوي على مصفوفة داخل خاصية
+            if (typeof jsonData === 'object') {
+                for (const key in jsonData) {
+                    if (Array.isArray(jsonData[key])) {
+                        return normalizeData(jsonData[key]);
+                    }
+                }
+            }
+            
+            // إذا لم تكن البيانات في تنسيق معروف
+            return [];
+        }
+        
+        // تنظيف القيم من الاقتباسات
+        function cleanValue(value) {
+            if (typeof value === 'string') {
+                // إزالة الاقتباسات الفردية أو المزدوجة من البداية والنهاية
+                let cleaned = value.replace(/^['"]+|['"]+$/g, '').trim();
+                
+                // استبدال الاقتباسات الفردية داخل النص بمسافات
+                cleaned = cleaned.replace(/'/g, ' ');
+                
+                return cleaned;
+            }
+            return value;
+        }
+        
+        // تمكين عناصر البحث بعد تحميل البيانات
+        function enableSearchElements() {
+            searchInput.disabled = false;
+            searchBtn.disabled = false;
+            nameFilter.disabled = false;
+            specialtyFilter.disabled = false;
+            locationFilter.disabled = false;
+            exportBtn.disabled = false;
+        }
+        
+        // إنشاء الاسم الكامل: الاسم + اسم الأب + النسبة
+        function getFullName(item) {
+            // محاولة العثور على حقول الاسم المختلفة
+            const name = item['الاسم'] || item['firstName'] || item['name'] || '';
+            const fatherName = item['اسم الأب'] || item['fatherName'] || item['الأب'] || '';
+            const surname = item['النسبة'] || item['lastName'] || item['الكنية'] || '';
+            
+            return `${name} ${fatherName} ${surname}`.trim();
+        }
+        
+        // إنشاء تاريخ الميلاد كامل
+        function getBirthDate(item) {
+            // محاولة العثور على تاريخ الميلاد بمختلف الأشكال
+            const birthDate = item['تاريخ الولادة'] || item['birthDate'] || 
+                             item['تاريخ الميلاد'] || item['المواليد'] || '';
+            
+            if (birthDate) {
+                return birthDate;
+            }
+            
+            // إذا كان التاريخ مقسماً إلى أجزاء
+            const day = item['المواليد / اليوم'] || item['day'] || '';
+            const month = item['المواليد / شهر'] || item['month'] || '';
+            const year = item['المواليد / عام'] || item['year'] || '';
+            
+            if (day && month && year) {
+                return `${day}/${month}/${year}`;
+            }
+            
+            // محاولة استخراج التاريخ من حقل آخر
+            const birthField = item['الولادة والتاريخ'] || item['مكان وتاريخ الولادة'] || '';
+            return birthField;
+        }
+        
+        // الحصول على مكان الولادة
+        function getBirthPlace(item) {
+            return item['مكان الولادة'] || item['birthPlace'] || 
+                   item['الولادة والتاريخ'] || item['مكان الولاده'] || '';
+        }
+        
+        // الحصول على الرقم الوطني
+        function getNationalId(item) {
+            return item['الرقم الوطني'] || item['nationalId'] || 
+                   item['الرقم الوطني'] || item['idNumber'] || '';
+        }
+        
+        // الحصول على التخصص
+        function getSpecialty(item) {
+            return item['التخصص'] || item['specialty'] || 
+                   item['تخصص'] || item['field'] || '';
+        }
+        
+        // الحصول على المسمى الوظيفي
+        function getJobTitle(item) {
+            return item['مسمى وظيفي'] || item['jobTitle'] || 
+                   item['المسمى الوظيفي'] || item['position'] || 
+                   item['الوظيفة'] || '';
+        }
+        
+        // تعبئة القوائم المنسدلة بالخيارات
+        function populateFilters() {
+            // تنظيف القوائم المنسدلة أولاً
+            nameFilter.innerHTML = '<option value="">جميع الأسماء</option>';
+            specialtyFilter.innerHTML = '<option value="">جميع التخصصات</option>';
+            locationFilter.innerHTML = '<option value="">جميع الأماكن</option>';
+            
+            // جمع جميع الأسماء الفريدة
+            const names = [...new Set(data.map(item => {
+                const name = getFullName(item).split(' ')[0];
+                return name || '';
+            }))].filter(name => name).sort();
+            
+            names.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                nameFilter.appendChild(option);
+            });
+                     // جمع جميع التخصصات الفريدة
+            const specialties = [...new Set(data.map(item => getSpecialty(item)))].filter(s => s).sort();
+            specialties.forEach(specialty => {
+                const option = document.createElement('option');
+                option.value = specialty;
+                option.textContent = specialty;
+                specialtyFilter.appendChild(option);
+            });
+            
+            // جمع جميع أماكن الولادة الفريدة
+            const locations = [...new Set(data.map(item => getBirthPlace(item)))].filter(l => l).sort();
+            locations.forEach(location => {
+                const option = document.createElement('option');
+                option.value = location;
+                option.textContent = location;
+                locationFilter.appendChild(option);
+            });
+        }
+        
+        // تطبيق البحث والتصفية
+        function applyFilters() {
+            let searchTerm = searchInput.value.trim().toLowerCase();
+            let selectedName = nameFilter.value;
+            let selectedSpecialty = specialtyFilter.value;
+            let selectedLocation = locationFilter.value;
+            
+            // تصفية البيانات
+            filteredData = data.filter(item => {
+                // تطبيق البحث العام
+                let matchesSearch = true;
+                if (searchTerm) {
+                    matchesSearch = Object.values(item).some(value => 
+                        String(value).toLowerCase().includes(searchTerm)
+                    ) || getFullName(item).toLowerCase().includes(searchTerm);
+                }
+                
+                // تطبيق تصفية الاسم
+                let matchesName = true;
+                if (selectedName) {
+                    const firstName = getFullName(item).split(' ')[0];
+                    matchesName = firstName === selectedName;
+                }
+                
+                // تطبيق تصفية التخصص
+                let matchesSpecialty = true;
+                if (selectedSpecialty) {
+                    matchesSpecialty = getSpecialty(item) === selectedSpecialty;
+                }
+                
+                // تطبيق تصفية المكان
+                let matchesLocation = true;
+                if (selectedLocation) {
+                    matchesLocation = getBirthPlace(item) === selectedLocation;
+                }
+                
+                return matchesSearch && matchesName && matchesSpecialty && matchesLocation;
+            });
+            
+            // تطبيق الترتيب
+            applySorting();
+            
+            // عرض النتائج
+            displayResults();
+        }
+        
+        // تطبيق الترتيب على البيانات
+        function applySorting() {
+            const sortValue = document.getElementById('sortFilter')?.value || 'name_asc';
+            
+            filteredData.sort((a, b) => {
+                switch(sortValue) {
+                    case 'name_asc':
+                        return getFullName(a).localeCompare(getFullName(b));
+                    case 'name_desc':
+                        return getFullName(b).localeCompare(getFullName(a));
+                    case 'birth_asc':
+                        return parseArabicDate(getBirthDate(a)) - parseArabicDate(getBirthDate(b));
+                    case 'birth_desc':
+                        return parseArabicDate(getBirthDate(b)) - parseArabicDate(getBirthDate(a));
+                    default:
+                        return 0;
+                }
+            });
+        }
+        
+        // تحويل التاريخ العربي إلى تاريخ يمكن مقارنته
+        function parseArabicDate(dateStr) {
+            if (!dateStr) return 0;
+            
+            // تحويل التاريخ من تنسيق dd/mm/yyyy أو d/m/yyyy
+            const parts = dateStr.split('/').map(part => parseInt(part));
+            if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+                return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+            }
+            
+            // إذا لم يكن التنسيق صحيحاً، حاول تحويله من نص
+            try {
+                const date = new Date(dateStr);
+                if (!isNaN(date.getTime())) {
+                    return date.getTime();
+                }
+            } catch {
+                // تجاهل الخطأ
+            }
+            
+            return 0;
+        }
+        
+        // عرض النتائج في الجدول
+        function displayResults() {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            
+            if (filteredData.length === 0) {
+                resultsBody.innerHTML = '';
+                noResults.style.display = 'block';
+                resultsTable.style.display = 'none';
+                resultsCount.textContent = '0';
+                return;
+            }
+            
+            noResults.style.display = 'none';
+            resultsTable.style.display = 'table';
+            resultsCount.textContent = filteredData.length;
+            
+            let html = '';
+            
+            filteredData.forEach(item => {
+                const fullName = getFullName(item);
+                const birthPlace = getBirthPlace(item);
+                const birthDate = getBirthDate(item);
+                const nationalityNumber = getNationalId(item);
+                const specialty = getSpecialty(item);
+                const jobTitle = getJobTitle(item);
+                
+                html += `
+                <tr>
+                    <td>${highlightText(fullName, searchTerm)}</td>
+                    <td>${highlightText(birthPlace, searchTerm)}</td>
+                    <td>${birthDate}</td>
+                    <td>${highlightText(nationalityNumber, searchTerm)}</td>
+                    <td>${highlightText(specialty, searchTerm)}</td>
+                    <td>${highlightText(jobTitle, searchTerm)}</td>
+                </tr>
+                `;
+            });
+            
+            resultsBody.innerHTML = html;
+                      }
+        
+        // تمييز نص البحث في النتائج
+        function highlightText(text, searchTerm) {
+            if (!searchTerm || !text) return text;
+            
+            const str = String(text);
+            const lowerStr = str.toLowerCase();
+            const lowerSearchTerm = searchTerm.toLowerCase();
+            
+            if (!lowerStr.includes(lowerSearchTerm)) return str;
+            
+            // الهروب من الأحرف الخاصة في regex
+            const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`(${escapedSearchTerm})`, 'gi');
+            return str.replace(regex, '<span class="highlight">$1</span>');
+        }
+        
+        // تصدير النتائج إلى ملف CSV
+        function exportToCSV() {
+            if (filteredData.length === 0) {
+                alert('لا توجد بيانات للتصدير');
+                return;
+            }
+            
+            // عناوين الأعمدة
+            const headers = ['الاسم الكامل', 'مكان الولادة', 'تاريخ الميلاد', 'الرقم الوطني', 'التخصص', 'المسمى الوظيفي'];
+            
+            // بيانات CSV
+            let csvContent = headers.join(',') + '\n';
+            
+            filteredData.forEach(item => {
+                const fullName = getFullName(item);
+                const birthPlace = getBirthPlace(item);
+                const birthDate = getBirthDate(item);
+                const nationalityNumber = getNationalId(item);
+                const specialty = getSpecialty(item);
+                const jobTitle = getJobTitle(item);
+                
+                const row = [
+                    `"${fullName}"`,
+                    `"${birthPlace}"`,
+                    `"${birthDate}"`,
+                    `"${nationalityNumber}"`,
+                    `"${specialty}"`,
+                    `"${jobTitle}"`
+                ];
+                csvContent += row.join(',') + '\n';
+            });
+            
+            // إنشاء ملف وتنزيله
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'نتائج_البحث.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // إضافة مستمعي الأحداث
+        searchBtn.addEventListener('click', applyFilters);
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') applyFilters();
+        });
+        
+        nameFilter.addEventListener('change', applyFilters);
+        specialtyFilter.addEventListener('change', applyFilters);
+        locationFilter.addEventListener('change', applyFilters);
+        exportBtn.addEventListener('click', exportToCSV);
+        
+        // تحميل البيانات عند فتح الصفحة
+        window.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
