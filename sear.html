@@ -7,16 +7,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <style>
+        /* DARK THEME - DEFAULT */
         :root {
             --gold: #d4af37;
             --gold-light: #e8c84b;
-            --gold-pale: #f5e6a3;
             --gold-dark: #b8941f;
-            --transition-speed: 0.5s;
-        }
-
-        /* DARK THEME (default) */
-        [data-theme="dark"] {
             --bg: #0a0a0a;
             --bg-secondary: #141414;
             --surface: #1a1a1a;
@@ -28,11 +23,12 @@
             --shadow: rgba(0,0,0,0.5);
             --input-bg: #141414;
             --hover-bg: rgba(212, 175, 55, 0.03);
-            --logo-src: url('Syrian_vertical_logo_off-white.png');
+            --logo-file: url('Syrian_vertical_logo_off-white.png');
+            --transition-speed: 0.5s;
         }
 
-        /* LIGHT THEME */
-        [data-theme="light"] {
+        /* LIGHT THEME - when body has .light class */
+        body.light {
             --bg: #f5f0e8;
             --bg-secondary: #faf6f0;
             --surface: #ffffff;
@@ -44,7 +40,7 @@
             --shadow: rgba(0,0,0,0.08);
             --input-bg: #faf6f0;
             --hover-bg: rgba(212, 175, 55, 0.05);
-            --logo-src: url('Syrian_vertical_logo_(1).png');
+            --logo-file: url('Syrian_vertical_logo_(1).png');
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -67,8 +63,6 @@
             z-index: 0;
             overflow: hidden;
         }
-
-        /* Floating orbs */
         .orb {
             position: absolute;
             border-radius: 50%;
@@ -100,7 +94,6 @@
             66% { transform: translate(-20px, 20px) scale(0.9); }
         }
 
-        /* Grid pattern overlay */
         .grid-pattern {
             position: fixed;
             top: 0; left: 0;
@@ -113,7 +106,6 @@
             z-index: 0;
         }
 
-        /* Floating particles */
         .particles {
             position: fixed;
             top: 0; left: 0;
@@ -147,14 +139,14 @@
             background: var(--surface);
             border: 2px solid var(--glass-border);
             border-radius: 50px;
-            padding: 8px 16px;
+            padding: 10px 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             font-family: 'Cairo', sans-serif;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.9rem;
+            font-weight: 700;
             color: var(--gold);
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px var(--shadow);
@@ -163,7 +155,7 @@
             transform: scale(1.05);
             box-shadow: 0 6px 20px rgba(212,175,55,0.2);
         }
-        .theme-toggle i { font-size: 1rem; }
+        .theme-toggle i { font-size: 1.1rem; }
 
         /* ===== MAIN CONTAINER ===== */
         .wrapper {
@@ -181,8 +173,8 @@
             animation: fadeInDown 1s ease;
         }
         .logo-container {
-            width: 200px;
-            height: 200px;
+            width: 220px;
+            height: 220px;
             margin: 0 auto 30px;
             position: relative;
         }
@@ -190,7 +182,7 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 250px; height: 250px;
+            width: 280px; height: 280px;
             background: radial-gradient(circle, rgba(212,175,55,0.2) 0%, transparent 70%);
             border-radius: 50%;
             animation: glow-pulse 3s ease-in-out infinite;
@@ -386,6 +378,10 @@
             box-shadow: 0 20px 60px var(--shadow);
             animation: fadeInUp 0.8s ease 0.4s both;
             transition: all var(--transition-speed) ease;
+            display: none;
+        }
+        .results-panel.active {
+            display: block;
         }
 
         .results-top {
@@ -608,11 +604,11 @@
             .results-panel, .search-panel { padding: 25px; }
             .data-table { font-size: 0.85rem; }
             .data-table th, .data-table td { padding: 12px 10px; }
-            .theme-toggle { top: 10px; left: 10px; padding: 6px 12px; font-size: 0.75rem; }
+            .theme-toggle { top: 10px; left: 10px; padding: 8px 14px; font-size: 0.8rem; }
         }
     </style>
 </head>
-<body data-theme="dark">
+<body>
     <!-- Background Effects -->
     <div class="bg-effects">
         <div class="orb orb-1"></div>
@@ -623,7 +619,7 @@
     <div class="particles" id="particles"></div>
 
     <!-- Theme Toggle -->
-    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+    <button class="theme-toggle" id="themeToggle">
         <i class="fas fa-sun" id="themeIcon"></i>
         <span id="themeText">وضع فاتح</span>
     </button>
@@ -668,12 +664,12 @@
 
             <div class="status-line" id="statusLine">
                 <i class="fas fa-circle-notch fa-spin"></i>
-                <span>جاري التحميل من <span class="badge">ali.json</span></span>
+                <span>جاري تحميل البيانات... <span class="badge">ali.json</span></span>
             </div>
         </div>
 
         <!-- Results Panel -->
-        <div class="results-panel">
+        <div class="results-panel" id="resultsPanel">
             <div class="results-top">
                 <div class="results-info">
                     <span class="lbl">النتائج:</span>
@@ -723,25 +719,32 @@
     </div>
 
     <script>
-        // Theme Toggle
-        function toggleTheme() {
-            var body = document.body;
-            var icon = document.getElementById('themeIcon');
-            var text = document.getElementById('themeText');
-            var logo = document.getElementById('logoImg');
+        // Theme Toggle - Fixed
+        var isDark = true;
+        var themeToggle = document.getElementById('themeToggle');
+        var themeIcon = document.getElementById('themeIcon');
+        var themeText = document.getElementById('themeText');
+        var logoImg = document.getElementById('logoImg');
 
-            if (body.getAttribute('data-theme') === 'dark') {
-                body.setAttribute('data-theme', 'light');
-                icon.className = 'fas fa-moon';
-                text.textContent = 'وضع داكن';
-                logo.src = 'Syrian_vertical_logo_(1).png';
+        themeToggle.addEventListener('click', function() {
+            var body = document.body;
+
+            if (isDark) {
+                // Switch to light
+                body.classList.add('light');
+                themeIcon.className = 'fas fa-moon';
+                themeText.textContent = 'وضع داكن';
+                logoImg.src = 'Syrian_vertical_logo_(1).png';
+                isDark = false;
             } else {
-                body.setAttribute('data-theme', 'dark');
-                icon.className = 'fas fa-sun';
-                text.textContent = 'وضع فاتح';
-                logo.src = 'Syrian_vertical_logo_off-white.png';
+                // Switch to dark
+                body.classList.remove('light');
+                themeIcon.className = 'fas fa-sun';
+                themeText.textContent = 'وضع فاتح';
+                logoImg.src = 'Syrian_vertical_logo_off-white.png';
+                isDark = true;
             }
-        }
+        });
 
         // Create particles
         (function() {
@@ -763,9 +766,9 @@
         var filteredData = [];
         var currentDisplayData = [];
         var itemsPerPage = 20;
-        var initialDisplayCount = 10;
         var currentPage = 1;
         var totalPages = 1;
+        var dataLoaded = false;
 
         // DOM
         var searchInput = document.getElementById('searchInput');
@@ -784,23 +787,22 @@
         var prevPageBtn = document.getElementById('prevPage');
         var nextPageBtn = document.getElementById('nextPage');
         var pageInfo = document.getElementById('pageInfo');
+        var resultsPanel = document.getElementById('resultsPanel');
 
-        // Load
+        // Load data silently in background
         async function loadData() {
             try {
                 var response = await fetch('ali.json');
                 if (!response.ok) throw new Error('Failed');
                 var jsonData = await response.json();
                 allData = normalizeData(jsonData);
-                currentDisplayData = allData.slice(0, initialDisplayCount);
-                statusLine.innerHTML = '<i class="fas fa-check-circle" style="color: var(--gold);"></i><span>تم تحميل <span class="badge">' + allData.length + '</span> سجل</span>';
-                loadingIndicator.style.display = 'none';
-                resultsTable.style.display = 'table';
+                dataLoaded = true;
+
+                statusLine.innerHTML = '<i class="fas fa-check-circle" style="color: var(--gold);"></i><span>جاهز للبحث في <span class="badge">' + allData.length + '</span> سجل</span>';
+
                 populateFilters();
-                displayCurrentData();
             } catch (error) {
                 statusLine.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i><span style="color: #e74c3c;">خطأ: ' + error.message + '</span>';
-                loadingIndicator.innerHTML = '<i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e74c3c; margin-bottom: 15px;"></i><p style="color: #e74c3c;">تأكد من وجود ملف ali.json</p>';
             }
         }
 
@@ -844,10 +846,21 @@
         }
 
         function applyFilters() {
+            if (!dataLoaded) {
+                alert('البيانات قيد التحميل، يرجى الانتظار');
+                return;
+            }
+
             var term = searchInput.value.trim().toLowerCase();
             var name = nameFilter.value;
             var spec = specialtyFilter.value;
             var loc = locationFilter.value;
+
+            resultsPanel.classList.add('active');
+            loadingIndicator.style.display = 'block';
+            resultsTable.style.display = 'none';
+            noResults.style.display = 'none';
+
             filteredData = allData.filter(function(item) {
                 var matchSearch = true;
                 if (term) {
@@ -862,10 +875,15 @@
                 var matchLoc = true; if (loc) matchLoc = getBirthPlace(item) === loc;
                 return matchSearch && matchName && matchSpec && matchLoc;
             });
+
             currentPage = 1;
             currentDisplayData = filteredData;
             updatePagination();
-            displayCurrentData();
+
+            setTimeout(function() {
+                loadingIndicator.style.display = 'none';
+                displayCurrentData();
+            }, 300);
         }
 
         function displayCurrentData() {
