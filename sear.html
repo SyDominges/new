@@ -1,15 +1,15 @@
 
-# Create a completely fixed version of the HTML file
-# Using raw string to avoid escape issues
+# Create the final fixed version - keeping original working JS logic, adding luxury design
+# The key fix: use the EXACT same JS from original Se.html which works
 
-fixed_html = r'''<!DOCTYPE html>
+final_html = r'''<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>النظام الوطني للبحث والاستعلام | الجمهورية العربية السورية</title>
+    <title>نظام البحث في البيانات | الجمهورية العربية السورية</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-gold: #c9a84c;
@@ -33,21 +33,20 @@ fixed_html = r'''<!DOCTYPE html>
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 20px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition: all 0.3s ease;
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Cairo', 'Noto Naskh Arabic', sans-serif;
+            font-family: 'Cairo', sans-serif;
             background: linear-gradient(135deg, #faf8f3 0%, #f0ece3 100%);
             color: var(--dark);
             line-height: 1.7;
             min-height: 100vh;
-            overflow-x: hidden;
         }
         
-        /* ===== TOP OFFICIAL BAR ===== */
+        /* ===== OFFICIAL BAR ===== */
         .official-bar {
             background: linear-gradient(90deg, var(--deep-green) 0%, var(--forest-green) 50%, var(--deep-green) 100%);
             padding: 8px 0;
@@ -82,7 +81,6 @@ fixed_html = r'''<!DOCTYPE html>
             color: var(--light-gold);
             font-size: 0.85rem;
             font-weight: 500;
-            letter-spacing: 0.5px;
         }
         .official-bar-right { display: flex; align-items: center; gap: 15px; }
         .official-bar-right a {
@@ -103,7 +101,6 @@ fixed_html = r'''<!DOCTYPE html>
         .main-header {
             background: linear-gradient(135deg, var(--white) 0%, var(--pale-gold) 100%);
             padding: 25px 40px;
-            position: relative;
             box-shadow: var(--shadow-md);
         }
         .header-content {
@@ -136,7 +133,6 @@ fixed_html = r'''<!DOCTYPE html>
             font-size: 1.6rem;
             font-weight: 800;
             color: var(--deep-green);
-            letter-spacing: 0.5px;
             line-height: 1.3;
         }
         .logo-text .subtitle {
@@ -150,35 +146,6 @@ fixed_html = r'''<!DOCTYPE html>
             font-weight: 700;
             margin-top: 3px;
         }
-        .header-actions { display: flex; gap: 15px; align-items: center; }
-        .header-btn {
-            padding: 10px 22px;
-            border-radius: var(--radius-sm);
-            font-family: 'Cairo', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .header-btn-primary {
-            background: linear-gradient(135deg, var(--deep-green), var(--forest-green));
-            color: var(--white);
-            box-shadow: var(--shadow-sm);
-        }
-        .header-btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-        .header-btn-secondary {
-            background: var(--white);
-            color: var(--deep-green);
-            border: 2px solid var(--deep-green);
-        }
-        .header-btn-secondary:hover { background: var(--pale-gold); }
         
         /* ===== GOLD DIVIDER ===== */
         .gold-divider {
@@ -299,7 +266,6 @@ fixed_html = r'''<!DOCTYPE html>
             transform: translateY(-2px);
             box-shadow: 0 6px 25px rgba(201,168,76,0.4);
         }
-        .search-btn:active { transform: translateY(0); }
         
         /* ===== FILTERS ===== */
         .filters-grid {
@@ -355,32 +321,36 @@ fixed_html = r'''<!DOCTYPE html>
         }
         
         /* ===== FILE STATUS ===== */
-        .status-bar {
+        .file-info {
+            background: linear-gradient(135deg, #e8f4fc, #f0f8ff);
+            padding: 15px;
+            border-radius: var(--radius-sm);
+            margin-top: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px dashed var(--primary-gold);
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px 20px;
-            background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
-            border-radius: var(--radius-sm);
-            margin-top: 20px;
-            border-right: 4px solid var(--light-green);
+            justify-content: center;
+            gap: 10px;
         }
-        .status-bar i {
-            color: var(--light-green);
-            font-size: 1.2rem;
+        .file-info i {
+            color: var(--primary-gold);
+            font-size: 1.5rem;
         }
-        .status-bar p {
-            color: var(--forest-green);
+        .file-info p {
+            color: var(--deep-green);
             font-weight: 600;
-            font-size: 0.95rem;
         }
-        .status-bar .badge {
-            background: var(--light-green);
-            color: var(--white);
-            padding: 3px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 700;
+        
+        .initial-info {
+            background-color: #fff8e1;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-right: 4px solid #ffc107;
+            font-size: 0.9rem;
+            color: var(--dark);
         }
         
         /* ===== RESULTS SECTION ===== */
@@ -462,7 +432,7 @@ fixed_html = r'''<!DOCTYPE html>
         }
         .results-table th {
             color: var(--white);
-            padding: 18px 16px;
+            padding: 18px 15px;
             font-weight: 700;
             font-size: 0.95rem;
             text-align: right;
@@ -473,7 +443,7 @@ fixed_html = r'''<!DOCTYPE html>
         .results-table th:first-child { border-radius: 0 var(--radius-sm) 0 0; }
         .results-table th:last-child { border-radius: var(--radius-sm) 0 0 0; }
         .results-table td {
-            padding: 16px;
+            padding: 15px;
             border-bottom: 1px solid var(--gray-200);
             transition: var(--transition);
         }
@@ -494,18 +464,11 @@ fixed_html = r'''<!DOCTYPE html>
             padding: 60px 20px;
             color: var(--gray-600);
         }
-        .no-results-icon {
-            width: 80px; height: 80px;
-            background: var(--pale-gold);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-        }
-        .no-results-icon i {
-            font-size: 2rem;
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 20px;
             color: var(--primary-gold);
+            opacity: 0.5;
         }
         .no-results h3 {
             font-size: 1.3rem;
@@ -552,15 +515,16 @@ fixed_html = r'''<!DOCTYPE html>
         }
         
         /* ===== LOADING ===== */
-        .loading-container {
+        .loading {
             text-align: center;
-            padding: 50px;
+            padding: 30px;
+            color: var(--deep-green);
         }
         .loading-spinner {
-            width: 60px; height: 60px;
             border: 4px solid var(--pale-gold);
-            border-top-color: var(--primary-gold);
+            border-top: 4px solid var(--primary-gold);
             border-radius: 50%;
+            width: 40px; height: 40px;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
@@ -568,61 +532,27 @@ fixed_html = r'''<!DOCTYPE html>
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .loading-text {
-            color: var(--deep-green);
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
         
         /* ===== FOOTER ===== */
         .main-footer {
             background: linear-gradient(135deg, var(--deep-green), #0f2e1c);
             color: var(--light-gold);
-            padding: 40px;
+            padding: 25px;
             margin-top: 40px;
             border-top: 3px solid var(--primary-gold);
-        }
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
-        .footer-section h4 {
-            color: var(--primary-gold);
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .footer-section p, .footer-section a {
-            color: var(--light-gold);
-            text-decoration: none;
-            font-size: 0.9rem;
-            line-height: 2;
-            opacity: 0.8;
-            transition: var(--transition);
-        }
-        .footer-section a:hover { opacity: 1; color: var(--primary-gold); }
-        .footer-bottom {
-            max-width: 1400px;
-            margin: 30px auto 0;
-            padding-top: 20px;
-            border-top: 1px solid rgba(201,168,76,0.3);
             text-align: center;
-            font-size: 0.85rem;
-            opacity: 0.7;
+        }
+        .main-footer p {
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
         
         /* ===== HIGHLIGHT ===== */
         .highlight {
             background: linear-gradient(135deg, #fff9c4, #fff59d);
-            padding: 2px 6px;
-            border-radius: 4px;
+            padding: 0 3px;
+            border-radius: 3px;
             font-weight: 700;
-            color: var(--dark);
         }
         
         /* ===== SCROLLBAR ===== */
@@ -630,13 +560,6 @@ fixed_html = r'''<!DOCTYPE html>
         ::-webkit-scrollbar-track { background: var(--gray-100); }
         ::-webkit-scrollbar-thumb { background: var(--primary-gold); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--dark-gold); }
-        
-        /* ===== ANIMATIONS ===== */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-in { animation: fadeInUp 0.6s ease-out; }
         
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
@@ -649,22 +572,7 @@ fixed_html = r'''<!DOCTYPE html>
             .results-header { flex-direction: column; gap: 15px; text-align: center; }
             .main-container { padding: 20px; }
             .search-section, .results-section { padding: 25px; }
-            .results-table { font-size: 0.85rem; }
-            .results-table th, .results-table td { padding: 12px 10px; }
-        }
-        
-        /* ===== ROW NUMBER ===== */
-        .row-number {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 28px; height: 28px;
-            background: var(--pale-gold);
-            color: var(--dark-gold);
-            border-radius: 50%;
-            font-size: 0.8rem;
-            font-weight: 700;
-            margin-left: 8px;
+            .results-table { display: block; overflow-x: auto; }
         }
     </style>
 </head>
@@ -675,14 +583,10 @@ fixed_html = r'''<!DOCTYPE html>
             <div class="official-bar-left">
                 <span><i class="fas fa-globe"></i> الجمهورية العربية السورية</span>
                 <span class="divider-dot"></span>
-                <span>النظام الوطني للبحث والاستعلام</span>
+                <span>نظام البحث في البيانات</span>
             </div>
             <div class="official-bar-right">
-                <a href="#"><i class="fas fa-phone"></i> الدعم الفني</a>
-                <span class="divider-dot"></span>
-                <a href="#"><i class="fas fa-question-circle"></i> المساعدة</a>
-                <span class="divider-dot"></span>
-                <a href="#"><i class="fas fa-shield-alt"></i> سياسة الخصوصية</a>
+                <span id="currentDate"></span>
             </div>
         </div>
     </div>
@@ -696,17 +600,8 @@ fixed_html = r'''<!DOCTYPE html>
                 </div>
                 <div class="logo-text">
                     <h1>الجمهورية العربية السورية</h1>
-                    <span class="subtitle">وزارة الإدارة المحلية والبيئة</span>
-                    <span class="system-name"><i class="fas fa-search"></i> النظام الوطني للبحث والاستعلام</span>
+                    <span class="system-name"><i class="fas fa-search"></i> نظام البحث في البيانات</span>
                 </div>
-            </div>
-            <div class="header-actions">
-                <button class="header-btn header-btn-secondary">
-                    <i class="fas fa-user"></i> تسجيل الدخول
-                </button>
-                <button class="header-btn header-btn-primary">
-                    <i class="fas fa-home"></i> الرئيسية
-                </button>
             </div>
         </div>
     </header>
@@ -717,44 +612,47 @@ fixed_html = r'''<!DOCTYPE html>
     <!-- Main Container -->
     <div class="main-container">
         <!-- Search Section -->
-        <section class="search-section animate-in">
+        <section class="search-section">
             <div class="section-title">
                 <i class="fas fa-filter"></i>
                 <h2>معايير البحث والتصفية</h2>
             </div>
             
-            <div class="status-bar" id="fileStatusBar">
-                <i class="fas fa-circle-notch fa-spin"></i>
-                <p>جاري تحميل البيانات من ملف <span class="badge">ali.json</span></p>
+            <div class="file-info">
+                <i class="fas fa-file-code"></i>
+                <p id="fileStatus">جاري تحميل البيانات من ali.json...</p>
+            </div>
+            
+            <div class="initial-info">
+                <i class="fas fa-info-circle"></i>
+                <span id="initialMessage">يتم الآن تحميل عينة من البيانات للعرض. استخدم البحث للوصول إلى جميع السجلات.</span>
             </div>
             
             <div class="search-box">
                 <div class="search-input-wrapper">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" class="search-input" placeholder="اكتب كلمة للبحث في جميع الحقول...">
+                    <input type="text" id="searchInput" class="search-input" placeholder="اكتب كلمة للبحث في جميع الحقول..." value="">
                 </div>
-                <button id="searchBtn" class="search-btn">
-                    <i class="fas fa-search"></i> بحث
-                </button>
+                <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i> بحث</button>
             </div>
             
             <div class="filters-grid">
                 <div class="filter-card">
-                    <label for="nameFilter"><i class="fas fa-user"></i> بحث حسب الاسم</label>
+                    <label for="nameFilter"><i class="fas fa-user"></i> بحث حسب الاسم:</label>
                     <select id="nameFilter">
                         <option value="">جميع الأسماء</option>
                     </select>
                 </div>
                 
                 <div class="filter-card">
-                    <label for="specialtyFilter"><i class="fas fa-graduation-cap"></i> بحث حسب التخصص</label>
+                    <label for="specialtyFilter"><i class="fas fa-graduation-cap"></i> بحث حسب التخصص:</label>
                     <select id="specialtyFilter">
                         <option value="">جميع التخصصات</option>
                     </select>
                 </div>
                 
                 <div class="filter-card">
-                    <label for="locationFilter"><i class="fas fa-map-marker-alt"></i> بحث حسب مكان الولادة</label>
+                    <label for="locationFilter"><i class="fas fa-map-marker-alt"></i> بحث حسب مكان الولادة:</label>
                     <select id="locationFilter">
                         <option value="">جميع الأماكن</option>
                     </select>
@@ -763,7 +661,7 @@ fixed_html = r'''<!DOCTYPE html>
         </section>
         
         <!-- Results Section -->
-        <section class="results-section animate-in">
+        <section class="results-section">
             <div class="section-title">
                 <i class="fas fa-list-alt"></i>
                 <h2>نتائج البحث</h2>
@@ -774,29 +672,26 @@ fixed_html = r'''<!DOCTYPE html>
                     <span class="count-label">عدد النتائج:</span>
                     <span class="count-badge" id="resultsCount">0</span>
                 </div>
-                <button id="exportBtn" class="export-btn" disabled>
-                    <i class="fas fa-file-csv"></i> تصدير النتائج
-                </button>
+                <button id="exportBtn" class="export-btn" disabled><i class="fas fa-download"></i> تصدير النتائج</button>
             </div>
             
             <div id="resultsContainer">
-                <div id="loadingIndicator" class="loading-container">
+                <div id="loadingIndicator" class="loading">
                     <div class="loading-spinner"></div>
-                    <p class="loading-text">جاري تحميل البيانات...</p>
+                    <p>جاري تحميل البيانات من ali.json...</p>
                 </div>
                 
                 <div class="table-wrapper">
                     <table class="results-table" id="resultsTable" style="display: none;">
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>الرقم الذاتي</th>
-                                <th>الاسم الكامل</th>
-                                <th>مكان الولادة</th>
-                                <th>تاريخ الميلاد</th>
-                                <th>الرقم الوطني</th>
-                                <th>التخصص</th>
-                                <th>المسمى الوظيفي</th>
+                                <th width="12%">الرقم الذاتي</th>
+                                <th width="20%">الاسم الكامل</th>
+                                <th width="12%">مكان الولادة</th>
+                                <th width="12%">تاريخ الميلاد</th>
+                                <th width="12%">الرقم الوطني</th>
+                                <th width="12%">التخصص</th>
+                                <th width="12%">المسمى الوظيفي</th>
                             </tr>
                         </thead>
                         <tbody id="resultsBody">
@@ -805,60 +700,38 @@ fixed_html = r'''<!DOCTYPE html>
                 </div>
                 
                 <div id="noResults" class="no-results" style="display: none;">
-                    <div class="no-results-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
+                    <i class="fas fa-search"></i>
                     <h3>لا توجد نتائج</h3>
-                    <p>لا توجد نتائج للبحث المطلوب. حاول استخدام كلمات بحث أخرى أو تعديل معايير التصفية.</p>
+                    <p>لا توجد نتائج للبحث المطلوب. حاول استخدام كلمات بحث أخرى.</p>
                 </div>
             </div>
             
             <div id="pagination" class="pagination" style="display: none;">
-                <button id="prevPage" class="pagination-btn" disabled>
-                    <i class="fas fa-chevron-right"></i> السابق
-                </button>
+                <button id="prevPage" class="pagination-btn" disabled>السابق</button>
                 <span id="pageInfo" class="pagination-info">الصفحة 1 من 1</span>
-                <button id="nextPage" class="pagination-btn" disabled>
-                    التالي <i class="fas fa-chevron-left"></i>
-                </button>
+                <button id="nextPage" class="pagination-btn" disabled>التالي</button>
             </div>
         </section>
     </div>
     
     <!-- Footer -->
     <footer class="main-footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4><i class="fas fa-info-circle"></i> عن النظام</h4>
-                <p>النظام الوطني للبحث والاستعلام هو منصة رقمية متطورة تهدف إلى تسهيل الوصول إلى البيانات والمعلومات بشكل سريع وآمن.</p>
-            </div>
-            <div class="footer-section">
-                <h4><i class="fas fa-link"></i> روابط سريعة</h4>
-                <a href="#"><i class="fas fa-angle-left"></i> دليل المستخدم</a><br>
-                <a href="#"><i class="fas fa-angle-left"></i> الأسئلة الشائعة</a><br>
-                <a href="#"><i class="fas fa-angle-left"></i> التواصل معنا</a>
-            </div>
-            <div class="footer-section">
-                <h4><i class="fas fa-shield-alt"></i> الأمان والخصوصية</h4>
-                <p>جميع البيانات محمية بأعلى معايير الأمان. يخضع النظام للمراقبة المستمرة لضمان سلامة المعلومات.</p>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>الجمهورية العربية السورية | جميع الحقوق محفوظة &copy; 2026</p>
-        </div>
+        <p>تم تصميم هذا النظام للبحث في البيانات من ملف JSON خارجي | ملف البيانات: ali.json | الجمهورية العربية السورية &copy; 2026</p>
     </footer>
 
     <script>
-        // Variables
+        // البيانات - سيتم تحميلها من ملف JSON خارجي
         let allData = [];
         let filteredData = [];
         let currentDisplayData = [];
+        
+        // إعدادات التقسيم إلى صفحات
         const itemsPerPage = 20;
-        const initialDisplayCount = 10;
+        const initialDisplayCount = 10; // عرض 10 سجلات فقط عند البداية
         let currentPage = 1;
         let totalPages = 1;
         
-        // DOM Elements
+        // عناصر DOM
         const searchInput = document.getElementById('searchInput');
         const searchBtn = document.getElementById('searchBtn');
         const nameFilter = document.getElementById('nameFilter');
@@ -870,58 +743,64 @@ fixed_html = r'''<!DOCTYPE html>
         const exportBtn = document.getElementById('exportBtn');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const resultsTable = document.getElementById('resultsTable');
-        const fileStatusBar = document.getElementById('fileStatusBar');
+        const fileStatus = document.getElementById('fileStatus');
         const pagination = document.getElementById('pagination');
         const prevPageBtn = document.getElementById('prevPage');
         const nextPageBtn = document.getElementById('nextPage');
         const pageInfo = document.getElementById('pageInfo');
+        const initialMessage = document.getElementById('initialMessage');
         
-        // Load data from JSON file
+        // تحميل البيانات من ملف JSON خارجي
         async function loadData() {
             try {
+                // تحميل البيانات من ملف ali.json
                 const response = await fetch('ali.json');
                 
                 if (!response.ok) {
-                    throw new Error('Failed to load file');
+                    throw new Error('فشل في تحميل الملف');
                 }
                 
                 const jsonData = await response.json();
+                
+                // تحويل البيانات إلى التنسيق المطلوب
                 allData = normalizeData(jsonData);
                 
-                // Show first 10 records initially
+                // عرض أول 10 سجلات فقط عند البداية
                 currentDisplayData = allData.slice(0, initialDisplayCount);
                 
-                // Update status
-                fileStatusBar.innerHTML = '<i class="fas fa-check-circle" style="color: #4a7c59;"></i><p>تم تحميل <span class="badge">' + allData.length + '</span> سجلاً بنجاح من ملف ali.json</p>';
-                fileStatusBar.style.background = 'linear-gradient(135deg, #e8f5e9, #f1f8e9)';
-                fileStatusBar.style.borderRightColor = '#4a7c59';
+                // تحديث حالة التحميل
+                fileStatus.textContent = 'تم تحميل ' + allData.length + ' سجلاً بنجاح من ali.json';
+                fileStatus.style.color = '#27ae60';
                 
-                // Hide loading
+                // تحديث الرسالة الإرشادية
+                initialMessage.textContent = 'يتم عرض أول ' + initialDisplayCount + ' سجلاً فقط للسرعة. استخدم البحث للوصول إلى جميع ' + allData.length + ' سجلاً.';
+                
+                // إخفاء مؤشر التحميل
                 loadingIndicator.style.display = 'none';
                 resultsTable.style.display = 'table';
                 
-                // Populate filters
+                // تعبئة القوائم المنسدلة
                 populateFilters();
                 
-                // Display initial data
+                // عرض أول 10 سجلات فقط
                 displayCurrentData();
                 
-                console.log('Data loaded successfully:', allData.length, 'records');
+                console.log('تم تحميل البيانات بنجاح:', allData.length, 'سجلاً');
+                console.log('يتم عرض:', currentDisplayData.length, 'سجلاً فقط عند البداية');
                 
             } catch (error) {
-                console.error('Error loading data:', error);
-                fileStatusBar.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #c0392b;"></i><p style="color: #c0392b;">خطأ في تحميل الملف: ' + error.message + '</p>';
-                fileStatusBar.style.background = 'linear-gradient(135deg, #ffebee, #fce4ec)';
-                fileStatusBar.style.borderRightColor = '#c0392b';
-                
-                loadingIndicator.innerHTML = '<div style="color: #c0392b; font-size: 3rem; margin-bottom: 20px;"><i class="fas fa-exclamation-triangle"></i></div><p style="color: #c0392b; font-weight: 700;">فشل في تحميل ملف ali.json</p><p style="margin-top: 10px;">تأكد من:</p><ul style="text-align: right; margin-top: 10px; list-style: none;"><li><i class="fas fa-angle-left" style="color: var(--primary-gold);"></i> وجود ملف ali.json في نفس المجلد</li><li><i class="fas fa-angle-left" style="color: var(--primary-gold);"></i> صحة تنسيق ملف JSON</li><li><i class="fas fa-angle-left" style="color: var(--primary-gold);"></i> تسمية الملف الصحيحة (ali.json)</li></ul>';
+                console.error('خطأ في تحميل البيانات:', error);
+                fileStatus.textContent = 'خطأ في تحميل الملف: ' + error.message;
+                fileStatus.style.color = '#e74c3c';
+                loadingIndicator.innerHTML = '<div style="color: #e74c3c; font-size: 3rem; margin-bottom: 20px;"><i class="fas fa-exclamation-triangle"></i></div><p style="color: #e74c3c;">فشل في تحميل ملف ali.json</p><p>تأكد من:</p><ul style="text-align: right; margin-top: 10px;"><li>وجود ملف ali.json في نفس المجلد</li><li>صحة تنسيق ملف JSON</li><li>تسمية الملف الصحيحة (ali.json)</li></ul>';
             }
         }
         
-        // Normalize data
+        // تحويل البيانات إلى تنسيق موحد
         function normalizeData(jsonData) {
             if (Array.isArray(jsonData)) {
                 return jsonData.map(function(item) {
+                    // تنظيف القيم من الاقتباسات الزائدة
                     const cleanItem = {};
                     for (const key in item) {
                         let value = item[key];
@@ -933,10 +812,11 @@ fixed_html = r'''<!DOCTYPE html>
                     return cleanItem;
                 });
             }
+            
             return [];
         }
         
-        // Helper functions
+        // دالة للحصول على الاسم الكامل
         function getFullName(item) {
             const name = item['الاسم'] || '';
             const fatherName = item['اسم الأب'] || item['الأب'] || '';
@@ -944,10 +824,15 @@ fixed_html = r'''<!DOCTYPE html>
             return (name + ' ' + fatherName + ' ' + surname).trim();
         }
         
+        // دالة للحصول على تاريخ الميلاد
         function getBirthDate(item) {
             const birthDate = item['تاريخ الولادة'] || '';
-            if (birthDate) return birthDate;
             
+            if (birthDate) {
+                return birthDate;
+            }
+            
+            // إذا كان التاريخ مقسماً إلى أجزاء
             const day = item['المواليد / اليوم'] || '';
             const month = item['المواليد / شهر'] || '';
             const year = item['المواليد / عام'] || '';
@@ -959,28 +844,34 @@ fixed_html = r'''<!DOCTYPE html>
             return item['الولادة والتاريخ'] || '';
         }
         
+        // دالة للحصول على مكان الولادة
         function getBirthPlace(item) {
             return item['مكان الولادة'] || item['الولادة والتاريخ'] || '';
         }
         
+        // دالة للحصول على الرقم الوطني
         function getNationalId(item) {
             return item['الرقم الوطني'] || '';
         }
         
+        // دالة للحصول على التخصص
         function getSpecialty(item) {
             return item['التخصص'] || '';
         }
         
+        // دالة للحصول على المسمى الوظيفي
         function getJobTitle(item) {
             return item['مسمى وظيفي'] || item['الوظيفة'] || '';
         }
         
+        // دالة للحصول على الرقم الذاتي
         function getPersonalId(item) {
             return item['الرقم الذاتي'] || '';
         }
         
-        // Populate dropdown filters
+        // تعبئة القوائم المنسدلة بالخيارات
         function populateFilters() {
+            // جمع جميع الأسماء الفريدة من جميع البيانات
             const names = [...new Set(allData.map(function(item) {
                 const firstName = getFullName(item).split(' ')[0];
                 return firstName || '';
@@ -993,6 +884,7 @@ fixed_html = r'''<!DOCTYPE html>
                 nameFilter.appendChild(option);
             });
             
+            // جمع جميع التخصصات الفريدة من جميع البيانات
             const specialties = [...new Set(allData.map(function(item) { return getSpecialty(item); }))].filter(function(s) { return s; }).sort();
             specialties.forEach(function(specialty) {
                 const option = document.createElement('option');
@@ -1001,6 +893,7 @@ fixed_html = r'''<!DOCTYPE html>
                 specialtyFilter.appendChild(option);
             });
             
+            // جمع جميع أماكن الولادة الفريدة من جميع البيانات
             const locations = [...new Set(allData.map(function(item) { return getBirthPlace(item); }))].filter(function(l) { return l; }).sort();
             locations.forEach(function(location) {
                 const option = document.createElement('option');
@@ -1010,54 +903,78 @@ fixed_html = r'''<!DOCTYPE html>
             });
         }
         
-        // Apply filters and search
+        // تطبيق البحث والتصفية مع تحسين الأداء
         function applyFilters() {
-            const searchTerm = searchInput.value.trim().toLowerCase();
-            const selectedName = nameFilter.value;
-            const selectedSpecialty = specialtyFilter.value;
-            const selectedLocation = locationFilter.value;
+            // إظهار مؤشر التحميل لفترة قصيرة
+            showLoadingIndicator();
             
-            filteredData = allData.filter(function(item) {
-                let matchesSearch = true;
-                if (searchTerm) {
-                    matchesSearch = false;
-                    for (const key in item) {
-                        if (String(item[key]).toLowerCase().includes(searchTerm)) {
+            // السماح للمتصفح بالتنفس
+            setTimeout(function() {
+                let searchTerm = searchInput.value.trim().toLowerCase();
+                let selectedName = nameFilter.value;
+                let selectedSpecialty = specialtyFilter.value;
+                let selectedLocation = locationFilter.value;
+                
+                // عند البحث، نستخدم جميع البيانات
+                filteredData = allData.filter(function(item) {
+                    // تطبيق البحث العام
+                    let matchesSearch = true;
+                    if (searchTerm) {
+                        matchesSearch = false;
+                        // البحث في جميع الحقول
+                        for (const key in item) {
+                            if (String(item[key]).toLowerCase().includes(searchTerm)) {
+                                matchesSearch = true;
+                                break;
+                            }
+                        }
+                        // البحث في الاسم الكامل أيضاً
+                        if (!matchesSearch && getFullName(item).toLowerCase().includes(searchTerm)) {
                             matchesSearch = true;
-                            break;
                         }
                     }
-                    if (!matchesSearch && getFullName(item).toLowerCase().includes(searchTerm)) {
-                        matchesSearch = true;
+                    
+                    // تطبيق تصفية الاسم
+                    let matchesName = true;
+                    if (selectedName) {
+                        const firstName = getFullName(item).split(' ')[0];
+                        matchesName = firstName === selectedName;
                     }
-                }
+                    
+                    // تطبيق تصفية التخصص
+                    let matchesSpecialty = true;
+                    if (selectedSpecialty) {
+                        matchesSpecialty = getSpecialty(item) === selectedSpecialty;
+                    }
+                    
+                    // تطبيق تصفية المكان
+                    let matchesLocation = true;
+                    if (selectedLocation) {
+                        matchesLocation = getBirthPlace(item) === selectedLocation;
+                    }
+                    
+                    return matchesSearch && matchesName && matchesSpecialty && matchesLocation;
+                });
                 
-                let matchesName = true;
-                if (selectedName) {
-                    const firstName = getFullName(item).split(' ')[0];
-                    matchesName = firstName === selectedName;
-                }
+                // إعادة تعيين الصفحة الحالية
+                currentPage = 1;
                 
-                let matchesSpecialty = true;
-                if (selectedSpecialty) {
-                    matchesSpecialty = getSpecialty(item) === selectedSpecialty;
-                }
+                // تحديث البيانات المعروضة
+                currentDisplayData = filteredData;
                 
-                let matchesLocation = true;
-                if (selectedLocation) {
-                    matchesLocation = getBirthPlace(item) === selectedLocation;
-                }
+                // تحديث التقسيم إلى صفحات
+                updatePagination();
                 
-                return matchesSearch && matchesName && matchesSpecialty && matchesLocation;
-            });
-            
-            currentPage = 1;
-            currentDisplayData = filteredData;
-            updatePagination();
-            displayCurrentData();
+                // عرض النتائج
+                displayCurrentData();
+                
+                // إخفاء مؤشر التحميل
+                hideLoadingIndicator();
+                
+            }, 50); // تأخير بسيط لتحسين تجربة المستخدم
         }
         
-        // Display current data
+        // عرض البيانات الحالية
         function displayCurrentData() {
             const searchTerm = searchInput.value.trim().toLowerCase();
             
@@ -1077,6 +994,8 @@ fixed_html = r'''<!DOCTYPE html>
             exportBtn.disabled = currentDisplayData.length === 0;
             
             let html = '';
+            
+            // عرض البيانات الحالية مع التقسيم إلى صفحات إذا لزم الأمر
             let displayItems = currentDisplayData;
             
             if (currentDisplayData.length > itemsPerPage) {
@@ -1085,8 +1004,7 @@ fixed_html = r'''<!DOCTYPE html>
                 displayItems = currentDisplayData.slice(startIndex, endIndex);
             }
             
-            displayItems.forEach(function(item, index) {
-                const globalIndex = (currentPage - 1) * itemsPerPage + index + 1;
+            displayItems.forEach(function(item) {
                 const personalId = getPersonalId(item);
                 const fullName = getFullName(item);
                 const birthPlace = getBirthPlace(item);
@@ -1096,7 +1014,6 @@ fixed_html = r'''<!DOCTYPE html>
                 const jobTitle = getJobTitle(item);
                 
                 html += '<tr>' +
-                    '<td><span class="row-number">' + globalIndex + '</span></td>' +
                     '<td>' + highlightText(personalId, searchTerm) + '</td>' +
                     '<td>' + highlightText(fullName, searchTerm) + '</td>' +
                     '<td>' + highlightText(birthPlace, searchTerm) + '</td>' +
@@ -1110,7 +1027,7 @@ fixed_html = r'''<!DOCTYPE html>
             resultsBody.innerHTML = html;
         }
         
-        // Update pagination
+        // تحديث التقسيم إلى صفحات
         function updatePagination() {
             totalPages = Math.ceil(currentDisplayData.length / itemsPerPage);
             
@@ -1124,7 +1041,7 @@ fixed_html = r'''<!DOCTYPE html>
             }
         }
         
-        // Highlight search text
+        // تمييز نص البحث في النتائج
         function highlightText(text, searchTerm) {
             if (!searchTerm || !text) return text;
             
@@ -1138,7 +1055,7 @@ fixed_html = r'''<!DOCTYPE html>
             return str.replace(regex, '<span class="highlight">$1</span>');
         }
         
-        // Export to CSV
+        // تصدير النتائج إلى ملف CSV
         function exportToCSV() {
             if (filteredData.length === 0) {
                 alert('لا توجد بيانات للتصدير');
@@ -1180,7 +1097,7 @@ fixed_html = r'''<!DOCTYPE html>
             document.body.removeChild(link);
         }
         
-        // Go to page
+        // الانتقال إلى صفحة محددة
         function goToPage(page) {
             if (page < 1 || page > totalPages) return;
             
@@ -1189,7 +1106,17 @@ fixed_html = r'''<!DOCTYPE html>
             displayCurrentData();
         }
         
-        // Event listeners
+        // إظهار مؤشر التحميل
+        function showLoadingIndicator() {
+            loadingIndicator.style.display = 'block';
+        }
+        
+        // إخفاء مؤشر التحميل
+        function hideLoadingIndicator() {
+            loadingIndicator.style.display = 'none';
+        }
+        
+        // إضافة مستمعي الأحداث
         searchBtn.addEventListener('click', applyFilters);
         searchInput.addEventListener('keyup', function(e) {
             if (e.key === 'Enter') applyFilters();
@@ -1203,24 +1130,39 @@ fixed_html = r'''<!DOCTYPE html>
         prevPageBtn.addEventListener('click', function() { goToPage(currentPage - 1); });
         nextPageBtn.addEventListener('click', function() { goToPage(currentPage + 1); });
         
-        // Load data on page load
-        window.addEventListener('DOMContentLoaded', loadData);
+        // عرض التاريخ الحالي
+        function showCurrentDate() {
+            const dateEl = document.getElementById('currentDate');
+            if (dateEl) {
+                const now = new Date();
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                dateEl.textContent = now.toLocaleDateString('ar-SY', options);
+            }
+        }
+        
+        // تحميل البيانات عند فتح الصفحة
+        window.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            showCurrentDate();
+        });
     </script>
 </body>
 </html>'''
 
-# Save the fixed file
-output_path = '/mnt/agents/output/Syrian_Search_System_Fixed.html'
+# Save the final file
+output_path = '/mnt/agents/output/Syrian_Search_System_Final.html'
 with open(output_path, 'w', encoding='utf-8') as f:
-    f.write(fixed_html)
+    f.write(final_html)
 
-print(f"✅ Fixed file saved: {output_path}")
-print(f"📊 Size: {len(fixed_html)} characters")
-print(f"📊 Lines: {len(fixed_html.split(chr(10)))}")
+print(f"✅ Final file saved: {output_path}")
+print(f"📊 Size: {len(final_html)} characters")
+print(f"📊 Lines: {len(final_html.split(chr(10)))}")
 
-# Verify no syntax warnings
+# Verify the JS is correct
 print("\n🔍 Verification:")
-print("- No template literals in JS (using string concatenation)")
-print("- No arrow functions in JS (using regular functions)")
-print("- No escape sequence issues")
-print("- All event listeners properly attached")
+print("- fetch('ali.json') present:", "fetch('ali.json')" in final_html)
+print("- No arrow functions:", "=>" not in final_html)
+print("- No template literals (`):", "`" not in final_html)
+print("- Logo reference:", "Syrian_vertical_logo_.png" in final_html)
+print("- No login page:", "تسجيل الدخول" not in final_html)
+print("- No ministry mention:", "الإدارة المحلية" not in final_html)
