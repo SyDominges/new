@@ -5,920 +5,662 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام البحث في البيانات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* DARK THEME - DEFAULT */
+        /* ============================================================
+           نظام التصميم — أبيض ذهبي هادئ (افتراضي فاتح)
+           ============================================================ */
         :root {
-            --gold: #d4af37;
-            --gold-light: #e8c84b;
-            --gold-dark: #b8941f;
-            --bg: #0a0a0a;
-            --bg-secondary: #141414;
-            --surface: #1a1a1a;
-            --surface-light: #242424;
-            --text: #f0f0f0;
-            --text-muted: #a0a0a0;
-            --glass: rgba(212, 175, 55, 0.08);
-            --glass-border: rgba(212, 175, 55, 0.2);
-            --shadow: rgba(0,0,0,0.5);
-            --input-bg: #141414;
-            --hover-bg: rgba(212, 175, 55, 0.03);
-            --logo-file: url('Syrian_vertical_logo_off-white.png');
-            --transition-speed: 0.5s;
-        }
-
-        /* LIGHT THEME - when body has .light class */
-        body.light {
-            --bg: #f5f0e8;
-            --bg-secondary: #faf6f0;
+            --bg: #faf9f6;
             --surface: #ffffff;
-            --surface-light: #f0ebe3;
-            --text: #1a1a1a;
-            --text-muted: #6b6b6b;
-            --glass: rgba(212, 175, 55, 0.12);
-            --glass-border: rgba(212, 175, 55, 0.3);
-            --shadow: rgba(0,0,0,0.08);
-            --input-bg: #faf6f0;
-            --hover-bg: rgba(212, 175, 55, 0.05);
-            --logo-file: url('Syrian_vertical_logo_(1).png');
+            --surface-2: #f5f3ed;
+            --border: #e6e0d2;
+            --gold: #b8932a;
+            --gold-2: #d4af37;
+            --gold-soft: rgba(212, 175, 55, 0.12);
+            --text: #2b2a26;
+            --text-dim: #8a8578;
+            --green: #27ae60;
+            --red: #c0392b;
+            --radius: 12px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body.dark-mode {
+            --bg: #101014;
+            --surface: #18181f;
+            --surface-2: #1e1e27;
+            --border: rgba(212, 175, 55, 0.2);
+            --gold: #d4af37;
+            --gold-2: #f5d76e;
+            --gold-soft: rgba(212, 175, 55, 0.12);
+            --text: #ece5d0;
+            --text-dim: #9a94a6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
 
         body {
-            font-family: 'Cairo', 'Tajawal', sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            overflow-x: hidden;
-            transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
+            transition: background 0.4s ease, color 0.4s ease;
         }
 
-        /* ===== ANIMATED BACKGROUND ===== */
-        .bg-effects {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.15;
-            animation: orb-float 15s ease-in-out infinite;
-        }
-        .orb-1 {
-            width: 400px; height: 400px;
-            background: var(--gold);
-            top: -100px; right: -100px;
-            animation-delay: 0s;
-        }
-        .orb-2 {
-            width: 300px; height: 300px;
-            background: var(--gold-dark);
-            bottom: -50px; left: -50px;
-            animation-delay: -5s;
-        }
-        .orb-3 {
-            width: 200px; height: 200px;
-            background: var(--gold-light);
-            top: 50%; left: 50%;
-            animation-delay: -10s;
-        }
-        @keyframes orb-float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -30px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-
-        .grid-pattern {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-image: 
-                linear-gradient(rgba(212,175,55,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(212,175,55,0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .particles {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-        .particle {
-            position: absolute;
-            width: 6px; height: 6px;
-            background: var(--gold);
-            border-radius: 50%;
-            opacity: 0;
-            box-shadow: 0 0 10px var(--gold);
-            animation: particle-rise 10s infinite;
-        }
-        @keyframes particle-rise {
-            0% { opacity: 0; transform: translateY(100vh) scale(0) rotate(0deg); }
-            10% { opacity: 0.8; }
-            90% { opacity: 0.8; }
-            100% { opacity: 0; transform: translateY(-10vh) scale(1.5) rotate(360deg); }
-        }
-
-        /* ===== THEME TOGGLE ===== */
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 100;
+        /* الترويسة */
+        header {
             background: var(--surface);
-            border: 2px solid var(--glass-border);
-            border-radius: 50px;
-            padding: 10px 20px;
-            cursor: pointer;
+            border-bottom: 2px solid var(--gold-soft);
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        h1 i { color: var(--gold); margin-left: 10px; }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        /* الحاوية */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px 60px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            margin-bottom: 26px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-family: 'Cairo', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--gold);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px var(--shadow);
-        }
-        .theme-toggle:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(212,175,55,0.2);
-        }
-        .theme-toggle i { font-size: 1.1rem; }
-
-        /* ===== MAIN CONTAINER ===== */
-        .wrapper {
-            position: relative;
-            z-index: 1;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
         }
 
-        /* ===== HEADER ===== */
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
-            animation: fadeInDown 1s ease;
-        }
-        .logo-container {
-            width: 220px;
-            height: 220px;
-            margin: 0 auto 30px;
-            position: relative;
-        }
-        .logo-glow {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 280px; height: 280px;
-            background: radial-gradient(circle, rgba(212,175,55,0.2) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: glow-pulse 3s ease-in-out infinite;
-        }
-        @keyframes glow-pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
-        }
-        .logo-img {
-            width: 100%; height: 100%;
-            object-fit: contain;
-            position: relative;
-            z-index: 2;
-            filter: drop-shadow(0 0 20px rgba(212,175,55,0.3));
-            transition: all 0.5s ease;
-        }
-        .header h1 {
-            font-size: 2.4rem;
-            font-weight: 900;
-            color: var(--gold);
-            text-shadow: 0 0 30px rgba(212,175,55,0.3);
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-            animation: text-shimmer 3s ease-in-out infinite;
-        }
-        @keyframes text-shimmer {
-            0%, 100% { text-shadow: 0 0 30px rgba(212,175,55,0.3); }
-            50% { text-shadow: 0 0 50px rgba(212,175,55,0.5), 0 0 80px rgba(212,175,55,0.2); }
-        }
-        .header p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            font-weight: 400;
-        }
-
-        /* ===== SEARCH PANEL ===== */
-        .search-panel {
-            background: var(--surface);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 40px;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 60px var(--shadow), 0 0 0 1px var(--glass-border);
-            animation: fadeInUp 0.8s ease 0.2s both;
-            transition: all var(--transition-speed) ease;
-        }
-
-        .search-main {
+        /* حالة الملف */
+        .file-status {
             display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            margin-bottom: 18px;
+            border: 1px dashed var(--border);
+            background: var(--surface-2);
+            flex-wrap: wrap;
         }
-        .search-input-wrap {
-            flex: 1;
+
+        .file-status .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--gold);
+            flex-shrink: 0;
+        }
+        .file-status.loading .dot { animation: pulse 1.2s ease infinite; }
+        .file-status.success { color: var(--green); border-color: rgba(39, 174, 96, 0.4); }
+        .file-status.error { color: var(--red); border-color: rgba(192, 57, 43, 0.4); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .file-upload-btn {
+            margin-inline-start: auto;
+            background: var(--gold-soft);
+            color: var(--gold);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 7px;
+        }
+        .file-status.error .file-upload-btn { display: inline-flex; }
+        .file-upload-btn:hover { background: var(--gold); color: #fff; }
+        #fileInput { display: none; }
+
+        /* البحث */
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .input-wrapper {
             position: relative;
+            flex: 1;
         }
-        .search-input-wrap i {
+
+        .input-wrapper i {
             position: absolute;
-            right: 20px;
             top: 50%;
+            right: 16px;
             transform: translateY(-50%);
             color: var(--gold);
-            font-size: 1.1rem;
+            pointer-events: none;
         }
+
         .search-input {
             width: 100%;
-            padding: 18px 55px 18px 20px;
-            background: var(--input-bg);
-            border: 2px solid var(--glass-border);
-            border-radius: 16px;
+            padding: 13px 46px 13px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
             color: var(--text);
-            font-family: 'Cairo', sans-serif;
-            font-size: 1.05rem;
-            transition: all 0.3s ease;
+            font-size: 15px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-        .search-input:focus {
+
+        body.dark-mode .search-input,
+        body.dark-mode .filter-item select { background: var(--surface-2); }
+
+        .search-input::placeholder { color: var(--text-dim); }
+
+        .search-input:focus, .filter-item select:focus {
             outline: none;
             border-color: var(--gold);
-            box-shadow: 0 0 0 4px rgba(212,175,55,0.15), 0 0 30px rgba(212,175,55,0.1);
+            box-shadow: 0 0 0 3px var(--gold-soft);
         }
-        .search-input::placeholder { color: var(--text-muted); }
 
         .search-btn {
-            padding: 0 40px;
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            background: var(--gold);
+            color: #fff;
             border: none;
-            border-radius: 16px;
-            color: #0a0a0a;
-            font-family: 'Cairo', sans-serif;
-            font-size: 1.05rem;
-            font-weight: 800;
+            padding: 13px 32px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 20px rgba(212,175,55,0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        .search-btn::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s ease;
-        }
-        .search-btn:hover::before {
-            left: 100%;
-        }
-        .search-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(212,175,55,0.4);
-        }
-
-        /* ===== FILTERS ===== */
-        .filters-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-        .filter-box {
-            position: relative;
-        }
-        .filter-box label {
-            display: block;
-            color: var(--gold);
-            font-size: 0.9rem;
+            font-size: 15px;
             font-weight: 700;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+            white-space: nowrap;
         }
-        .filter-box label i { font-size: 0.85rem; }
-        .filter-box select {
-            width: 100%;
-            padding: 14px 40px 14px 15px;
-            background: var(--input-bg);
-            border: 2px solid var(--glass-border);
-            border-radius: 12px;
+
+        .search-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+        /* الفلاتر */
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+        }
+
+        .filter-item { display: flex; flex-direction: column; gap: 8px; }
+
+        .filter-item label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .filter-item select {
+            padding: 12px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
             color: var(--text);
-            font-family: 'Cairo', sans-serif;
-            font-size: 0.95rem;
+            font-size: 14px;
             cursor: pointer;
-            transition: all 0.3s ease;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23d4af37' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b8932a' stroke-width='2' fill='none'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: left 15px center;
-        }
-        .filter-box select:focus {
-            outline: none;
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px rgba(212,175,55,0.15);
-        }
-        .filter-box select option {
-            background: var(--surface);
-            color: var(--text);
+            background-position: left 14px center;
         }
 
-        /* ===== STATUS ===== */
-        .status-line {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 25px;
-            padding: 14px;
-            background: var(--glass);
-            border-radius: 12px;
-            border: 1px dashed var(--glass-border);
-            transition: all var(--transition-speed) ease;
-        }
-        .status-line i { color: var(--gold); font-size: 1.1rem; }
-        .status-line span { color: var(--text-muted); font-size: 0.95rem; }
-        .status-line .badge {
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            color: #0a0a0a;
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 800;
-        }
+        .filter-item select option { background: var(--surface); color: var(--text); }
 
-        /* ===== RESULTS PANEL ===== */
-        .results-panel {
-            background: var(--surface);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 20px 60px var(--shadow);
-            animation: fadeInUp 0.8s ease 0.4s both;
-            transition: all var(--transition-speed) ease;
-            display: none;
-        }
-        .results-panel.active {
-            display: block;
-        }
-
-        .results-top {
+        /* شريط النتائج */
+        .results-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--glass-border);
-        }
-        .results-info {
-            display: flex;
-            align-items: center;
+            flex-wrap: wrap;
             gap: 12px;
+            margin-bottom: 20px;
         }
-        .results-info .num {
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            color: #0a0a0a;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 1.2rem;
-            font-weight: 900;
-            box-shadow: 0 4px 15px rgba(212,175,55,0.3);
-            animation: count-pulse 2s ease-in-out infinite;
-        }
-        @keyframes count-pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        .results-info .lbl {
-            color: var(--text-muted);
-            font-size: 1.05rem;
-            font-weight: 500;
-        }
-        .export-btn {
-            padding: 12px 25px;
-            background: transparent;
-            border: 2px solid var(--gold);
-            border-radius: 12px;
-            color: var(--gold);
-            font-family: 'Cairo', sans-serif;
-            font-size: 0.95rem;
+
+        .results-count {
+            font-size: 1rem;
             font-weight: 700;
+        }
+
+        .results-count .badge {
+            background: var(--gold);
+            color: #fff;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.88rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .actions { display: flex; gap: 10px; }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 9px 18px;
+            border-radius: 9px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
             display: flex;
             align-items: center;
-            gap: 10px;
-        }
-        .export-btn:hover:not(:disabled) {
-            background: var(--gold);
-            color: #0a0a0a;
-            box-shadow: 0 4px 20px rgba(212,175,55,0.3);
-        }
-        .export-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            border-color: var(--text-muted);
-            color: var(--text-muted);
+            gap: 7px;
         }
 
-        /* ===== TABLE ===== */
-        .table-wrap {
-            overflow-x: auto;
-            border-radius: 16px;
-            border: 1px solid var(--glass-border);
-        }
-        .data-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            font-size: 0.92rem;
-        }
-        .data-table thead {
-            background: linear-gradient(135deg, #0d2818, #1a5c3a);
-        }
-        .data-table th {
+        .action-btn:hover:not(:disabled) {
+            border-color: var(--gold);
             color: var(--gold);
-            padding: 18px 15px;
-            font-weight: 800;
-            text-align: right;
-            white-space: nowrap;
-            border-bottom: 2px solid var(--gold);
-        }
-        .data-table th:first-child { border-radius: 0 16px 0 0; }
-        .data-table th:last-child { border-radius: 16px 0 0 0; }
-        .data-table td {
-            padding: 15px;
-            border-bottom: 1px solid var(--glass-border);
-            color: var(--text);
-            transition: all 0.2s ease;
-        }
-        .data-table tbody tr {
-            transition: all 0.3s ease;
-        }
-        .data-table tbody tr:nth-child(even) {
-            background: var(--hover-bg);
-        }
-        .data-table tbody tr:hover {
-            background: var(--glass);
-            transform: scale(1.005);
-            box-shadow: 0 4px 15px var(--shadow);
         }
 
-        /* ===== EMPTY STATE ===== */
-        .empty-state {
+        .action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        /* الجدول */
+        .table-wrapper { overflow-x: auto; }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        .results-table th {
+            background: var(--surface-2);
+            color: var(--gold);
+            text-align: right;
+            padding: 14px 14px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            border-bottom: 2px solid var(--gold-soft);
+            white-space: nowrap;
+        }
+
+        .results-table td {
+            padding: 13px 14px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .results-table tbody tr { transition: background 0.2s ease; }
+        .results-table tbody tr:hover { background: var(--gold-soft); }
+
+        .highlight {
+            background: var(--gold-soft);
+            color: var(--gold);
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        /* حالات */
+        .state-box {
             text-align: center;
             padding: 60px 20px;
+            color: var(--text-dim);
         }
-        .empty-state i {
-            font-size: 4rem;
-            color: var(--gold);
-            opacity: 0.3;
-            margin-bottom: 20px;
-            animation: icon-bounce 2s ease-in-out infinite;
-        }
-        @keyframes icon-bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        .empty-state h3 {
-            color: var(--text);
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-        }
-        .empty-state p { color: var(--text-muted); }
 
-        /* ===== PAGINATION ===== */
+        .state-box i {
+            font-size: 3rem;
+            margin-bottom: 18px;
+            color: var(--gold);
+            opacity: 0.4;
+        }
+
+        /* الترقيم */
         .pagination {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 30px;
-            gap: 10px;
+            gap: 12px;
+            margin-top: 22px;
         }
-        .page-btn {
-            padding: 10px 22px;
-            background: var(--input-bg);
-            border: 2px solid var(--glass-border);
-            border-radius: 12px;
-            color: var(--text);
-            font-family: 'Cairo', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
+
+        .pagination-btn {
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--border);
+            padding: 8px 20px;
+            border-radius: 9px;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .page-btn:hover:not(:disabled) {
-            border-color: var(--gold);
-            color: var(--gold);
-            background: var(--glass);
-        }
-        .page-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-        .page-info {
-            padding: 10px 22px;
-            background: var(--glass);
-            border: 2px solid var(--gold);
-            border-radius: 12px;
-            color: var(--gold);
-            font-weight: 800;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
-        /* ===== LOADING ===== */
-        .loading-box {
+        .pagination-btn:hover:not(:disabled) { border-color: var(--gold); }
+        .pagination-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .page-info { font-size: 0.88rem; color: var(--text-dim); }
+
+        /* الفوتر */
+        footer {
             text-align: center;
-            padding: 50px;
-        }
-        .spinner {
-            width: 50px; height: 50px;
-            border: 3px solid var(--glass-border);
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .loading-box p { color: var(--text-muted); font-size: 1rem; }
-
-        /* ===== HIGHLIGHT ===== */
-        .highlight {
-            background: linear-gradient(135deg, rgba(212,175,55,0.3), rgba(212,175,55,0.15));
-            color: var(--gold-light);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 800;
+            padding: 26px 20px;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
         }
 
-        /* ===== SCROLLBAR ===== */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+        .fade-in { animation: fadeIn 0.5s ease both; }
 
-        /* ===== ANIMATIONS ===== */
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(14px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .wrapper { padding: 20px 15px; }
-            .header h1 { font-size: 1.6rem; }
-            .logo-container { width: 150px; height: 150px; }
-            .logo-glow { width: 180px; height: 180px; }
-            .search-main { flex-direction: column; }
-            .search-btn { padding: 15px; justify-content: center; }
-            .filters-row { grid-template-columns: 1fr; }
-            .results-top { flex-direction: column; gap: 15px; }
-            .results-panel, .search-panel { padding: 25px; }
-            .data-table { font-size: 0.85rem; }
-            .data-table th, .data-table td { padding: 12px 10px; }
-            .theme-toggle { top: 10px; left: 10px; padding: 8px 14px; font-size: 0.8rem; }
+        @media (max-width: 700px) {
+            .search-box { flex-direction: column; }
+            header { padding: 30px 16px; }
+            h1 { font-size: 1.4rem; }
+            .card { padding: 20px 16px; }
         }
     </style>
 </head>
 <body>
-    <!-- Background Effects -->
-    <div class="bg-effects">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-    </div>
-    <div class="grid-pattern"></div>
-    <div class="particles" id="particles"></div>
+    <header>
+        <h1><i class="fas fa-database"></i> نظام البحث في البيانات</h1>
+        <p class="subtitle">ابحث وتصفَّ في قاعدة البيانات — مصدر البيانات: ali.json</p>
+    </header>
 
-    <!-- Theme Toggle -->
-    <button class="theme-toggle" id="themeToggle">
-        <i class="fas fa-sun" id="themeIcon"></i>
-        <span id="themeText">وضع فاتح</span>
-    </button>
+    <div class="container">
+        <!-- البحث -->
+        <section class="card fade-in">
+            <div class="card-title"><i class="fas fa-sliders"></i> البحث والتصفية</div>
 
-    <div class="wrapper">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo-container">
-                <div class="logo-glow"></div>
-                <img src="Syrian_vertical_logo_off-white.png" alt="Logo" class="logo-img" id="logoImg">
-            </div>
-            <h1>نظام البحث في البيانات</h1>
-            <p>ابحث في قاعدة البيانات من ملف ali.json</p>
-        </div>
-
-        <!-- Search Panel -->
-        <div class="search-panel">
-            <div class="search-main">
-                <div class="search-input-wrap">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" class="search-input" placeholder="اكتب كلمة للبحث في جميع الحقول...">
-                </div>
-                <button id="searchBtn" class="search-btn">
-                    <i class="fas fa-search"></i> بحث
+            <div class="file-status loading" id="fileStatus">
+                <span class="dot"></span>
+                <span id="fileStatusText">جاري تحميل البيانات...</span>
+                <button class="file-upload-btn" id="uploadTrigger">
+                    <i class="fas fa-upload"></i> رفع ali.json يدوياً
                 </button>
+                <input type="file" id="fileInput" accept=".json">
             </div>
 
-            <div class="filters-row">
-                <div class="filter-box">
-                    <label><i class="fas fa-user"></i> الاسم</label>
-                    <select id="nameFilter"><option value="">الكل</option></select>
-                </div>
-                <div class="filter-box">
-                    <label><i class="fas fa-graduation-cap"></i> التخصص</label>
-                    <select id="specialtyFilter"><option value="">الكل</option></select>
-                </div>
-                <div class="filter-box">
-                    <label><i class="fas fa-map-marker-alt"></i> مكان الولادة</label>
-                    <select id="locationFilter"><option value="">الكل</option></select>
-                </div>
-            </div>
-
-            <div class="status-line" id="statusLine">
-                <i class="fas fa-circle-notch fa-spin"></i>
-                <span>جاري تحميل البيانات... <span class="badge">ali.json</span></span>
-            </div>
-        </div>
-
-        <!-- Results Panel -->
-        <div class="results-panel" id="resultsPanel">
-            <div class="results-top">
-                <div class="results-info">
-                    <span class="lbl">النتائج:</span>
-                    <span class="num" id="resultsCount">0</span>
-                </div>
-                <button id="exportBtn" class="export-btn" disabled>
-                    <i class="fas fa-download"></i> تصدير CSV
-                </button>
-            </div>
-
-            <div id="resultsContainer">
-                <div id="loadingIndicator" class="loading-box">
-                    <div class="spinner"></div>
-                    <p>جاري تحميل البيانات...</p>
-                </div>
-
-                <div class="table-wrap">
-                    <table class="data-table" id="resultsTable" style="display: none;">
-                        <thead>
-                            <tr>
-                                <th>الرقم الذاتي</th>
-                                <th>الاسم الكامل</th>
-                                <th>مكان الولادة</th>
-                                <th>تاريخ الميلاد</th>
-                                <th>الرقم الوطني</th>
-                                <th>التخصص</th>
-                                <th>المسمى الوظيفي</th>
-                            </tr>
-                        </thead>
-                        <tbody id="resultsBody"></tbody>
-                    </table>
-                </div>
-
-                <div id="noResults" class="empty-state" style="display: none;">
+            <div class="search-box">
+                <div class="input-wrapper">
                     <i class="fas fa-search"></i>
-                    <h3>لا توجد نتائج</h3>
-                    <p>جرب كلمات بحث مختلفة</p>
+                    <input type="text" id="searchInput" class="search-input" placeholder="ابحث في جميع الحقول...">
                 </div>
+                <button id="searchBtn" class="search-btn">بحث</button>
+            </div>
+
+            <div class="filters">
+                <div class="filter-item">
+                    <label for="nameFilter">الاسم</label>
+                    <select id="nameFilter"><option value="">جميع الأسماء</option></select>
+                </div>
+                <div class="filter-item">
+                    <label for="specialtyFilter">التخصص</label>
+                    <select id="specialtyFilter"><option value="">جميع التخصصات</option></select>
+                </div>
+                <div class="filter-item">
+                    <label for="locationFilter">مكان الولادة</label>
+                    <select id="locationFilter"><option value="">جميع الأماكن</option></select>
+                </div>
+            </div>
+        </section>
+
+        <!-- النتائج -->
+        <section class="card fade-in">
+            <div class="results-header">
+                <div class="results-count">عدد النتائج <span class="badge" id="resultsCount">0</span></div>
+                <div class="actions">
+                    <button id="exportBtn" class="action-btn" disabled>
+                        <i class="fas fa-file-pdf"></i> تصدير PDF
+                    </button>
+                    <button id="themeToggle" class="action-btn" title="الوضع الداكن">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="loadingIndicator" class="state-box">
+                <div style="width: 44px; height: 44px; margin: 0 auto 18px; border-radius: 50%;
+                     border: 3px solid var(--border); border-top-color: var(--gold);
+                     animation: spin 0.9s linear infinite;"></div>
+                <p>جاري تحميل البيانات...</p>
+            </div>
+
+            <div class="table-wrapper" id="tableWrapper" style="display: none;">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>الرقم الذاتي</th>
+                            <th>الاسم الكامل</th>
+                            <th>مكان الولادة</th>
+                            <th>تاريخ الميلاد</th>
+                            <th>الرقم الوطني</th>
+                            <th>التخصص</th>
+                            <th>المسمى الوظيفي</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody"></tbody>
+                </table>
+            </div>
+
+            <div id="noResults" class="state-box" style="display: none;">
+                <i class="fas fa-search"></i>
+                <p>لا توجد نتائج مطابقة لبحثك</p>
+            </div>
+
+            <div id="initialState" class="state-box">
+                <i class="fas fa-magnifying-glass-chart"></i>
+                <p style="font-weight: 700; color: var(--text); margin-bottom: 6px;">ابدأ بالبحث لعرض النتائج</p>
+                <p style="font-size: 0.85rem;">اكتب كلمة بحث أو اختر من الفلاتر ثم اضغط زر البحث</p>
             </div>
 
             <div id="pagination" class="pagination" style="display: none;">
-                <button id="prevPage" class="page-btn" disabled>السابق</button>
-                <span id="pageInfo" class="page-info">1 / 1</span>
-                <button id="nextPage" class="page-btn" disabled>التالي</button>
+                <button id="prevPage" class="pagination-btn">السابق</button>
+                <span id="pageInfo" class="page-info">صفحة 1 من 1</span>
+                <button id="nextPage" class="pagination-btn">التالي</button>
             </div>
-        </div>
+        </section>
     </div>
 
+    <footer>نظام البحث في البيانات | جميع الحقوق محفوظة © 2026</footer>
+
     <script>
-        // Theme Toggle - Fixed
-        var isDark = true;
-        var themeToggle = document.getElementById('themeToggle');
-        var themeIcon = document.getElementById('themeIcon');
-        var themeText = document.getElementById('themeText');
-        var logoImg = document.getElementById('logoImg');
+        /* ============================================================
+           المنطق البرمجي
+           ============================================================ */
+        let allData = [];
+        let filteredData = [];
+        let currentDisplayData = [];
 
-        themeToggle.addEventListener('click', function() {
-            var body = document.body;
+        const itemsPerPage = 20;
+        const initialDisplayCount = 10;
+        let currentPage = 1;
+        let totalPages = 1;
 
-            if (isDark) {
-                // Switch to light
-                body.classList.add('light');
-                themeIcon.className = 'fas fa-moon';
-                themeText.textContent = 'وضع داكن';
-                logoImg.src = 'Syrian_vertical_logo_(1).png';
-                isDark = false;
-            } else {
-                // Switch to dark
-                body.classList.remove('light');
-                themeIcon.className = 'fas fa-sun';
-                themeText.textContent = 'وضع فاتح';
-                logoImg.src = 'Syrian_vertical_logo_off-white.png';
-                isDark = true;
-            }
-        });
+        const $ = id => document.getElementById(id);
+        const searchInput = $('searchInput'), searchBtn = $('searchBtn');
+        const nameFilter = $('nameFilter'), specialtyFilter = $('specialtyFilter'), locationFilter = $('locationFilter');
+        const resultsBody = $('resultsBody'), resultsCount = $('resultsCount');
+        const noResults = $('noResults'), exportBtn = $('exportBtn');
+        const loadingIndicator = $('loadingIndicator'), tableWrapper = $('tableWrapper');
+        const fileStatus = $('fileStatus'), fileStatusText = $('fileStatusText');
+        const pagination = $('pagination'), prevPageBtn = $('prevPage'), nextPageBtn = $('nextPage'), pageInfo = $('pageInfo');
+        const fileInput = $('fileInput'), uploadTrigger = $('uploadTrigger');
 
-        // Create particles
-        (function() {
-            var container = document.getElementById('particles');
-            for (var i = 0; i < 40; i++) {
-                var p = document.createElement('div');
-                p.className = 'particle';
-                p.style.left = Math.random() * 100 + '%';
-                p.style.animationDelay = Math.random() * 10 + 's';
-                p.style.animationDuration = (8 + Math.random() * 6) + 's';
-                p.style.width = (4 + Math.random() * 4) + 'px';
-                p.style.height = p.style.width;
-                container.appendChild(p);
-            }
-        })();
-
-        // Data
-        var allData = [];
-        var filteredData = [];
-        var currentDisplayData = [];
-        var itemsPerPage = 20;
-        var currentPage = 1;
-        var totalPages = 1;
-        var dataLoaded = false;
-
-        // DOM
-        var searchInput = document.getElementById('searchInput');
-        var searchBtn = document.getElementById('searchBtn');
-        var nameFilter = document.getElementById('nameFilter');
-        var specialtyFilter = document.getElementById('specialtyFilter');
-        var locationFilter = document.getElementById('locationFilter');
-        var resultsBody = document.getElementById('resultsBody');
-        var resultsCount = document.getElementById('resultsCount');
-        var noResults = document.getElementById('noResults');
-        var exportBtn = document.getElementById('exportBtn');
-        var loadingIndicator = document.getElementById('loadingIndicator');
-        var resultsTable = document.getElementById('resultsTable');
-        var statusLine = document.getElementById('statusLine');
-        var pagination = document.getElementById('pagination');
-        var prevPageBtn = document.getElementById('prevPage');
-        var nextPageBtn = document.getElementById('nextPage');
-        var pageInfo = document.getElementById('pageInfo');
-        var resultsPanel = document.getElementById('resultsPanel');
-
-        // Load data silently in background
+        /* ===== التحميل: تلقائي + يدوي ===== */
         async function loadData() {
             try {
-                var response = await fetch('ali.json');
-                if (!response.ok) throw new Error('Failed');
-                var jsonData = await response.json();
-                allData = normalizeData(jsonData);
-                dataLoaded = true;
-
-                statusLine.innerHTML = '<i class="fas fa-check-circle" style="color: var(--gold);"></i><span>جاهز للبحث في <span class="badge">' + allData.length + '</span> سجل</span>';
-
-                populateFilters();
+                const response = await fetch('ali.json');
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const jsonData = await response.json();
+                onDataLoaded(jsonData, 'تلقائياً من ali.json');
             } catch (error) {
-                statusLine.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i><span style="color: #e74c3c;">خطأ: ' + error.message + '</span>';
+                console.warn('فشل التحميل التلقائي:', error);
+                showLoadError();
             }
+        }
+
+        function showLoadError() {
+            setFileStatus('error', 'تعذر تحميل ali.json تلقائياً — اضغط "رفع يدوي" لاختيار الملف');
+            loadingIndicator.innerHTML = `
+                <i class="fas fa-triangle-exclamation" style="color: var(--red); opacity: 1;"></i>
+                <p style="color: var(--red); margin-bottom: 8px;">تعذر تحميل ملف البيانات</p>
+                <p style="font-size: 0.85rem;">استخدم زر "رفع ali.json يدوياً" في الأعلى</p>`;
+        }
+
+        uploadTrigger.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    onDataLoaded(JSON.parse(ev.target.result), 'من الملف: ' + file.name);
+                } catch {
+                    setFileStatus('error', 'الملف المحدد ليس بصيغة JSON صالحة');
+                }
+            };
+            reader.readAsText(file, 'UTF-8');
+        });
+
+        function onDataLoaded(jsonData, source) {
+            allData = normalizeData(jsonData);
+            currentDisplayData = allData.slice(0, initialDisplayCount);
+
+            setFileStatus('success', `تم تحميل ${allData.length.toLocaleString('ar')} سجلاً (${source}) — جاهز للبحث`);
+            loadingIndicator.style.display = 'none';
+
+            populateFilters();
+            // لا نعرض أي سجلات عند الدخول — ننتظر ضغط زر البحث
+        }
+
+        function setFileStatus(type, text) {
+            fileStatus.className = 'file-status ' + type;
+            fileStatusText.textContent = text;
         }
 
         function normalizeData(jsonData) {
             if (!Array.isArray(jsonData)) return [];
-            return jsonData.map(function(item) {
-                var clean = {};
-                for (var key in item) {
-                    var val = item[key];
-                    if (typeof val === 'string') val = val.replace(/^['"]+|['"]+$/g, '').trim();
-                    clean[key] = val;
+            return jsonData.map(item => {
+                const clean = {};
+                for (const key in item) {
+                    let v = item[key];
+                    if (typeof v === 'string') v = v.replace(/^['"]+|['"]+$/g, '').trim();
+                    clean[key] = v;
                 }
                 return clean;
             });
         }
 
-        function getFullName(item) {
-            return ((item['الاسم'] || '') + ' ' + (item['اسم الأب'] || item['الأب'] || '') + ' ' + (item['النسبة'] || item['الكنية'] || '')).trim();
+        /* المستخرجات */
+        const getFullName = i => `${i['الاسم'] || ''} ${i['اسم الأب'] || i['الأب'] || ''} ${i['النسبة'] || i['الكنية'] || ''}`.trim();
+        const getBirthPlace = i => i['مكان الولادة'] || i['الولادة والتاريخ'] || '';
+        const getNationalId = i => i['الرقم الوطني'] || '';
+        const getSpecialty = i => i['التخصص'] || '';
+        const getJobTitle = i => i['مسمى وظيفي'] || i['الوظيفة'] || '';
+        const getPersonalId = i => i['الرقم الذاتي'] || '';
+
+        function getBirthDate(i) {
+            if (i['تاريخ الولادة']) return i['تاريخ الولادة'];
+            const d = i['المواليد / اليوم'], m = i['المواليد / شهر'], y = i['المواليد / عام'];
+            return (d && m && y) ? `${d}/${m}/${y}` : (i['الولادة والتاريخ'] || '');
         }
-        function getBirthDate(item) {
-            if (item['تاريخ الولادة']) return item['تاريخ الولادة'];
-            var d = item['المواليد / اليوم'] || '';
-            var m = item['المواليد / شهر'] || '';
-            var y = item['المواليد / عام'] || '';
-            if (d && m && y) return d + '/' + m + '/' + y;
-            return item['الولادة والتاريخ'] || '';
-        }
-        function getBirthPlace(item) { return item['مكان الولادة'] || item['الولادة والتاريخ'] || ''; }
-        function getNationalId(item) { return item['الرقم الوطني'] || ''; }
-        function getSpecialty(item) { return item['التخصص'] || ''; }
-        function getJobTitle(item) { return item['مسمى وظيفي'] || item['الوظيفة'] || ''; }
-        function getPersonalId(item) { return item['الرقم الذاتي'] || ''; }
 
         function populateFilters() {
-            var names = [...new Set(allData.map(function(i) { return (getFullName(i).split(' ')[0] || ''); }))].filter(function(n) { return n; }).sort();
-            names.forEach(function(n) { var o = document.createElement('option'); o.value = n; o.textContent = n; nameFilter.appendChild(o); });
-            var specs = [...new Set(allData.map(function(i) { return getSpecialty(i); }))].filter(function(s) { return s; }).sort();
-            specs.forEach(function(s) { var o = document.createElement('option'); o.value = s; o.textContent = s; specialtyFilter.appendChild(o); });
-            var locs = [...new Set(allData.map(function(i) { return getBirthPlace(i); }))].filter(function(l) { return l; }).sort();
-            locs.forEach(function(l) { var o = document.createElement('option'); o.value = l; o.textContent = l; locationFilter.appendChild(o); });
+            const unique = fn => [...new Set(allData.map(fn))].filter(v => v).sort();
+            unique(i => getFullName(i).split(' ')[0]).forEach(v => addOption(nameFilter, v));
+            unique(getSpecialty).forEach(v => addOption(specialtyFilter, v));
+            unique(getBirthPlace).forEach(v => addOption(locationFilter, v));
         }
 
+        function addOption(select, value) {
+            const opt = document.createElement('option');
+            opt.value = value; opt.textContent = value;
+            select.appendChild(opt);
+        }
+
+        /* البحث */
         function applyFilters() {
-            if (!dataLoaded) {
-                alert('البيانات قيد التحميل، يرجى الانتظار');
-                return;
-            }
+            loadingIndicator.style.display = 'none';
+            const term = searchInput.value.trim().toLowerCase();
+            const selName = nameFilter.value, selSpec = specialtyFilter.value, selLoc = locationFilter.value;
 
-            var term = searchInput.value.trim().toLowerCase();
-            var name = nameFilter.value;
-            var spec = specialtyFilter.value;
-            var loc = locationFilter.value;
-
-            resultsPanel.classList.add('active');
-            loadingIndicator.style.display = 'block';
-            resultsTable.style.display = 'none';
-            noResults.style.display = 'none';
-
-            filteredData = allData.filter(function(item) {
-                var matchSearch = true;
+            filteredData = allData.filter(item => {
+                let ok = true;
                 if (term) {
-                    matchSearch = false;
-                    for (var key in item) {
-                        if (String(item[key]).toLowerCase().indexOf(term) !== -1) { matchSearch = true; break; }
-                    }
-                    if (!matchSearch && getFullName(item).toLowerCase().indexOf(term) !== -1) matchSearch = true;
+                    ok = Object.values(item).some(v => String(v).toLowerCase().includes(term))
+                      || getFullName(item).toLowerCase().includes(term);
                 }
-                var matchName = true; if (name) matchName = getFullName(item).split(' ')[0] === name;
-                var matchSpec = true; if (spec) matchSpec = getSpecialty(item) === spec;
-                var matchLoc = true; if (loc) matchLoc = getBirthPlace(item) === loc;
-                return matchSearch && matchName && matchSpec && matchLoc;
+                if (ok && selName) ok = getFullName(item).split(' ')[0] === selName;
+                if (ok && selSpec) ok = getSpecialty(item) === selSpec;
+                if (ok && selLoc) ok = getBirthPlace(item) === selLoc;
+                return ok;
             });
 
             currentPage = 1;
             currentDisplayData = filteredData;
+            $('initialState').style.display = 'none';
             updatePagination();
-
-            setTimeout(function() {
-                loadingIndicator.style.display = 'none';
-                displayCurrentData();
-            }, 300);
+            displayCurrentData();
         }
 
         function displayCurrentData() {
-            var term = searchInput.value.trim().toLowerCase();
+            const term = searchInput.value.trim().toLowerCase();
+
             if (currentDisplayData.length === 0) {
                 resultsBody.innerHTML = '';
                 noResults.style.display = 'block';
-                resultsTable.style.display = 'none';
+                $('initialState').style.display = 'none';
+                tableWrapper.style.display = 'none';
                 resultsCount.textContent = '0';
                 exportBtn.disabled = true;
                 pagination.style.display = 'none';
                 return;
             }
+
             noResults.style.display = 'none';
-            resultsTable.style.display = 'table';
-            resultsCount.textContent = currentDisplayData.length;
+            tableWrapper.style.display = 'block';
+            resultsCount.textContent = currentDisplayData.length.toLocaleString('ar');
             exportBtn.disabled = false;
-            var items = currentDisplayData;
+
+            let displayItems = currentDisplayData;
             if (currentDisplayData.length > itemsPerPage) {
-                var start = (currentPage - 1) * itemsPerPage;
-                items = currentDisplayData.slice(start, start + itemsPerPage);
+                const start = (currentPage - 1) * itemsPerPage;
+                displayItems = currentDisplayData.slice(start, start + itemsPerPage);
             }
-            var html = '';
-            items.forEach(function(item) {
-                html += '<tr>' +
-                    '<td>' + highlightText(getPersonalId(item), term) + '</td>' +
-                    '<td>' + highlightText(getFullName(item), term) + '</td>' +
-                    '<td>' + highlightText(getBirthPlace(item), term) + '</td>' +
-                    '<td>' + getBirthDate(item) + '</td>' +
-                    '<td>' + highlightText(getNationalId(item), term) + '</td>' +
-                    '<td>' + highlightText(getSpecialty(item), term) + '</td>' +
-                    '<td>' + highlightText(getJobTitle(item), term) + '</td>' +
-                '</tr>';
-            });
-            resultsBody.innerHTML = html;
+
+            resultsBody.innerHTML = displayItems.map(item => `
+                <tr>
+                    <td>${highlightText(getPersonalId(item), term)}</td>
+                    <td style="font-weight: 600;">${highlightText(getFullName(item), term)}</td>
+                    <td>${highlightText(getBirthPlace(item), term)}</td>
+                    <td style="direction: ltr; text-align: right;">${getBirthDate(item)}</td>
+                    <td style="direction: ltr; text-align: right;">${highlightText(getNationalId(item), term)}</td>
+                    <td>${highlightText(getSpecialty(item), term)}</td>
+                    <td>${highlightText(getJobTitle(item), term)}</td>
+                </tr>
+            `).join('');
         }
 
         function updatePagination() {
@@ -927,59 +669,147 @@
                 pagination.style.display = 'flex';
                 prevPageBtn.disabled = currentPage === 1;
                 nextPageBtn.disabled = currentPage === totalPages;
-                pageInfo.textContent = currentPage + ' / ' + totalPages;
+                pageInfo.textContent = `صفحة ${currentPage} من ${totalPages}`;
             } else {
                 pagination.style.display = 'none';
             }
         }
 
         function highlightText(text, term) {
-            if (!term || !text) return text;
-            var str = String(text);
-            if (str.toLowerCase().indexOf(term) === -1) return str;
-            var esc = term.replace(/[.*+?^${}()|[\]\]/g, '\$&');
-            var re = new RegExp('(' + esc + ')', 'gi');
-            return str.replace(re, '<span class="highlight">$1</span>');
+            if (!term || !text) return text || '';
+            const str = String(text);
+            if (!str.toLowerCase().includes(term)) return str;
+            const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            return str.replace(new RegExp(`(${escaped})`, 'gi'), '<span class="highlight">$1</span>');
         }
 
-        function exportToCSV() {
-            if (filteredData.length === 0) { alert('لا توجد بيانات'); return; }
-            var headers = ['الرقم الذاتي', 'الاسم الكامل', 'مكان الولادة', 'تاريخ الميلاد', 'الرقم الوطني', 'التخصص', 'المسمى الوظيفي'];
-            var csv = headers.join(',') + '
-';
-            filteredData.forEach(function(item) {
-                var row = ['"' + getPersonalId(item) + '"', '"' + getFullName(item) + '"', '"' + getBirthPlace(item) + '"', '"' + getBirthDate(item) + '"', '"' + getNationalId(item) + '"', '"' + getSpecialty(item) + '"', '"' + getJobTitle(item) + '"'];
-                csv += row.join(',') + '
-';
+        /* ===== التصدير إلى PDF — تصميم فاخر ===== */
+        function exportToPDF() {
+            if (filteredData.length === 0) { alert('لا توجد بيانات للتصدير'); return; }
+
+            exportBtn.disabled = true;
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
+
+            const term = searchInput.value.trim();
+            const now = new Date();
+
+            const printTable = document.createElement('div');
+            printTable.style.cssText = 'position:fixed; top:-9999px; right:0; width:1100px; background:#fff; font-family:Tahoma,Arial,sans-serif; direction:rtl; color:#333;';
+            printTable.innerHTML = `
+                <!-- غلاف التقرير -->
+                <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 30px 35px; border-radius: 14px 14px 0 0; border-bottom: 5px solid #d4af37;">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <tr>
+                            <td style="width:70px; vertical-align:middle;">
+                                <div style="width:58px; height:58px; border-radius:50%; background:linear-gradient(135deg,#f5d76e,#b8932a); display:flex; align-items:center; justify-content:center; color:#1a1a1a; font-size:26px; font-weight:bold; border:3px solid rgba(245,215,110,0.4);">✦</div>
+                            </td>
+                            <td style="vertical-align:middle; padding-right:16px;">
+                                <div style="color:#f5d76e; font-size:22px; font-weight:bold;">تقرير نتائج البحث</div>
+                                <div style="color:#c9c2ad; font-size:12px; margin-top:4px;">نظام البحث في قاعدة البيانات الوطنية</div>
+                            </td>
+                            <td style="vertical-align:middle; text-align:left; color:#c9c2ad; font-size:11px;">
+                                <div>تاريخ التصدير: ${now.toLocaleDateString('ar')} — ${now.toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'})}</div>
+                                <div style="margin-top:5px;">عدد السجلات: <span style="color:#f5d76e; font-weight:bold;">${filteredData.length}</span></div>
+                                ${term ? `<div style="margin-top:5px;">كلمة البحث: <span style="color:#f5d76e; font-weight:bold;">${term}</span></div>` : ''}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- شريط معلومات -->
+                <div style="background:#faf6ea; padding:10px 35px; font-size:11px; color:#8a7a3a; border-bottom:1px solid #e8dfc2;">
+                    <span>✦</span> هذا التقرير تم إنشاؤه إلكترونياً من نظام البحث في البيانات ولا يحتاج إلى توقيع
+                </div>
+
+                <!-- الجدول -->
+                <table style="width:100%; border-collapse:collapse; font-size:11.5px; margin-top:15px;">
+                    <thead>
+                        <tr>
+                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a; width:7%;">الرقم الذاتي</th>
+                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a; width:20%;">الاسم الكامل</th>
+                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a; width:13%;">مكان الولادة</th>
+                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a; width:11%;">تاريخ الميلاد</th>
+                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a; width:13%;">الرقم الوطني</th>
+                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a; width:18%;">التخصص</th>
+                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a;">المسمى الوظيفي</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filteredData.map((item, idx) => `
+                        <tr style="background:${idx % 2 === 0 ? '#ffffff' : '#faf8f1'};">
+                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right;">${getPersonalId(item) || '—'}</td>
+                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right; font-weight:bold; color:#2b2a26;">${getFullName(item)}</td>
+                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right;">${getBirthPlace(item) || '—'}</td>
+                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right; direction:ltr;">${getBirthDate(item) || '—'}</td>
+                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right; direction:ltr;">${getNationalId(item) || '—'}</td>
+                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right;">${getSpecialty(item) || '—'}</td>
+                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right;">${getJobTitle(item) || '—'}</td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>
+
+                <!-- تذييل -->
+                <div style="margin-top:20px; padding:14px 35px; background:#faf6ea; border-radius:0 0 14px 14px; border-top:3px solid #d4af37; text-align:center; font-size:10px; color:#8a7a3a;">
+                    نظام البحث في البيانات <span style="color:#d4af37;">✦</span> جميع الحقوق محفوظة © ${now.getFullYear()}
+                </div>`;
+            document.body.appendChild(printTable);
+
+            const worker = html2pdf().set({
+                margin: [10, 8, 14, 8],
+                filename: 'تقرير_نتائج_البحث.pdf',
+                image: { type: 'jpeg', quality: 0.96 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            }).from(printTable);
+
+            // إضافة أرقام الصفحات والتذييل لكل صفحة
+            worker.toPdf().get('pdf').then(pdf => {
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(150, 130, 60);
+                    const w = pdf.internal.pageSize.getWidth();
+                    pdf.text(`صفحة ${i} من ${totalPages}`, w / 2, pdf.internal.pageSize.getHeight() - 4, { align: 'center' });
+                    pdf.text('تقرير نتائج البحث — نظام البحث في البيانات', 8, pdf.internal.pageSize.getHeight() - 4);
+                }
+            }).save().then(() => {
+                document.body.removeChild(printTable);
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = '<i class="fas fa-file-pdf"></i> تصدير PDF';
+            }).catch(() => {
+                document.body.removeChild(printTable);
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = '<i class="fas fa-file-pdf"></i> تصدير PDF';
+                alert('حدث خطأ أثناء إنشاء ملف PDF');
             });
-            var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = 'results.csv';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
         }
 
-        function goToPage(p) {
-            if (p < 1 || p > totalPages) return;
-            currentPage = p;
+        function goToPage(page) {
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
             updatePagination();
             displayCurrentData();
         }
 
-        // Events
+        /* المظهر */
+        const themeToggle = $('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.body.classList.toggle('dark-mode');
+            themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        });
+
+        /* الأحداث */
         searchBtn.addEventListener('click', applyFilters);
-        searchInput.addEventListener('keyup', function(e) { if (e.key === 'Enter') applyFilters(); });
+        searchInput.addEventListener('keyup', e => { if (e.key === 'Enter') applyFilters(); });
         nameFilter.addEventListener('change', applyFilters);
         specialtyFilter.addEventListener('change', applyFilters);
         locationFilter.addEventListener('change', applyFilters);
-        exportBtn.addEventListener('click', exportToCSV);
-        prevPageBtn.addEventListener('click', function() { goToPage(currentPage - 1); });
-        nextPageBtn.addEventListener('click', function() { goToPage(currentPage + 1); });
+        exportBtn.addEventListener('click', exportToPDF);
+        prevPageBtn.addEventListener('click', () => goToPage(currentPage - 1));
+        nextPageBtn.addEventListener('click', () => goToPage(currentPage + 1));
 
-        // Init
         window.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
