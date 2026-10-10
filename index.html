@@ -3,399 +3,519 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المنظومة الوطنية للبحث في البيانات</title>
+    <title>بوابة البيانات الوطنية</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
-            --bg: #f4f2ec;
-            --surface: #ffffff;
-            --surface-2: #faf8f2;
-            --border: #e4ddca;
-            --gold: #b8932a;
-            --gold-bright: #d4af37;
-            --gold-deep: #8f6f1d;
-            --gold-soft: rgba(184, 147, 42, 0.1);
-            --ink: #23211b;
-            --ink-soft: #6f6a5a;
-            --green: #1e8f52;
-            --red: #b3392b;
-            --radius: 14px;
-        }
-
-        body.dark-mode {
-            --bg: #111014;
-            --surface: #1a191f;
-            --surface-2: #201f26;
-            --border: rgba(212, 175, 55, 0.22);
+            --bg: #0d1117;
+            --bg-2: #11161d;
+            --surface: #161d27;
+            --surface-2: #1b232f;
+            --line: #232c3a;
+            --line-soft: #1e2733;
             --gold: #d4af37;
-            --gold-bright: #f5d76e;
-            --gold-deep: #b8932a;
             --gold-soft: rgba(212, 175, 55, 0.12);
-            --ink: #ece4cd;
-            --ink-soft: #9a937f;
+            --text: #e6e1d3;
+            --muted: #8b93a1;
+            --green: #3fb96f;
+            --red: #d05a4a;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; }
+        button { font-family: inherit; }
 
-        body { background: var(--bg); color: var(--ink); min-height: 100vh; transition: background 0.4s, color 0.4s; }
-
-        /* الشريط العلوي */
-        .top-strip {
-            height: 6px;
-            background: linear-gradient(90deg, var(--gold-deep), var(--gold-bright), var(--gold-deep));
-        }
-
-        /* الترويسة */
-        header {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .header-inner {
-            max-width: 1240px;
-            margin: 0 auto;
-            padding: 22px 24px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .logo-wrap {
-            width: 84px; height: 84px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold-deep));
+        /* شاشة الدخول */
+        #loginScreen {
+            position: fixed; inset: 0; z-index: 200;
+            background:
+                radial-gradient(ellipse 700px 400px at 50% 20%, rgba(212,175,55,0.07), transparent),
+                var(--bg);
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 18px rgba(184, 147, 42, 0.35);
-            flex-shrink: 0;
-            padding: 10px;
+            padding: 20px;
         }
 
-        .logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+        .login-box {
+            width: 100%; max-width: 400px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 44px 36px;
+            text-align: center;
+            box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+            animation: rise 0.55s ease both;
+        }
 
-        .header-text { flex: 1; }
-        .header-text h1 { font-size: 1.55rem; font-weight: 800; letter-spacing: 0.3px; }
-        .header-text h1 span { color: var(--gold); }
-        .header-text p { color: var(--ink-soft); font-size: 0.88rem; margin-top: 5px; }
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        .header-side { text-align: left; }
-        .clock { font-size: 0.85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-        .clock b { color: var(--gold); }
+        .login-logo {
+            width: 108px; height: 108px;
+            margin: 0 auto 8px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .login-logo img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 6px 20px rgba(212,175,55,0.25)); }
 
-        /* الحاوية */
-        .container { max-width: 1240px; margin: 0 auto; padding: 28px 24px 50px; }
+        .login-title { font-size: 1.3rem; font-weight: 800; margin-top: 10px; }
+        .login-title span { color: var(--gold); }
+        .login-sub { color: var(--muted); font-size: 0.84rem; margin: 8px 0 30px; }
+
+        .pass-field { position: relative; margin-bottom: 14px; }
+        .pass-field i {
+            position: absolute; top: 50%; right: 16px;
+            transform: translateY(-50%);
+            color: var(--gold); font-size: 0.9rem;
+        }
+        .pass-field .toggle-eye {
+            left: 16px; right: auto; cursor: pointer;
+            color: var(--muted);
+        }
+        #passInput {
+            width: 100%;
+            padding: 14px 46px 14px 44px;
+            background: var(--bg-2);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 16px;
+            letter-spacing: 3px;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+        #passInput::placeholder { letter-spacing: 0; color: var(--muted); font-size: 14px; }
+        #passInput:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-soft);
+        }
+
+        .login-error {
+            color: var(--red); font-size: 0.82rem;
+            min-height: 20px; margin-bottom: 8px;
+        }
+
+        #loginBtn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #e8c656, var(--gold), #a8842a);
+            color: #16130a;
+            border: none; border-radius: 12px;
+            font-size: 15px; font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.25s;
+            box-shadow: 0 6px 22px rgba(212,175,55,0.22);
+        }
+        #loginBtn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(212,175,55,0.32); }
+
+        .login-hint { margin-top: 22px; color: var(--muted); font-size: 0.76rem; }
+        .shake { animation: shake 0.45s ease; }
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            25% { transform: translateX(-9px); }
+            75% { transform: translateX(9px); }
+        }
+
+        /* الهيكل الرئيسي */
+        #app { display: none; }
+        #app.visible { display: block; animation: fadeIn 0.6s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(13, 17, 23, 0.88);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--line-soft);
+        }
+        .topbar-inner {
+            max-width: 1260px; margin: 0 auto;
+            padding: 13px 24px;
+            display: flex; align-items: center; gap: 16px;
+        }
+        .app-logo { width: 52px; height: 52px; flex-shrink: 0; }
+        .app-logo img { width: 100%; height: 100%; object-fit: contain; }
+        .app-title { flex: 1; }
+        .app-title h1 { font-size: 1.15rem; font-weight: 800; }
+        .app-title h1 em { font-style: normal; color: var(--gold); }
+        .app-title p { color: var(--muted); font-size: 0.78rem; margin-top: 2px; }
+
+        .topbar-actions { display: flex; align-items: center; gap: 10px; }
+        .icon-btn {
+            width: 40px; height: 40px;
+            background: var(--surface); border: 1px solid var(--line);
+            color: var(--muted); border-radius: 11px;
+            cursor: pointer; font-size: 0.92rem;
+            transition: all 0.25s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .icon-btn:hover { color: var(--gold); border-color: var(--gold); }
+        .logout-btn { width: auto; padding: 0 16px; font-size: 0.82rem; font-weight: 700; gap: 7px; color: var(--red); }
+        .logout-btn:hover { border-color: var(--red); color: var(--red); background: rgba(208,90,74,0.08); }
+
+        .container { max-width: 1260px; margin: 0 auto; padding: 28px 24px 60px; }
 
         .card {
             background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 26px;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            border: 1px solid var(--line-soft);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 22px;
         }
 
         .card-head {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding-bottom: 14px;
-            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 13px;
+            margin-bottom: 18px;
         }
-
-        .card-head .icon {
-            width: 38px; height: 38px;
-            border-radius: 10px;
+        .card-head .chip {
+            width: 40px; height: 40px; border-radius: 12px;
             background: var(--gold-soft);
             color: var(--gold);
             display: flex; align-items: center; justify-content: center;
             font-size: 0.95rem;
+            border: 1px solid rgba(212,175,55,0.18);
         }
+        .card-head h2 { font-size: 0.98rem; font-weight: 700; }
+        .card-head .spacer { flex: 1; }
 
-        .card-head h2 { font-size: 1rem; font-weight: 700; }
-
-        /* حالة الملف */
         .file-status {
             display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-            padding: 12px 16px; border-radius: 10px;
-            font-size: 0.88rem; margin-bottom: 18px;
-            border: 1px dashed var(--border); background: var(--surface-2);
+            padding: 11px 15px; border-radius: 11px;
+            font-size: 0.85rem; margin-bottom: 18px;
+            background: var(--surface-2);
+            border: 1px dashed var(--line);
         }
-
-        .file-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+        .file-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
         .file-status.loading .dot { animation: pulse 1.2s infinite; }
-        .file-status.success { color: var(--green); border-color: rgba(30, 143, 82, 0.35); }
+        .file-status.success { color: var(--green); border-color: rgba(63,185,111,0.35); }
         .file-status.success .dot { background: var(--green); }
-        .file-status.error { color: var(--red); border-color: rgba(179, 57, 43, 0.35); }
+        .file-status.error { color: var(--red); border-color: rgba(208,90,74,0.35); }
         .file-status.error .dot { background: var(--red); }
-
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
 
         .upload-btn {
             margin-inline-start: auto;
             display: none; align-items: center; gap: 7px;
-            background: var(--gold); color: #fff; border: none;
-            padding: 8px 16px; border-radius: 8px;
-            font-size: 0.82rem; font-weight: 700; cursor: pointer;
+            background: var(--gold); color: #16130a; border: none;
+            padding: 8px 15px; border-radius: 9px;
+            font-size: 0.8rem; font-weight: 800; cursor: pointer;
         }
         .file-status.error .upload-btn { display: inline-flex; }
-        .upload-btn:hover { opacity: 0.88; }
+        .upload-btn:hover { filter: brightness(1.1); }
         #fileInput { display: none; }
 
-        /* البحث */
-        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-
-        .input-wrapper { position: relative; flex: 1; }
-        .input-wrapper i {
+        .search-row { display: flex; gap: 10px; margin-bottom: 18px; }
+        .input-wrap { position: relative; flex: 1; }
+        .input-wrap > i {
             position: absolute; top: 50%; right: 16px;
-            transform: translateY(-50%); color: var(--gold); pointer-events: none;
+            transform: translateY(-50%);
+            color: var(--gold); pointer-events: none;
         }
-
         .search-input {
             width: 100%; padding: 13px 44px 13px 14px;
-            background: var(--surface-2); border: 1px solid var(--border);
-            border-radius: 10px; color: var(--ink); font-size: 15px;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            color: var(--text); font-size: 15px;
             transition: border-color 0.25s, box-shadow 0.25s;
         }
-        .search-input::placeholder { color: var(--ink-soft); }
-        .search-input:focus {
-            outline: none; border-color: var(--gold);
-            box-shadow: 0 0 0 3px var(--gold-soft);
+        .search-input::placeholder { color: var(--muted); }
+        .search-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #e8c656, var(--gold), #a8842a);
+            color: #16130a; border: none;
+            padding: 13px 34px; border-radius: 12px;
+            font-size: 15px; font-weight: 800;
+            cursor: pointer; white-space: nowrap;
+            transition: transform 0.2s, box-shadow 0.25s;
+            box-shadow: 0 4px 18px rgba(212,175,55,0.2);
         }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(212,175,55,0.32); }
 
-        .search-btn {
-            background: linear-gradient(135deg, var(--gold-bright), var(--gold-deep));
-            color: #fff; border: none; padding: 13px 36px;
-            border-radius: 10px; cursor: pointer;
-            font-size: 15px; font-weight: 700;
-            transition: opacity 0.25s, transform 0.2s;
-            white-space: nowrap;
-        }
-        .search-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-
-        /* الفلاتر */
-        .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
-
+        .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 15px; }
         .filter-item { display: flex; flex-direction: column; gap: 8px; }
-        .filter-item label { font-size: 0.8rem; font-weight: 700; color: var(--gold); }
-
+        .filter-item label { font-size: 0.78rem; font-weight: 700; color: var(--gold); letter-spacing: 0.3px; }
         .filter-item select {
             padding: 12px 14px;
-            background: var(--surface-2); border: 1px solid var(--border);
-            border-radius: 10px; color: var(--ink); font-size: 14px; cursor: pointer;
+            background: var(--surface-2);
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            color: var(--text); font-size: 14px; cursor: pointer;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b8932a' stroke-width='2' fill='none'/%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: left 14px center;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23d4af37' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 14px center;
         }
         .filter-item select:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
-        .filter-item select option { background: var(--surface); color: var(--ink); }
+        .filter-item select option { background: var(--surface); color: var(--text); }
 
-        /* شريط النتائج */
         .results-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap; gap: 12px; margin-bottom: 18px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
         }
-
-        .results-count { font-size: 0.98rem; font-weight: 700; }
+        .results-count { font-size: 0.95rem; font-weight: 700; }
         .results-count .badge {
-            background: linear-gradient(135deg, var(--gold-bright), var(--gold-deep));
-            color: #fff; padding: 4px 15px; border-radius: 20px;
-            font-size: 0.85rem; font-variant-numeric: tabular-nums;
+            background: var(--gold-soft);
+            color: var(--gold);
+            border: 1px solid rgba(212,175,55,0.3);
+            padding: 4px 14px; border-radius: 20px;
+            font-size: 0.84rem; font-variant-numeric: tabular-nums;
         }
-
         .actions { display: flex; gap: 9px; }
-
         .action-btn {
-            background: transparent; border: 1px solid var(--border);
-            color: var(--ink-soft); padding: 9px 17px; border-radius: 9px;
-            cursor: pointer; font-size: 0.84rem; font-weight: 600;
-            transition: all 0.25s; display: flex; align-items: center; gap: 7px;
+            background: var(--surface-2); border: 1px solid var(--line);
+            color: var(--muted); padding: 9px 17px; border-radius: 10px;
+            cursor: pointer; font-size: 0.83rem; font-weight: 700;
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.25s;
         }
-        .action-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+        .action-btn:hover:not(:disabled) { color: var(--gold); border-color: var(--gold); }
         .action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-        /* الجدول */
-        .table-wrapper { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
-
-        .results-table { width: 100%; border-collapse: collapse; min-width: 850px; }
-
-        .results-table th {
-            background: var(--surface-2); color: var(--gold);
-            text-align: right; padding: 13px 14px;
-            font-size: 0.8rem; font-weight: 700;
-            border-bottom: 2px solid var(--gold-soft); white-space: nowrap;
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--line-soft);
+            border-radius: 13px;
         }
-
-        .results-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 0.89rem; }
+        .results-table { width: 100%; border-collapse: collapse; min-width: 860px; }
+        .results-table th {
+            background: var(--surface-2);
+            color: var(--gold);
+            text-align: right; padding: 13px 15px;
+            font-size: 0.79rem; font-weight: 700;
+            border-bottom: 2px solid rgba(212,175,55,0.2);
+            white-space: nowrap;
+        }
+        .results-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--line-soft);
+            font-size: 0.88rem;
+        }
         .results-table tbody tr { transition: background 0.2s; }
         .results-table tbody tr:hover { background: var(--gold-soft); }
+        .highlight {
+            background: var(--gold-soft); color: var(--gold);
+            padding: 1px 6px; border-radius: 5px; font-weight: 700;
+        }
 
-        .highlight { background: var(--gold-soft); color: var(--gold); padding: 1px 5px; border-radius: 4px; font-weight: 700; }
-
-        /* الحالات */
-        .state-box { text-align: center; padding: 55px 20px; color: var(--ink-soft); }
-        .state-box i { font-size: 2.6rem; margin-bottom: 16px; color: var(--gold); opacity: 0.45; }
-        .state-box p { font-size: 0.95rem; }
-
+        .state-box { text-align: center; padding: 52px 20px; color: var(--muted); }
+        .state-box i { font-size: 2.4rem; margin-bottom: 15px; color: var(--gold); opacity: 0.5; }
+        .state-box p { font-size: 0.92rem; }
         .spinner {
             width: 42px; height: 42px; margin: 0 auto 18px;
-            border-radius: 50%; border: 3px solid var(--border);
-            border-top-color: var(--gold);
+            border-radius: 50%;
+            border: 3px solid var(--line); border-top-color: var(--gold);
             animation: spin 0.9s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* الترقيم */
         .pagination {
             display: flex; justify-content: center; align-items: center;
             gap: 12px; margin-top: 20px;
         }
         .pagination-btn {
-            background: transparent; color: var(--gold); border: 1px solid var(--border);
-            padding: 8px 20px; border-radius: 9px; cursor: pointer;
-            font-size: 0.84rem; font-weight: 600;
+            background: var(--surface-2); border: 1px solid var(--line);
+            color: var(--gold); padding: 8px 20px; border-radius: 10px;
+            cursor: pointer; font-size: 0.83rem; font-weight: 700;
+            transition: border-color 0.25s;
         }
         .pagination-btn:hover:not(:disabled) { border-color: var(--gold); }
         .pagination-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-        .page-info { font-size: 0.86rem; color: var(--ink-soft); }
+        .page-info { font-size: 0.85rem; color: var(--muted); }
 
-        /* الفوتر */
         footer {
-            border-top: 1px solid var(--border); background: var(--surface);
-            padding: 22px 24px; text-align: center;
+            border-top: 1px solid var(--line-soft);
+            padding: 24px; text-align: center;
         }
-        footer p { color: var(--ink-soft); font-size: 0.84rem; }
-        footer .f-logo { height: 26px; vertical-align: middle; margin-left: 8px; opacity: 0.75; }
+        footer p { color: var(--muted); font-size: 0.82rem; }
+        footer img { height: 24px; vertical-align: middle; margin-left: 8px; opacity: 0.85; }
 
-        .fade-in { animation: fadeIn 0.5s ease both; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-
-        @media (max-width: 720px) {
-            .header-inner { flex-direction: column; text-align: center; }
-            .header-side { text-align: center; }
-            .search-box { flex-direction: column; }
-            h1 { font-size: 1.25rem; }
+        @media (max-width: 700px) {
+            .search-row { flex-direction: column; }
+            .topbar-inner { padding: 12px 16px; }
+            .app-title h1 { font-size: 1rem; }
         }
     </style>
 </head>
 <body>
-    <div class="top-strip"></div>
 
-    <header>
-        <div class="header-inner">
-            <div class="logo-wrap">
-                <img src="logo.png" alt="الشعار" onerror="this.style.display='none'">
+    <div id="loginScreen">
+        <div class="login-box" id="loginBox">
+            <div class="login-logo">
+                <img src="logo.png" alt="الشعار">
             </div>
-            <div class="header-text">
-                <h1>المنظومة الوطنية <span>للبحث في البيانات</span></h1>
-                <p>البحث المتقدم في السجلات الوطنية — سرعة، دقة، وموثوقية</p>
+            <div class="login-title">بوابة <span>البيانات الوطنية</span></div>
+            <p class="login-sub">منطقة محمية — أدخل كلمة السر للمتابعة</p>
+
+            <div class="pass-field">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="passInput" placeholder="كلمة السر" autocomplete="off">
+                <i class="fas fa-eye toggle-eye" id="eyeToggle"></i>
             </div>
-            <div class="header-side">
-                <div class="clock" id="clock"></div>
-            </div>
+
+            <div class="login-error" id="loginError"></div>
+
+            <button id="loginBtn"><i class="fas fa-right-to-bracket"></i> دخول</button>
+
+            <p class="login-hint">© 2026 — جميع الحقوق محفوظة</p>
         </div>
-    </header>
-
-    <div class="container">
-        <!-- البحث -->
-        <section class="card fade-in">
-            <div class="card-head">
-                <div class="icon"><i class="fas fa-magnifying-glass"></i></div>
-                <h2>البحث والتصفية</h2>
-            </div>
-
-            <div class="file-status loading" id="fileStatus">
-                <span class="dot"></span>
-                <span id="fileStatusText">جاري تجهيز قاعدة البيانات...</span>
-                <button class="upload-btn" id="uploadTrigger"><i class="fas fa-upload"></i> رفع ali.json</button>
-                <input type="file" id="fileInput" accept=".json">
-            </div>
-
-            <div class="search-box">
-                <div class="input-wrapper">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" class="search-input" placeholder="ابحث في جميع الحقول: الاسم، الرقم الوطني، التخصص...">
-                </div>
-                <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i> بحث</button>
-            </div>
-
-            <div class="filters">
-                <div class="filter-item">
-                    <label for="nameFilter">الاسم</label>
-                    <select id="nameFilter"><option value="">جميع الأسماء</option></select>
-                </div>
-                <div class="filter-item">
-                    <label for="specialtyFilter">التخصص</label>
-                    <select id="specialtyFilter"><option value="">جميع التخصصات</option></select>
-                </div>
-                <div class="filter-item">
-                    <label for="locationFilter">مكان الولادة</label>
-                    <select id="locationFilter"><option value="">جميع الأماكن</option></select>
-                </div>
-            </div>
-        </section>
-
-        <!-- النتائج -->
-        <section class="card fade-in">
-            <div class="results-bar">
-                <div class="results-count">النتائج <span class="badge" id="resultsCount">0</span></div>
-                <div class="actions">
-                    <button id="exportBtn" class="action-btn" disabled>
-                        <i class="fas fa-file-pdf"></i> تصدير PDF
-                    </button>
-                    <button id="themeToggle" class="action-btn" title="الوضع الداكن">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div id="loadingIndicator" class="state-box">
-                <div class="spinner"></div>
-                <p>جاري تجهيز قاعدة البيانات...</p>
-            </div>
-
-            <div id="initialState" class="state-box">
-                <i class="fas fa-folder-open"></i>
-                <p style="font-weight: 700; color: var(--ink); margin-bottom: 6px;">لا توجد نتائج بعد</p>
-                <p style="font-size: 0.85rem;">اكتب كلمة بحث أو اختر من الفلاتر ثم اضغط زر البحث</p>
-            </div>
-
-            <div class="table-wrapper" id="tableWrapper" style="display: none;">
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>الرقم الذاتي</th>
-                            <th>الاسم الكامل</th>
-                            <th>مكان الولادة</th>
-                            <th>تاريخ الميلاد</th>
-                            <th>الرقم الوطني</th>
-                            <th>التخصص</th>
-                            <th>المسمى الوظيفي</th>
-                        </tr>
-                    </thead>
-                    <tbody id="resultsBody"></tbody>
-                </table>
-            </div>
-
-            <div id="noResults" class="state-box" style="display: none;">
-                <i class="fas fa-circle-xmark"></i>
-                <p>لا توجد نتائج مطابقة لبحثك — جرّب كلمات أخرى</p>
-            </div>
-
-            <div id="pagination" class="pagination" style="display: none;">
-                <button id="prevPage" class="pagination-btn"><i class="fas fa-chevron-right"></i> السابق</button>
-                <span id="pageInfo" class="page-info">صفحة 1 من 1</span>
-                <button id="nextPage" class="pagination-btn">التالي <i class="fas fa-chevron-left"></i></button>
-            </div>
-        </section>
     </div>
 
-    <footer>
-        <p><img src="logo.png" class="f-logo" alt="" onerror="this.remove()"> المنظومة الوطنية للبحث في البيانات — جميع الحقوق محفوظة © 2026</p>
-    </footer>
+    <div id="app">
+        <div class="topbar">
+            <div class="topbar-inner">
+                <div class="app-logo"><img src="logo.png" alt="الشعار"></div>
+                <div class="app-title">
+                    <h1>بوابة <em>البيانات الوطنية</em></h1>
+                    <p>نظام البحث المتقدم في السجلات</p>
+                </div>
+                <div class="topbar-actions">
+                    <button class="icon-btn" title="النظام آمن"><i class="fas fa-shield-halved"></i></button>
+                    <button class="icon-btn logout-btn" id="logoutBtn"><i class="fas fa-power-off"></i> خروج</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <section class="card">
+                <div class="card-head">
+                    <div class="chip"><i class="fas fa-magnifying-glass"></i></div>
+                    <h2>البحث والتصفية</h2>
+                    <div class="spacer"></div>
+                </div>
+
+                <div class="file-status loading" id="fileStatus">
+                    <span class="dot"></span>
+                    <span id="fileStatusText">جاري تجهيز قاعدة البيانات...</span>
+                    <button class="upload-btn" id="uploadTrigger"><i class="fas fa-upload"></i> رفع ali.json</button>
+                    <input type="file" id="fileInput" accept=".json">
+                </div>
+
+                <div class="search-row">
+                    <div class="input-wrap">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" class="search-input" placeholder="ابحث في جميع الحقول: الاسم، الرقم الوطني، التخصص...">
+                    </div>
+                    <button id="searchBtn" class="btn-gold"><i class="fas fa-search"></i> بحث</button>
+                </div>
+
+                <div class="filters">
+                    <div class="filter-item">
+                        <label for="nameFilter">الاسم</label>
+                        <select id="nameFilter"><option value="">جميع الأسماء</option></select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="specialtyFilter">التخصص</label>
+                        <select id="specialtyFilter"><option value="">جميع التخصصات</option></select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="locationFilter">مكان الولادة</label>
+                        <select id="locationFilter"><option value="">جميع الأماكن</option></select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="results-bar">
+                    <div class="results-count">النتائج <span class="badge" id="resultsCount">0</span></div>
+                    <div class="actions">
+                        <button id="exportBtn" class="action-btn" disabled>
+                            <i class="fas fa-file-pdf"></i> تصدير PDF
+                        </button>
+                    </div>
+                </div>
+
+                <div id="loadingIndicator" class="state-box">
+                    <div class="spinner"></div>
+                    <p>جاري تجهيز قاعدة البيانات...</p>
+                </div>
+
+                <div id="initialState" class="state-box">
+                    <i class="fas fa-folder-open"></i>
+                    <p style="font-weight: 700; color: var(--text); margin-bottom: 5px;">لا توجد نتائج بعد</p>
+                    <p style="font-size: 0.84rem;">اكتب كلمة بحث أو اختر من الفلاتر ثم اضغط زر البحث</p>
+                </div>
+
+                <div class="table-wrap" id="tableWrapper" style="display: none;">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>الرقم الذاتي</th>
+                                <th>الاسم الكامل</th>
+                                <th>مكان الولادة</th>
+                                <th>تاريخ الميلاد</th>
+                                <th>الرقم الوطني</th>
+                                <th>التخصص</th>
+                                <th>المسمى الوظيفي</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody"></tbody>
+                    </table>
+                </div>
+
+                <div id="noResults" class="state-box" style="display: none;">
+                    <i class="fas fa-circle-xmark"></i>
+                    <p>لا توجد نتائج مطابقة لبحثك — جرّب كلمات أخرى</p>
+                </div>
+
+                <div id="pagination" class="pagination" style="display: none;">
+                    <button id="prevPage" class="pagination-btn"><i class="fas fa-chevron-right"></i> السابق</button>
+                    <span id="pageInfo" class="page-info">صفحة 1 من 1</span>
+                    <button id="nextPage" class="pagination-btn">التالي <i class="fas fa-chevron-left"></i></button>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p><img src="logo.png" alt="">بوابة البيانات الوطنية — نظام آمن للبحث في السجلات © 2026</p>
+        </footer>
+    </div>
 
     <script>
-        /* =================== البيانات =================== */
+        /* ==================== كلمة السر — غيّرها من هنا ==================== */
+        const APP_PASSWORD = "1234";
+
+        const loginScreen = document.getElementById('loginScreen');
+        const app = document.getElementById('app');
+        const passInput = document.getElementById('passInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+        const loginBox = document.getElementById('loginBox');
+        const eyeToggle = document.getElementById('eyeToggle');
+
+        function tryLogin() {
+            if (passInput.value === APP_PASSWORD) {
+                loginScreen.style.transition = 'opacity 0.5s ease';
+                loginScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loginScreen.style.display = 'none';
+                    app.classList.add('visible');
+                    loadData();
+                }, 500);
+            } else {
+                loginError.textContent = 'كلمة السر غير صحيحة — حاول مجدداً';
+                loginBox.classList.remove('shake');
+                void loginBox.offsetWidth;
+                loginBox.classList.add('shake');
+                passInput.value = '';
+                passInput.focus();
+            }
+        }
+
+        loginBtn.addEventListener('click', tryLogin);
+        passInput.addEventListener('keyup', e => { if (e.key === 'Enter') tryLogin(); });
+        passInput.focus();
+
+        eyeToggle.addEventListener('click', () => {
+            const show = passInput.type === 'password';
+            passInput.type = show ? 'text' : 'password';
+            eyeToggle.className = show ? 'fas fa-eye-slash toggle-eye' : 'fas fa-eye toggle-eye';
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => location.reload());
+
+        /* ==================== البيانات ==================== */
         let allData = [], filteredData = [], currentDisplayData = [];
         const itemsPerPage = 20;
         let currentPage = 1, totalPages = 1;
@@ -410,7 +530,6 @@
         const pagination = $('pagination'), prevPageBtn = $('prevPage'), nextPageBtn = $('nextPage'), pageInfo = $('pageInfo');
         const fileInput = $('fileInput'), uploadTrigger = $('uploadTrigger');
 
-        /* =================== التحميل =================== */
         async function loadData() {
             try {
                 const res = await fetch('ali.json');
@@ -443,7 +562,6 @@
             setFileStatus('success', `قاعدة البيانات جاهزة — ${allData.length.toLocaleString('ar')} سجلاً (تحميل ${source})`);
             loadingIndicator.style.display = 'none';
             populateFilters();
-            /* لا عرض مبدئي — ننتظر البحث */
         }
 
         function setFileStatus(type, text) {
@@ -464,8 +582,7 @@
             });
         }
 
-        /* =================== المستخرجات =================== */
-        const getFullName = i => `${i['الاسم'] || ''} ${i['اسم الأب'] || i['الأب'] || ''} ${i['النسبة'] || i['الكنية'] || ''}`.trim();
+        const getFullName = i => `${i['الاسم'] || ''} ${i['اسم الأب'] || i['الأب'] || ''} ${i['النسبة'] || ''} ${i['الكنية'] || ''}`.replace(/\s+/g, ' ').trim();
         const getBirthPlace = i => i['مكان الولادة'] || i['الولادة والتاريخ'] || '';
         const getNationalId = i => i['الرقم الوطني'] || '';
         const getSpecialty = i => i['التخصص'] || '';
@@ -490,7 +607,6 @@
             select.appendChild(opt);
         }
 
-        /* =================== البحث =================== */
         function applyFilters() {
             if (allData.length === 0) { setFileStatus('error', 'قاعدة البيانات غير محمّلة — ارفع ali.json أولاً'); return; }
             loadingIndicator.style.display = 'none';
@@ -574,7 +690,7 @@
             return str.replace(new RegExp(`(${escaped})`, 'gi'), '<span class="highlight">$1</span>');
         }
 
-        /* =================== تصدير PDF (إصلاح كامل) =================== */
+        /* ==================== تصدير PDF ==================== */
         const LOGO_B64 = "data:image/png;base64,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";
 
         function exportToPDF() {
@@ -588,19 +704,17 @@
             const dateStr = now.toLocaleDateString('ar');
             const timeStr = now.toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' });
 
-            /* حاوية داخل الشاشة لكن غير مرئية — الحل الموثوق لـ html2canvas */
             const holder = document.createElement('div');
             holder.style.cssText = 'position:fixed; top:0; left:0; width:1200px; z-index:-9999; opacity:0; pointer-events:none;';
             holder.innerHTML = `
             <div style="background:#ffffff; font-family:Tahoma, Arial, sans-serif; direction:rtl; color:#2b2b2b; padding:25px;">
-                <!-- الترويسة -->
-                <div style="background:linear-gradient(135deg,#17150f 0%, #2e2a1a 60%, #3d3419 100%); border-radius:12px; padding:26px 32px; border-bottom:6px solid #d4af37; display:flex; align-items:center;">
-                    <div style="width:72px; height:72px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #f5d76e, #8f6f1d); padding:7px; margin-left:18px; flex-shrink:0;">
+                <div style="background:linear-gradient(135deg,#101010 0%, #1d1a12 60%, #2b2410 100%); border-radius:12px; padding:26px 32px; border-bottom:6px solid #d4af37; display:flex; align-items:center;">
+                    <div style="width:74px; height:74px; border-radius:50%; background:#0d1117; padding:9px; margin-left:18px; flex-shrink:0; border:2px solid #d4af37;">
                         <img src="${LOGO_B64}" style="width:100%; height:100%; object-fit:contain;">
                     </div>
                     <div style="flex:1;">
                         <div style="color:#f5d76e; font-size:24px; font-weight:bold;">تقرير نتائج البحث</div>
-                        <div style="color:#cfc6a4; font-size:13px; margin-top:5px;">المنظومة الوطنية للبحث في البيانات</div>
+                        <div style="color:#cfc6a4; font-size:13px; margin-top:5px;">بوابة البيانات الوطنية — نظام البحث في السجلات</div>
                     </div>
                     <div style="text-align:left; color:#cfc6a4; font-size:12px; line-height:2;">
                         <div>التاريخ: <b style="color:#f5d76e;">${dateStr}</b> — <b style="color:#f5d76e;">${timeStr}</b></div>
@@ -609,12 +723,10 @@
                     </div>
                 </div>
 
-                <!-- شريط معلومات -->
                 <div style="background:#faf6e8; border:1px solid #e8ddba; border-top:none; padding:10px 32px; font-size:12px; color:#8a7a3a; text-align:center;">
-                    وثيقة إلكترونية صادرة عن نظام البحث في البيانات — لا تتطلب توقيعاً أو خاتماً
+                    وثيقة إلكترونية صادرة عن بوابة البيانات الوطنية — لا تتطلب توقيعاً أو خاتماً
                 </div>
 
-                <!-- الجدول -->
                 <table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:18px;">
                     <thead>
                         <tr>
@@ -641,9 +753,8 @@
                     </tbody>
                 </table>
 
-                <!-- التذييل -->
                 <div style="margin-top:22px; background:#faf6e8; border:1px solid #e8ddba; border-radius:10px; padding:13px; text-align:center; font-size:11px; color:#8a7a3a;">
-                    المنظومة الوطنية للبحث في البيانات &nbsp;✦&nbsp; جميع الحقوق محفوظة © ${now.getFullYear()}
+                    بوابة البيانات الوطنية &nbsp;✦&nbsp; جميع الحقوق محفوظة © ${now.getFullYear()}
                 </div>
             </div>`;
             document.body.appendChild(holder);
@@ -657,9 +768,7 @@
                 pagebreak: { mode: 'css' }
             })
             .from(holder.firstElementChild)
-            .toPdf()
-            .get('pdf')
-            .then(pdf => {
+            .toPdf().get('pdf').then(pdf => {
                 const pages = pdf.internal.getNumberOfPages();
                 const pageH = pdf.internal.pageSize.getHeight();
                 const pageW = pdf.internal.pageSize.getWidth();
@@ -668,13 +777,13 @@
                     pdf.setFontSize(8);
                     pdf.setTextColor(150, 130, 60);
                     pdf.text(`صفحة ${i} من ${pages}`, pageW / 2, pageH - 4.5, { align: 'center' });
-                    pdf.text('المنظومة الوطنية للبحث في البيانات', pageW - 8, pageH - 4.5, { align: 'right' });
+                    pdf.text('بوابة البيانات الوطنية', pageW - 8, pageH - 4.5, { align: 'right' });
                     pdf.text(dateStr, 8, pageH - 4.5);
                 }
             })
             .save()
             .then(() => cleanup(holder))
-            .catch(err => { console.error(err); cleanup(holder); alert('حدث خطأ أثناء إنشاء PDF — حاول مجدداً'); });
+            .catch(err => { console.error(err); cleanup(holder); alert('حدث خطأ أثناء إنشاء PDF'); });
         }
 
         function cleanup(holder) {
@@ -683,7 +792,6 @@
             exportBtn.innerHTML = '<i class="fas fa-file-pdf"></i> تصدير PDF';
         }
 
-        /* =================== أدوات =================== */
         function goToPage(page) {
             if (page < 1 || page > totalPages) return;
             currentPage = page;
@@ -691,21 +799,6 @@
             displayCurrentData();
         }
 
-        const themeToggle = $('themeToggle');
-        themeToggle.addEventListener('click', () => {
-            const isDark = document.body.classList.toggle('dark-mode');
-            themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-        });
-
-        /* ساعة الترويسة */
-        function tickClock() {
-            const d = new Date();
-            $('clock').innerHTML = `<i class="fas fa-calendar-day" style="margin-left:6px;"></i>${d.toLocaleDateString('ar', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}<br><b>${d.toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</b>`;
-        }
-        tickClock();
-        setInterval(tickClock, 1000);
-
-        /* الأحداث */
         searchBtn.addEventListener('click', applyFilters);
         searchInput.addEventListener('keyup', e => { if (e.key === 'Enter') applyFilters(); });
         nameFilter.addEventListener('change', applyFilters);
@@ -714,8 +807,6 @@
         exportBtn.addEventListener('click', exportToPDF);
         prevPageBtn.addEventListener('click', () => goToPage(currentPage - 1));
         nextPageBtn.addEventListener('click', () => goToPage(currentPage + 1));
-
-        window.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
