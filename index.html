@@ -3,411 +3,320 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام البحث في البيانات</title>
+    <title>المنظومة الوطنية للبحث في البيانات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* ============================================================
-           نظام التصميم — أبيض ذهبي هادئ (افتراضي فاتح)
-           ============================================================ */
         :root {
-            --bg: #faf9f6;
+            --bg: #f4f2ec;
             --surface: #ffffff;
-            --surface-2: #f5f3ed;
-            --border: #e6e0d2;
+            --surface-2: #faf8f2;
+            --border: #e4ddca;
             --gold: #b8932a;
-            --gold-2: #d4af37;
-            --gold-soft: rgba(212, 175, 55, 0.12);
-            --text: #2b2a26;
-            --text-dim: #8a8578;
-            --green: #27ae60;
-            --red: #c0392b;
-            --radius: 12px;
+            --gold-bright: #d4af37;
+            --gold-deep: #8f6f1d;
+            --gold-soft: rgba(184, 147, 42, 0.1);
+            --ink: #23211b;
+            --ink-soft: #6f6a5a;
+            --green: #1e8f52;
+            --red: #b3392b;
+            --radius: 14px;
         }
 
         body.dark-mode {
-            --bg: #101014;
-            --surface: #18181f;
-            --surface-2: #1e1e27;
-            --border: rgba(212, 175, 55, 0.2);
+            --bg: #111014;
+            --surface: #1a191f;
+            --surface-2: #201f26;
+            --border: rgba(212, 175, 55, 0.22);
             --gold: #d4af37;
-            --gold-2: #f5d76e;
+            --gold-bright: #f5d76e;
+            --gold-deep: #b8932a;
             --gold-soft: rgba(212, 175, 55, 0.12);
-            --text: #ece5d0;
-            --text-dim: #9a94a6;
+            --ink: #ece4cd;
+            --ink-soft: #9a937f;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            transition: background 0.4s ease, color 0.4s ease;
+        body { background: var(--bg); color: var(--ink); min-height: 100vh; transition: background 0.4s, color 0.4s; }
+
+        /* الشريط العلوي */
+        .top-strip {
+            height: 6px;
+            background: linear-gradient(90deg, var(--gold-deep), var(--gold-bright), var(--gold-deep));
         }
 
         /* الترويسة */
         header {
             background: var(--surface);
-            border-bottom: 2px solid var(--gold-soft);
-            padding: 40px 20px;
-            text-align: center;
+            border-bottom: 1px solid var(--border);
         }
 
-        h1 {
-            font-size: 1.9rem;
-            font-weight: 800;
-            color: var(--text);
-            margin-bottom: 8px;
+        .header-inner {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 22px 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
 
-        h1 i { color: var(--gold); margin-left: 10px; }
-
-        .subtitle {
-            color: var(--text-dim);
-            font-size: 0.95rem;
+        .logo-wrap {
+            width: 84px; height: 84px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold-deep));
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 18px rgba(184, 147, 42, 0.35);
+            flex-shrink: 0;
+            padding: 10px;
         }
+
+        .logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+
+        .header-text { flex: 1; }
+        .header-text h1 { font-size: 1.55rem; font-weight: 800; letter-spacing: 0.3px; }
+        .header-text h1 span { color: var(--gold); }
+        .header-text p { color: var(--ink-soft); font-size: 0.88rem; margin-top: 5px; }
+
+        .header-side { text-align: left; }
+        .clock { font-size: 0.85rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+        .clock b { color: var(--gold); }
 
         /* الحاوية */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px 20px 60px;
-        }
+        .container { max-width: 1240px; margin: 0 auto; padding: 28px 24px 50px; }
 
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 28px;
-            margin-bottom: 26px;
+            padding: 26px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
         }
 
-        .card-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--gold);
-            margin-bottom: 20px;
+        .card-head {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
         }
+
+        .card-head .icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: var(--gold-soft);
+            color: var(--gold);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem;
+        }
+
+        .card-head h2 { font-size: 1rem; font-weight: 700; }
 
         /* حالة الملف */
         .file-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 13px 16px;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            margin-bottom: 18px;
-            border: 1px dashed var(--border);
-            background: var(--surface-2);
-            flex-wrap: wrap;
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            padding: 12px 16px; border-radius: 10px;
+            font-size: 0.88rem; margin-bottom: 18px;
+            border: 1px dashed var(--border); background: var(--surface-2);
         }
 
-        .file-status .dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: var(--gold);
-            flex-shrink: 0;
-        }
-        .file-status.loading .dot { animation: pulse 1.2s ease infinite; }
-        .file-status.success { color: var(--green); border-color: rgba(39, 174, 96, 0.4); }
-        .file-status.error { color: var(--red); border-color: rgba(192, 57, 43, 0.4); }
+        .file-status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+        .file-status.loading .dot { animation: pulse 1.2s infinite; }
+        .file-status.success { color: var(--green); border-color: rgba(30, 143, 82, 0.35); }
+        .file-status.success .dot { background: var(--green); }
+        .file-status.error { color: var(--red); border-color: rgba(179, 57, 43, 0.35); }
+        .file-status.error .dot { background: var(--red); }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
 
-        .file-upload-btn {
+        .upload-btn {
             margin-inline-start: auto;
-            background: var(--gold-soft);
-            color: var(--gold);
-            border: 1px solid var(--border);
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: none;
-            align-items: center;
-            gap: 7px;
+            display: none; align-items: center; gap: 7px;
+            background: var(--gold); color: #fff; border: none;
+            padding: 8px 16px; border-radius: 8px;
+            font-size: 0.82rem; font-weight: 700; cursor: pointer;
         }
-        .file-status.error .file-upload-btn { display: inline-flex; }
-        .file-upload-btn:hover { background: var(--gold); color: #fff; }
+        .file-status.error .upload-btn { display: inline-flex; }
+        .upload-btn:hover { opacity: 0.88; }
         #fileInput { display: none; }
 
         /* البحث */
-        .search-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 22px;
-        }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
 
-        .input-wrapper {
-            position: relative;
-            flex: 1;
-        }
-
+        .input-wrapper { position: relative; flex: 1; }
         .input-wrapper i {
-            position: absolute;
-            top: 50%;
-            right: 16px;
-            transform: translateY(-50%);
-            color: var(--gold);
-            pointer-events: none;
+            position: absolute; top: 50%; right: 16px;
+            transform: translateY(-50%); color: var(--gold); pointer-events: none;
         }
 
         .search-input {
-            width: 100%;
-            padding: 13px 46px 13px 16px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text);
-            font-size: 15px;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            width: 100%; padding: 13px 44px 13px 14px;
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--ink); font-size: 15px;
+            transition: border-color 0.25s, box-shadow 0.25s;
         }
-
-        body.dark-mode .search-input,
-        body.dark-mode .filter-item select { background: var(--surface-2); }
-
-        .search-input::placeholder { color: var(--text-dim); }
-
-        .search-input:focus, .filter-item select:focus {
-            outline: none;
-            border-color: var(--gold);
+        .search-input::placeholder { color: var(--ink-soft); }
+        .search-input:focus {
+            outline: none; border-color: var(--gold);
             box-shadow: 0 0 0 3px var(--gold-soft);
         }
 
         .search-btn {
-            background: var(--gold);
-            color: #fff;
-            border: none;
-            padding: 13px 32px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 700;
-            transition: opacity 0.3s ease, transform 0.2s ease;
+            background: linear-gradient(135deg, var(--gold-bright), var(--gold-deep));
+            color: #fff; border: none; padding: 13px 36px;
+            border-radius: 10px; cursor: pointer;
+            font-size: 15px; font-weight: 700;
+            transition: opacity 0.25s, transform 0.2s;
             white-space: nowrap;
         }
-
-        .search-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+        .search-btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
         /* الفلاتر */
-        .filters {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-            gap: 16px;
-        }
+        .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; }
 
         .filter-item { display: flex; flex-direction: column; gap: 8px; }
-
-        .filter-item label {
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: var(--gold);
-        }
+        .filter-item label { font-size: 0.8rem; font-weight: 700; color: var(--gold); }
 
         .filter-item select {
             padding: 12px 14px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text);
-            font-size: 14px;
-            cursor: pointer;
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--ink); font-size: 14px; cursor: pointer;
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b8932a' stroke-width='2' fill='none'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: left 14px center;
+            background-repeat: no-repeat; background-position: left 14px center;
         }
-
-        .filter-item select option { background: var(--surface); color: var(--text); }
+        .filter-item select:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+        .filter-item select option { background: var(--surface); color: var(--ink); }
 
         /* شريط النتائج */
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 20px;
+        .results-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 12px; margin-bottom: 18px;
         }
 
-        .results-count {
-            font-size: 1rem;
-            font-weight: 700;
-        }
-
+        .results-count { font-size: 0.98rem; font-weight: 700; }
         .results-count .badge {
-            background: var(--gold);
-            color: #fff;
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 0.88rem;
-            font-variant-numeric: tabular-nums;
+            background: linear-gradient(135deg, var(--gold-bright), var(--gold-deep));
+            color: #fff; padding: 4px 15px; border-radius: 20px;
+            font-size: 0.85rem; font-variant-numeric: tabular-nums;
         }
 
-        .actions { display: flex; gap: 10px; }
+        .actions { display: flex; gap: 9px; }
 
         .action-btn {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            padding: 9px 18px;
-            border-radius: 9px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.25s ease;
-            display: flex;
-            align-items: center;
-            gap: 7px;
+            background: transparent; border: 1px solid var(--border);
+            color: var(--ink-soft); padding: 9px 17px; border-radius: 9px;
+            cursor: pointer; font-size: 0.84rem; font-weight: 600;
+            transition: all 0.25s; display: flex; align-items: center; gap: 7px;
         }
-
-        .action-btn:hover:not(:disabled) {
-            border-color: var(--gold);
-            color: var(--gold);
-        }
-
+        .action-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
         .action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
         /* الجدول */
-        .table-wrapper { overflow-x: auto; }
+        .table-wrapper { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
 
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 850px;
-        }
+        .results-table { width: 100%; border-collapse: collapse; min-width: 850px; }
 
         .results-table th {
-            background: var(--surface-2);
-            color: var(--gold);
-            text-align: right;
-            padding: 14px 14px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            border-bottom: 2px solid var(--gold-soft);
-            white-space: nowrap;
+            background: var(--surface-2); color: var(--gold);
+            text-align: right; padding: 13px 14px;
+            font-size: 0.8rem; font-weight: 700;
+            border-bottom: 2px solid var(--gold-soft); white-space: nowrap;
         }
 
-        .results-table td {
-            padding: 13px 14px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
-        }
-
-        .results-table tbody tr { transition: background 0.2s ease; }
+        .results-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 0.89rem; }
+        .results-table tbody tr { transition: background 0.2s; }
         .results-table tbody tr:hover { background: var(--gold-soft); }
 
-        .highlight {
-            background: var(--gold-soft);
-            color: var(--gold);
-            padding: 1px 5px;
-            border-radius: 4px;
-            font-weight: 700;
-        }
+        .highlight { background: var(--gold-soft); color: var(--gold); padding: 1px 5px; border-radius: 4px; font-weight: 700; }
 
-        /* حالات */
-        .state-box {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-dim);
-        }
+        /* الحالات */
+        .state-box { text-align: center; padding: 55px 20px; color: var(--ink-soft); }
+        .state-box i { font-size: 2.6rem; margin-bottom: 16px; color: var(--gold); opacity: 0.45; }
+        .state-box p { font-size: 0.95rem; }
 
-        .state-box i {
-            font-size: 3rem;
-            margin-bottom: 18px;
-            color: var(--gold);
-            opacity: 0.4;
+        .spinner {
+            width: 42px; height: 42px; margin: 0 auto 18px;
+            border-radius: 50%; border: 3px solid var(--border);
+            border-top-color: var(--gold);
+            animation: spin 0.9s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* الترقيم */
         .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            margin-top: 22px;
+            display: flex; justify-content: center; align-items: center;
+            gap: 12px; margin-top: 20px;
         }
-
         .pagination-btn {
-            background: transparent;
-            color: var(--gold);
-            border: 1px solid var(--border);
-            padding: 8px 20px;
-            border-radius: 9px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
+            background: transparent; color: var(--gold); border: 1px solid var(--border);
+            padding: 8px 20px; border-radius: 9px; cursor: pointer;
+            font-size: 0.84rem; font-weight: 600;
         }
-
         .pagination-btn:hover:not(:disabled) { border-color: var(--gold); }
         .pagination-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        .page-info { font-size: 0.88rem; color: var(--text-dim); }
+        .page-info { font-size: 0.86rem; color: var(--ink-soft); }
 
         /* الفوتر */
         footer {
-            text-align: center;
-            padding: 26px 20px;
-            color: var(--text-dim);
-            font-size: 0.85rem;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--border); background: var(--surface);
+            padding: 22px 24px; text-align: center;
         }
+        footer p { color: var(--ink-soft); font-size: 0.84rem; }
+        footer .f-logo { height: 26px; vertical-align: middle; margin-left: 8px; opacity: 0.75; }
 
         .fade-in { animation: fadeIn 0.5s ease both; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(14px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 700px) {
+        @media (max-width: 720px) {
+            .header-inner { flex-direction: column; text-align: center; }
+            .header-side { text-align: center; }
             .search-box { flex-direction: column; }
-            header { padding: 30px 16px; }
-            h1 { font-size: 1.4rem; }
-            .card { padding: 20px 16px; }
+            h1 { font-size: 1.25rem; }
         }
     </style>
 </head>
 <body>
+    <div class="top-strip"></div>
+
     <header>
-        <h1><i class="fas fa-database"></i> نظام البحث في البيانات</h1>
-        <p class="subtitle">ابحث وتصفَّ في قاعدة البيانات — مصدر البيانات: ali.json</p>
+        <div class="header-inner">
+            <div class="logo-wrap">
+                <img src="logo.png" alt="الشعار" onerror="this.style.display='none'">
+            </div>
+            <div class="header-text">
+                <h1>المنظومة الوطنية <span>للبحث في البيانات</span></h1>
+                <p>البحث المتقدم في السجلات الوطنية — سرعة، دقة، وموثوقية</p>
+            </div>
+            <div class="header-side">
+                <div class="clock" id="clock"></div>
+            </div>
+        </div>
     </header>
 
     <div class="container">
         <!-- البحث -->
         <section class="card fade-in">
-            <div class="card-title"><i class="fas fa-sliders"></i> البحث والتصفية</div>
+            <div class="card-head">
+                <div class="icon"><i class="fas fa-magnifying-glass"></i></div>
+                <h2>البحث والتصفية</h2>
+            </div>
 
             <div class="file-status loading" id="fileStatus">
                 <span class="dot"></span>
-                <span id="fileStatusText">جاري تحميل البيانات...</span>
-                <button class="file-upload-btn" id="uploadTrigger">
-                    <i class="fas fa-upload"></i> رفع ali.json يدوياً
-                </button>
+                <span id="fileStatusText">جاري تجهيز قاعدة البيانات...</span>
+                <button class="upload-btn" id="uploadTrigger"><i class="fas fa-upload"></i> رفع ali.json</button>
                 <input type="file" id="fileInput" accept=".json">
             </div>
 
             <div class="search-box">
                 <div class="input-wrapper">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" class="search-input" placeholder="ابحث في جميع الحقول...">
+                    <input type="text" id="searchInput" class="search-input" placeholder="ابحث في جميع الحقول: الاسم، الرقم الوطني، التخصص...">
                 </div>
-                <button id="searchBtn" class="search-btn">بحث</button>
+                <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i> بحث</button>
             </div>
 
             <div class="filters">
@@ -428,8 +337,8 @@
 
         <!-- النتائج -->
         <section class="card fade-in">
-            <div class="results-header">
-                <div class="results-count">عدد النتائج <span class="badge" id="resultsCount">0</span></div>
+            <div class="results-bar">
+                <div class="results-count">النتائج <span class="badge" id="resultsCount">0</span></div>
                 <div class="actions">
                     <button id="exportBtn" class="action-btn" disabled>
                         <i class="fas fa-file-pdf"></i> تصدير PDF
@@ -441,10 +350,14 @@
             </div>
 
             <div id="loadingIndicator" class="state-box">
-                <div style="width: 44px; height: 44px; margin: 0 auto 18px; border-radius: 50%;
-                     border: 3px solid var(--border); border-top-color: var(--gold);
-                     animation: spin 0.9s linear infinite;"></div>
-                <p>جاري تحميل البيانات...</p>
+                <div class="spinner"></div>
+                <p>جاري تجهيز قاعدة البيانات...</p>
+            </div>
+
+            <div id="initialState" class="state-box">
+                <i class="fas fa-folder-open"></i>
+                <p style="font-weight: 700; color: var(--ink); margin-bottom: 6px;">لا توجد نتائج بعد</p>
+                <p style="font-size: 0.85rem;">اكتب كلمة بحث أو اختر من الفلاتر ثم اضغط زر البحث</p>
             </div>
 
             <div class="table-wrapper" id="tableWrapper" style="display: none;">
@@ -465,38 +378,27 @@
             </div>
 
             <div id="noResults" class="state-box" style="display: none;">
-                <i class="fas fa-search"></i>
-                <p>لا توجد نتائج مطابقة لبحثك</p>
-            </div>
-
-            <div id="initialState" class="state-box">
-                <i class="fas fa-magnifying-glass-chart"></i>
-                <p style="font-weight: 700; color: var(--text); margin-bottom: 6px;">ابدأ بالبحث لعرض النتائج</p>
-                <p style="font-size: 0.85rem;">اكتب كلمة بحث أو اختر من الفلاتر ثم اضغط زر البحث</p>
+                <i class="fas fa-circle-xmark"></i>
+                <p>لا توجد نتائج مطابقة لبحثك — جرّب كلمات أخرى</p>
             </div>
 
             <div id="pagination" class="pagination" style="display: none;">
-                <button id="prevPage" class="pagination-btn">السابق</button>
+                <button id="prevPage" class="pagination-btn"><i class="fas fa-chevron-right"></i> السابق</button>
                 <span id="pageInfo" class="page-info">صفحة 1 من 1</span>
-                <button id="nextPage" class="pagination-btn">التالي</button>
+                <button id="nextPage" class="pagination-btn">التالي <i class="fas fa-chevron-left"></i></button>
             </div>
         </section>
     </div>
 
-    <footer>نظام البحث في البيانات | جميع الحقوق محفوظة © 2026</footer>
+    <footer>
+        <p><img src="logo.png" class="f-logo" alt="" onerror="this.remove()"> المنظومة الوطنية للبحث في البيانات — جميع الحقوق محفوظة © 2026</p>
+    </footer>
 
     <script>
-        /* ============================================================
-           المنطق البرمجي
-           ============================================================ */
-        let allData = [];
-        let filteredData = [];
-        let currentDisplayData = [];
-
+        /* =================== البيانات =================== */
+        let allData = [], filteredData = [], currentDisplayData = [];
         const itemsPerPage = 20;
-        const initialDisplayCount = 10;
-        let currentPage = 1;
-        let totalPages = 1;
+        let currentPage = 1, totalPages = 1;
 
         const $ = id => document.getElementById(id);
         const searchInput = $('searchInput'), searchBtn = $('searchBtn');
@@ -508,25 +410,20 @@
         const pagination = $('pagination'), prevPageBtn = $('prevPage'), nextPageBtn = $('nextPage'), pageInfo = $('pageInfo');
         const fileInput = $('fileInput'), uploadTrigger = $('uploadTrigger');
 
-        /* ===== التحميل: تلقائي + يدوي ===== */
+        /* =================== التحميل =================== */
         async function loadData() {
             try {
-                const response = await fetch('ali.json');
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                const jsonData = await response.json();
-                onDataLoaded(jsonData, 'تلقائياً من ali.json');
-            } catch (error) {
-                console.warn('فشل التحميل التلقائي:', error);
-                showLoadError();
+                const res = await fetch('ali.json');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                onDataLoaded(await res.json(), 'تلقائياً');
+            } catch (e) {
+                console.warn('فشل التحميل التلقائي:', e);
+                setFileStatus('error', 'تعذر تحميل ali.json تلقائياً — اضغط "رفع ali.json" لاختيار الملف يدوياً');
+                loadingIndicator.innerHTML = `
+                    <i class="fas fa-triangle-exclamation" style="color: var(--red); opacity: 1;"></i>
+                    <p style="color: var(--red); margin-bottom: 6px; font-weight: 700;">تعذر تحميل قاعدة البيانات</p>
+                    <p style="font-size: 0.85rem;">اضغط زر "رفع ali.json" في بطاقة البحث بالأعلى</p>`;
             }
-        }
-
-        function showLoadError() {
-            setFileStatus('error', 'تعذر تحميل ali.json تلقائياً — اضغط "رفع يدوي" لاختيار الملف');
-            loadingIndicator.innerHTML = `
-                <i class="fas fa-triangle-exclamation" style="color: var(--red); opacity: 1;"></i>
-                <p style="color: var(--red); margin-bottom: 8px;">تعذر تحميل ملف البيانات</p>
-                <p style="font-size: 0.85rem;">استخدم زر "رفع ali.json يدوياً" في الأعلى</p>`;
         }
 
         uploadTrigger.addEventListener('click', () => fileInput.click());
@@ -535,24 +432,18 @@
             if (!file) return;
             const reader = new FileReader();
             reader.onload = ev => {
-                try {
-                    onDataLoaded(JSON.parse(ev.target.result), 'من الملف: ' + file.name);
-                } catch {
-                    setFileStatus('error', 'الملف المحدد ليس بصيغة JSON صالحة');
-                }
+                try { onDataLoaded(JSON.parse(ev.target.result), 'يدوياً'); }
+                catch { setFileStatus('error', 'الملف المحدد ليس JSON صالحاً'); }
             };
             reader.readAsText(file, 'UTF-8');
         });
 
         function onDataLoaded(jsonData, source) {
             allData = normalizeData(jsonData);
-            currentDisplayData = allData.slice(0, initialDisplayCount);
-
-            setFileStatus('success', `تم تحميل ${allData.length.toLocaleString('ar')} سجلاً (${source}) — جاهز للبحث`);
+            setFileStatus('success', `قاعدة البيانات جاهزة — ${allData.length.toLocaleString('ar')} سجلاً (تحميل ${source})`);
             loadingIndicator.style.display = 'none';
-
             populateFilters();
-            // لا نعرض أي سجلات عند الدخول — ننتظر ضغط زر البحث
+            /* لا عرض مبدئي — ننتظر البحث */
         }
 
         function setFileStatus(type, text) {
@@ -573,14 +464,13 @@
             });
         }
 
-        /* المستخرجات */
+        /* =================== المستخرجات =================== */
         const getFullName = i => `${i['الاسم'] || ''} ${i['اسم الأب'] || i['الأب'] || ''} ${i['النسبة'] || i['الكنية'] || ''}`.trim();
         const getBirthPlace = i => i['مكان الولادة'] || i['الولادة والتاريخ'] || '';
         const getNationalId = i => i['الرقم الوطني'] || '';
         const getSpecialty = i => i['التخصص'] || '';
         const getJobTitle = i => i['مسمى وظيفي'] || i['الوظيفة'] || '';
         const getPersonalId = i => i['الرقم الذاتي'] || '';
-
         function getBirthDate(i) {
             if (i['تاريخ الولادة']) return i['تاريخ الولادة'];
             const d = i['المواليد / اليوم'], m = i['المواليد / شهر'], y = i['المواليد / عام'];
@@ -600,9 +490,11 @@
             select.appendChild(opt);
         }
 
-        /* البحث */
+        /* =================== البحث =================== */
         function applyFilters() {
+            if (allData.length === 0) { setFileStatus('error', 'قاعدة البيانات غير محمّلة — ارفع ali.json أولاً'); return; }
             loadingIndicator.style.display = 'none';
+
             const term = searchInput.value.trim().toLowerCase();
             const selName = nameFilter.value, selSpec = specialtyFilter.value, selLoc = locationFilter.value;
 
@@ -631,7 +523,6 @@
             if (currentDisplayData.length === 0) {
                 resultsBody.innerHTML = '';
                 noResults.style.display = 'block';
-                $('initialState').style.display = 'none';
                 tableWrapper.style.display = 'none';
                 resultsCount.textContent = '0';
                 exportBtn.disabled = true;
@@ -683,109 +574,116 @@
             return str.replace(new RegExp(`(${escaped})`, 'gi'), '<span class="highlight">$1</span>');
         }
 
-        /* ===== التصدير إلى PDF — تصميم فاخر ===== */
+        /* =================== تصدير PDF (إصلاح كامل) =================== */
+        const LOGO_B64 = "data:image/png;base64,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";
+
         function exportToPDF() {
             if (filteredData.length === 0) { alert('لا توجد بيانات للتصدير'); return; }
 
             exportBtn.disabled = true;
-            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التصدير...';
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإنشاء...';
 
             const term = searchInput.value.trim();
             const now = new Date();
+            const dateStr = now.toLocaleDateString('ar');
+            const timeStr = now.toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' });
 
-            const printTable = document.createElement('div');
-            printTable.style.cssText = 'position:fixed; top:-9999px; right:0; width:1100px; background:#fff; font-family:Tahoma,Arial,sans-serif; direction:rtl; color:#333;';
-            printTable.innerHTML = `
-                <!-- غلاف التقرير -->
-                <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 30px 35px; border-radius: 14px 14px 0 0; border-bottom: 5px solid #d4af37;">
-                    <table style="width:100%; border-collapse:collapse;">
-                        <tr>
-                            <td style="width:70px; vertical-align:middle;">
-                                <div style="width:58px; height:58px; border-radius:50%; background:linear-gradient(135deg,#f5d76e,#b8932a); display:flex; align-items:center; justify-content:center; color:#1a1a1a; font-size:26px; font-weight:bold; border:3px solid rgba(245,215,110,0.4);">✦</div>
-                            </td>
-                            <td style="vertical-align:middle; padding-right:16px;">
-                                <div style="color:#f5d76e; font-size:22px; font-weight:bold;">تقرير نتائج البحث</div>
-                                <div style="color:#c9c2ad; font-size:12px; margin-top:4px;">نظام البحث في قاعدة البيانات الوطنية</div>
-                            </td>
-                            <td style="vertical-align:middle; text-align:left; color:#c9c2ad; font-size:11px;">
-                                <div>تاريخ التصدير: ${now.toLocaleDateString('ar')} — ${now.toLocaleTimeString('ar', {hour:'2-digit', minute:'2-digit'})}</div>
-                                <div style="margin-top:5px;">عدد السجلات: <span style="color:#f5d76e; font-weight:bold;">${filteredData.length}</span></div>
-                                ${term ? `<div style="margin-top:5px;">كلمة البحث: <span style="color:#f5d76e; font-weight:bold;">${term}</span></div>` : ''}
-                            </td>
-                        </tr>
-                    </table>
+            /* حاوية داخل الشاشة لكن غير مرئية — الحل الموثوق لـ html2canvas */
+            const holder = document.createElement('div');
+            holder.style.cssText = 'position:fixed; top:0; left:0; width:1200px; z-index:-9999; opacity:0; pointer-events:none;';
+            holder.innerHTML = `
+            <div style="background:#ffffff; font-family:Tahoma, Arial, sans-serif; direction:rtl; color:#2b2b2b; padding:25px;">
+                <!-- الترويسة -->
+                <div style="background:linear-gradient(135deg,#17150f 0%, #2e2a1a 60%, #3d3419 100%); border-radius:12px; padding:26px 32px; border-bottom:6px solid #d4af37; display:flex; align-items:center;">
+                    <div style="width:72px; height:72px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #f5d76e, #8f6f1d); padding:7px; margin-left:18px; flex-shrink:0;">
+                        <img src="${LOGO_B64}" style="width:100%; height:100%; object-fit:contain;">
+                    </div>
+                    <div style="flex:1;">
+                        <div style="color:#f5d76e; font-size:24px; font-weight:bold;">تقرير نتائج البحث</div>
+                        <div style="color:#cfc6a4; font-size:13px; margin-top:5px;">المنظومة الوطنية للبحث في البيانات</div>
+                    </div>
+                    <div style="text-align:left; color:#cfc6a4; font-size:12px; line-height:2;">
+                        <div>التاريخ: <b style="color:#f5d76e;">${dateStr}</b> — <b style="color:#f5d76e;">${timeStr}</b></div>
+                        <div>عدد السجلات: <b style="color:#f5d76e;">${filteredData.length}</b></div>
+                        ${term ? `<div>كلمة البحث: <b style="color:#f5d76e;">${term}</b></div>` : ''}
+                    </div>
                 </div>
 
                 <!-- شريط معلومات -->
-                <div style="background:#faf6ea; padding:10px 35px; font-size:11px; color:#8a7a3a; border-bottom:1px solid #e8dfc2;">
-                    <span>✦</span> هذا التقرير تم إنشاؤه إلكترونياً من نظام البحث في البيانات ولا يحتاج إلى توقيع
+                <div style="background:#faf6e8; border:1px solid #e8ddba; border-top:none; padding:10px 32px; font-size:12px; color:#8a7a3a; text-align:center;">
+                    وثيقة إلكترونية صادرة عن نظام البحث في البيانات — لا تتطلب توقيعاً أو خاتماً
                 </div>
 
                 <!-- الجدول -->
-                <table style="width:100%; border-collapse:collapse; font-size:11.5px; margin-top:15px;">
+                <table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:18px;">
                     <thead>
                         <tr>
-                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a; width:7%;">الرقم الذاتي</th>
-                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a; width:20%;">الاسم الكامل</th>
-                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a; width:13%;">مكان الولادة</th>
-                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a; width:11%;">تاريخ الميلاد</th>
-                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a; width:13%;">الرقم الوطني</th>
-                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a; width:18%;">التخصص</th>
-                            <th style="background:linear-gradient(135deg,#d4af37,#b8932a); color:#fff; padding:11px 8px; text-align:right; font-size:11px; border:1px solid #b8932a;">المسمى الوظيفي</th>
+                            <th style="background:linear-gradient(135deg,#c9a22f,#9a7a1e); color:#fff; padding:11px 9px; text-align:right; border:1px solid #a8863a;">الرقم الذاتي</th>
+                            <th style="background:linear-gradient(135deg,#c9a22f,#9a7a1e); color:#fff; padding:11px 9px; text-align:right; border:1px solid #a8863a;">الاسم الكامل</th>
+                            <th style="background:linear-gradient(135deg,#c9a22f,#9a7a1e); color:#fff; padding:11px 9px; text-align:right; border:1px solid #a8863a;">مكان الولادة</th>
+                            <th style="background:linear-gradient(135deg,#c9a22f,#9a7a1e); color:#fff; padding:11px 9px; text-align:right; border:1px solid #a8863a;">تاريخ الميلاد</th>
+                            <th style="background:linear-gradient(135deg,#c9a22f,#9a7a1e); color:#fff; padding:11px 9px; text-align:right; border:1px solid #a8863a;">الرقم الوطني</th>
+                            <th style="background:linear-gradient(135deg,#c9a22f,#9a7a1e); color:#fff; padding:11px 9px; text-align:right; border:1px solid #a8863a;">التخصص</th>
+                            <th style="background:linear-gradient(135deg,#c9a22f,#9a7a1e); color:#fff; padding:11px 9px; text-align:right; border:1px solid #a8863a;">المسمى الوظيفي</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${filteredData.map((item, idx) => `
-                        <tr style="background:${idx % 2 === 0 ? '#ffffff' : '#faf8f1'};">
-                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right;">${getPersonalId(item) || '—'}</td>
-                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right; font-weight:bold; color:#2b2a26;">${getFullName(item)}</td>
-                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right;">${getBirthPlace(item) || '—'}</td>
-                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right; direction:ltr;">${getBirthDate(item) || '—'}</td>
-                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right; direction:ltr;">${getNationalId(item) || '—'}</td>
-                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right;">${getSpecialty(item) || '—'}</td>
-                            <td style="border:1px solid #e8e2d0; padding:8px 8px; text-align:right;">${getJobTitle(item) || '—'}</td>
+                        <tr style="background:${idx % 2 === 0 ? '#ffffff' : '#faf7ec'};">
+                            <td style="border:1px solid #e5dec6; padding:9px; text-align:right;">${getPersonalId(item) || '—'}</td>
+                            <td style="border:1px solid #e5dec6; padding:9px; text-align:right; font-weight:bold;">${getFullName(item)}</td>
+                            <td style="border:1px solid #e5dec6; padding:9px; text-align:right;">${getBirthPlace(item) || '—'}</td>
+                            <td style="border:1px solid #e5dec6; padding:9px; text-align:right; direction:ltr;">${getBirthDate(item) || '—'}</td>
+                            <td style="border:1px solid #e5dec6; padding:9px; text-align:right; direction:ltr;">${getNationalId(item) || '—'}</td>
+                            <td style="border:1px solid #e5dec6; padding:9px; text-align:right;">${getSpecialty(item) || '—'}</td>
+                            <td style="border:1px solid #e5dec6; padding:9px; text-align:right;">${getJobTitle(item) || '—'}</td>
                         </tr>`).join('')}
                     </tbody>
                 </table>
 
-                <!-- تذييل -->
-                <div style="margin-top:20px; padding:14px 35px; background:#faf6ea; border-radius:0 0 14px 14px; border-top:3px solid #d4af37; text-align:center; font-size:10px; color:#8a7a3a;">
-                    نظام البحـث في البيانات <span style="color:#d4af37;">✦</span> جميع الحقوق محفوظة © ${now.getFullYear()}
-                </div>`;
-            document.body.appendChild(printTable);
+                <!-- التذييل -->
+                <div style="margin-top:22px; background:#faf6e8; border:1px solid #e8ddba; border-radius:10px; padding:13px; text-align:center; font-size:11px; color:#8a7a3a;">
+                    المنظومة الوطنية للبحث في البيانات &nbsp;✦&nbsp; جميع الحقوق محفوظة © ${now.getFullYear()}
+                </div>
+            </div>`;
+            document.body.appendChild(holder);
 
-            const worker = html2pdf().set({
-                margin: [10, 8, 14, 8],
-                filename: 'تقرير_نتائج_البحث.pdf',
-                image: { type: 'jpeg', quality: 0.96 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+            html2pdf().set({
+                margin: [9, 8, 15, 8],
+                filename: `تقرير_نتائج_البحث_${dateStr.replace(/\//g, '-')}.pdf`,
+                image: { type: 'jpeg', quality: 0.97 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-                pagebreak: { mode: ['css', 'legacy'] }
-            }).from(printTable);
-
-            // إضافة أرقام الصفحات والتذييل لكل صفحة
-            worker.toPdf().get('pdf').then(pdf => {
-                const totalPages = pdf.internal.getNumberOfPages();
-                for (let i = 1; i <= totalPages; i++) {
+                pagebreak: { mode: 'css' }
+            })
+            .from(holder.firstElementChild)
+            .toPdf()
+            .get('pdf')
+            .then(pdf => {
+                const pages = pdf.internal.getNumberOfPages();
+                const pageH = pdf.internal.pageSize.getHeight();
+                const pageW = pdf.internal.pageSize.getWidth();
+                for (let i = 1; i <= pages; i++) {
                     pdf.setPage(i);
                     pdf.setFontSize(8);
                     pdf.setTextColor(150, 130, 60);
-                    const w = pdf.internal.pageSize.getWidth();
-                    pdf.text(`صفحة ${i} من ${totalPages}`, w / 2, pdf.internal.pageSize.getHeight() - 4, { align: 'center' });
-                    pdf.text('تقرير نتائج البحث — نظام البحث في البيانات', 8, pdf.internal.pageSize.getHeight() - 4);
+                    pdf.text(`صفحة ${i} من ${pages}`, pageW / 2, pageH - 4.5, { align: 'center' });
+                    pdf.text('المنظومة الوطنية للبحث في البيانات', pageW - 8, pageH - 4.5, { align: 'right' });
+                    pdf.text(dateStr, 8, pageH - 4.5);
                 }
-            }).save().then(() => {
-                document.body.removeChild(printTable);
-                exportBtn.disabled = false;
-                exportBtn.innerHTML = '<i class="fas fa-file-pdf"></i> تصدير PDF';
-            }).catch(() => {
-                document.body.removeChild(printTable);
-                exportBtn.disabled = false;
-                exportBtn.innerHTML = '<i class="fas fa-file-pdf"></i> تصدير PDF';
-                alert('حدث خطأ أثناء إنشاء ملف PDF');
-            });
+            })
+            .save()
+            .then(() => cleanup(holder))
+            .catch(err => { console.error(err); cleanup(holder); alert('حدث خطأ أثناء إنشاء PDF — حاول مجدداً'); });
         }
 
+        function cleanup(holder) {
+            if (holder.parentNode) holder.parentNode.removeChild(holder);
+            exportBtn.disabled = false;
+            exportBtn.innerHTML = '<i class="fas fa-file-pdf"></i> تصدير PDF';
+        }
+
+        /* =================== أدوات =================== */
         function goToPage(page) {
             if (page < 1 || page > totalPages) return;
             currentPage = page;
@@ -793,12 +691,19 @@
             displayCurrentData();
         }
 
-        /* المظهر */
         const themeToggle = $('themeToggle');
         themeToggle.addEventListener('click', () => {
             const isDark = document.body.classList.toggle('dark-mode');
             themeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
         });
+
+        /* ساعة الترويسة */
+        function tickClock() {
+            const d = new Date();
+            $('clock').innerHTML = `<i class="fas fa-calendar-day" style="margin-left:6px;"></i>${d.toLocaleDateString('ar', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}<br><b>${d.toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</b>`;
+        }
+        tickClock();
+        setInterval(tickClock, 1000);
 
         /* الأحداث */
         searchBtn.addEventListener('click', applyFilters);
