@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بوابة البيانات الوطنية</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{
+  --ink:#14232b; --band:#0f2229; --band-2:#183039; --paper:#eef1f4; --white:#fff;
+  --line:#dde3e8; --muted:#5f7079; --gold:#b8912a; --gold-l:#e6c765; --gold-bg:#fbf2d4;
+  --red:#b3412f; --green:#2f8a5b;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;line-height:1.6}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold-l);outline-offset:2px}
+
+/* ===== الدخول ===== */
+#loginScreen{position:fixed;inset:0;z-index:100;background:var(--band);display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{width:100%;max-width:380px;text-align:center;color:#fff}
+.login-box img{width:96px;height:96px;object-fit:contain;margin-bottom:14px}
+.login-box h1{font-size:1.4rem;font-weight:700}
+.login-box p{color:#9fb2ba;font-size:.88rem;margin:6px 0 26px}
+.pass{position:relative;margin-bottom:10px}
+#passInput{width:100%;padding:14px 16px;border-radius:10px;border:1px solid #2a4651;background:var(--band-2);color:#fff;font-size:16px;letter-spacing:3px;text-align:center}
+#passInput::placeholder{letter-spacing:0;color:#7c919a}
+#passInput:focus{outline:none;border-color:var(--gold-l)}
+.eye{position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:#9fb2ba;padding:8px;font-size:.8rem}
