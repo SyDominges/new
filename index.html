@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>بوابة البيانات </title>
+<title>بوابة البيانات الوطنية</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
@@ -185,7 +185,7 @@ tr.d td{background:#fafbfc;padding:0}
   <div class="login-box" id="loginBox">
     <img data-logo alt="الشعار">
     <h1>بوابة البيانات </h1>
-    <p>  — أدخل كلمة السر للمتابعة</p>
+    <p>صفحة محمية — أدخل كلمة السر للمتابعة</p>
     <div class="pass">
       <input type="password" id="passInput" placeholder="كلمة السر" autocomplete="off" aria-label="كلمة السر">
       <button class="eye" id="eye" type="button" aria-label="إظهار كلمة السر">إظهار</button>
@@ -199,7 +199,7 @@ tr.d td{background:#fafbfc;padding:0}
   <div class="band">
     <div class="top">
       <img data-logo alt="">
-      <h1>بوابة البيانات الوطنية</h1>
+      <h1>بوابة البيانات </h1>
       <div class="pill" id="status"><i></i><span id="statusText">جاري تجهيز قاعدة البيانات…</span></div>
       <button class="quit" id="logout">خروج</button>
     </div>
@@ -342,7 +342,9 @@ function onData(json) {
   const arr = Array.isArray(json) ? json : [];
   entries = arr.map(item => {
     const r = {};
-    for (const k in item) { let v = item[k]; if (typeof v === 'string') v = v.replace(/^['"]+|['"]+$/g,'').trim(); r[k] = v; }
+    for (const k in item) { let v = item[k]; if (typeof v === 'string') v = v.replace(/^['"]+|['"]+$/g,'').trim();
+      if (v === null || (typeof v === 'string' && /^(null|undefined|nan)$/i.test(v))) v = '';
+      r[k] = v; }
     const all = Object.values(r).filter(v => v != null && v !== '').join(' | ') + ' | ' + getFullName(r) + ' | ' + getBirthDate(r);
     return { r, name: norm(getFullName(r)), all: norm(all) };
   });
@@ -523,10 +525,10 @@ function reportHTML(rows, note) {
 
 function printRows(rows, note) {
   if (!rows.length) { toast('لا توجد أسماء للطباعة'); return; }
-  // اتجاه الورقة حسب المحتوى: سجل واحد = عمودي، عدة سجلات = أفقي
+  // لا نحدد اتجاه الورقة حتى لا يختلف تقسيم الصفحات عن الورقة المختارة؛ نحدد الهوامش فقط
   let st = $('pageStyle');
   if (!st) { st = document.createElement('style'); st.id = 'pageStyle'; document.head.appendChild(st); }
-  st.textContent = `@page{size:A4 ${rows.length === 1 ? 'portrait' : 'landscape'};margin:${rows.length === 1 ? '8mm' : '5mm'}}`;
+  st.textContent = `@page{margin:${rows.length === 1 ? '8mm' : '5mm'}}`;
   $('printArea').innerHTML = reportHTML(rows, note);
   const done = () => { $('printArea').innerHTML = ''; window.removeEventListener('afterprint', done); };
   window.addEventListener('afterprint', done);
