@@ -184,7 +184,7 @@ tr.d td{background:#fafbfc;padding:0}
 <div id="loginScreen">
   <div class="login-box" id="loginBox">
     <img data-logo alt="الشعار">
-    <h1>بوابة البيانات </h1>
+    <h1>بوابة البيانات الوطنية</h1>
     <p>صفحة محمية — أدخل كلمة السر للمتابعة</p>
     <div class="pass">
       <input type="password" id="passInput" placeholder="كلمة السر" autocomplete="off" aria-label="كلمة السر">
@@ -199,7 +199,7 @@ tr.d td{background:#fafbfc;padding:0}
   <div class="band">
     <div class="top">
       <img data-logo alt="">
-      <h1>بوابة البيانات </h1>
+      <h1>بوابة البيانات الوطنية</h1>
       <div class="pill" id="status"><i></i><span id="statusText">جاري تجهيز قاعدة البيانات…</span></div>
       <button class="quit" id="logout">خروج</button>
     </div>
@@ -519,7 +519,7 @@ function reportHTML(rows, note) {
       <div class="rp-m">التاريخ: ${d} — ${tm}${one ? '' : `<br>عدد السجلات: ${rows.length}${note || ''}`}${q && !one ? `<br>كلمة البحث: ${esc(q)}` : ''}</div>
     </div>
     ${body}
-    <div class="rp-f">بوابة البيانات الوطنية © ${now.getFullYear()}</div>
+    <div class="rp-f">بوابة البيانات الوطنية © Ali Ghanoum ${now.getFullYear()}</div>
   </div>`;
 }
 
